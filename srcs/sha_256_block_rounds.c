@@ -3,16 +3,16 @@
 extern int g_is_little_endian;
 
 static void	_print_states(const char* prefix, sha_256_word_t H[8]) {
-	printf("%s %08x %08x %08x %08x %08x %08x %08x %08x\n", prefix,
+	dprintf(2, "%s %08x %08x %08x %08x %08x %08x %08x %08x\n", prefix,
 		H[0], H[1], H[2], H[3], H[4], H[5], H[6], H[7]
 	);
 }
 
 static void	_print_x(unsigned int X[16]) {
 	for (size_t i = 0; i < 16; i++) {
-		printf("%08x ", X[i]);
+		dprintf(2, "%08x ", X[i]);
 	}
-	printf("\n");
+	dprintf(2, "\n");
 }
 
 void	sha_256_block_rounds(t_sha_256_state* state) {
@@ -41,7 +41,7 @@ void	sha_256_block_rounds(t_sha_256_state* state) {
     _print_states("[*H]", (sha_256_word_t[]){a, b, c, d, e, f, g, h});
 	for (size_t i = 0; i < 64; ++i) {
 		OPE(a, b, c, d, e, f, g, h, state->schedule.W, i);
-		printf("%zu: ", i);
+		dprintf(2, "%zu: ", i);
         _print_states("[#H]", (sha_256_word_t[]){a, b, c, d, e, f, g, h});
 	}
 

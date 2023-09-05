@@ -124,11 +124,11 @@ static void 	size_padding(t_sha_256_state* state) {
 
 static void	print_byte_array(const uint8_t* bytes, size_t len) {
 	for (size_t i = 0; i < len; i++) {
-		if (0 < i && i % 8 == 0) { printf(" "); }
-		if (0 < i && i % 16 == 0) { printf(" "); }
-		printf("%02x", bytes[i]);
+		if (0 < i && i % 8 == 0) { dprintf(2, " "); }
+		if (0 < i && i % 16 == 0) { dprintf(2, " "); }
+		dprintf(2, "%02x", bytes[i]);
 	}
-	printf("\n");
+	dprintf(2, "\n");
 }
 
 void	sha_256_block_padding(t_sha_256_state* state) {
