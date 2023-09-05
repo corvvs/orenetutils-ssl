@@ -85,4 +85,7 @@ void	md5_block_padding(t_md5_state *state);
 // md5_block_rounds.c
 void	md5_block_rounds(t_md5_state* state);
 
+// md5_derive_digest.c
+t_md5_digest	md5_derive_digest(const t_md5_state* state);
+
 #endif

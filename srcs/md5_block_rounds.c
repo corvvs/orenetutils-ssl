@@ -7,11 +7,18 @@ extern int g_is_little_endian;
 #define OH(a, b, c, d, k, s, i)	OPE(state->X, H, state->a, state->b, state->c, state->d, k, s, i)
 #define OI(a, b, c, d, k, s, i)	OPE(state->X, I, state->a, state->b, state->c, state->d, k, s, i)
 
-void	_print_states(const char* prefix, md5_word_t abcd[5]) {
-	printf("%s %08x | %08x %08x %08x %08x\n", prefix, abcd[0], abcd[1], abcd[2], abcd[3], abcd[4]);
+static void	_print_states(const char* prefix, md5_word_t abcd[5]) {
+	dprintf(2, "%s %08x | %08x %08x %08x %08x\n", prefix, abcd[0], abcd[1], abcd[2], abcd[3], abcd[4]);
+}
+
+static void	print_states(unsigned int abcd[4]) {
+	dprintf(2, "%08x %08x %08x %08x\n", abcd[0], abcd[1], abcd[2], abcd[3]);
 }
 
 void	md5_block_rounds(t_md5_state* state) {
+	md5_word_t	ABCD[] = { state->A, state->B, state->C, state->D };
+	print_states((unsigned int[]){ state->A, state->B, state->C, state->D });
+
 	// X[0 ... 16] のエンディアン変換
 	for (size_t i = 0; i < 16; ++i) {
 		state->X[i] = PASS_LIT_END(state->X[i]);
@@ -49,4 +56,11 @@ void	md5_block_rounds(t_md5_state* state) {
 	OI(A, B, C, D,  8, 6, 56); OI(D, A, B, C, 15, 10, 57); OI(C, D, A, B,  6, 15, 58); OI(B, C, D, A, 13, 21, 59);
 	OI(A, B, C, D,  4, 6, 60); OI(D, A, B, C, 11, 10, 61); OI(C, D, A, B,  2, 15, 62); OI(B, C, D, A,  9, 21, 63);
 	_print_states("[@]", (md5_word_t[]){ state->X[9], state->A, state->B, state->C, state->D });
+
+	state->A += ABCD[0];
+	state->B += ABCD[1];
+	state->C += ABCD[2];
+	state->D += ABCD[3];
+
+	print_states((unsigned int[]){ state->A, state->B, state->C, state->D });
 }

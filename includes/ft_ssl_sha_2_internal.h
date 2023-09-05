@@ -148,4 +148,7 @@ void	sha_256_block_padding(t_sha_256_state* state);
 // sha_256_block_rounds.c
 void	sha_256_block_rounds(t_sha_256_state* state);
 
+// sha_256_derive_digest.c
+t_sha_256_digest	sha_256_derive_digest(const t_sha_256_state* state);
+
 #endif
