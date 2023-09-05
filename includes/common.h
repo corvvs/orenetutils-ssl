@@ -9,6 +9,7 @@
 #define FT_MAX(a, b) ((a) > (b) ? (a) : (b))
 #define FT_MIN(a, b) ((a) <= (b) ? (a) : (b))
 #define FT_MASK(n) ((1u << (n)) - 1)
+#define OCTET_BIT_SIZE 8
 
 #define TX_BLD "\e[01m"
 #define TX_GRY "\e[30m"
