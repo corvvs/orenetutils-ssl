@@ -1,5 +1,5 @@
-#ifndef FT_SSL_SHA_2_INTERNAL_H
-#define FT_SSL_SHA_2_INTERNAL_H
+#ifndef FT_SSL_SHA_256_INTERNAL_H
+#define FT_SSL_SHA_256_INTERNAL_H
 
 #include "ft_ssl_lib.h"
 #include "ft_ssl_sha_2.h"
@@ -90,7 +90,7 @@ static const sha_256_word_t SHA_256_H0[SHA_256_STATE_SIZE] = {
 #define SHA_256_WORD_BIT_SIZE (sizeof(sha_256_word_t) * OCTET_BIT_SIZE)
 #define SHA_256_ONE_PADDING_BIT_LEN(len) (len + 1)
 #define SHA_256_ZERO_PADDING_BIT_LEN(len) (SHA_256_ONE_PADDING_BIT_LEN(len) + SHA_256_ZERO_PADDING_BIT_SIZE(SHA_256_ONE_PADDING_BIT_LEN(len)))
-#define SHA_256_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_2_WORD_BLOCK_BIT_SIZE)
+#define SHA_256_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_256_WORD_BLOCK_BIT_SIZE)
 #define SHA_256_PADDING_BIT_LEN(len) (SHA_256_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
 
 #define SHR(n, x) ((x) >> (n))
