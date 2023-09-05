@@ -2,8 +2,15 @@
 #define FT_SSL_H
 
 #include "ft_ssl_md5.h"
+#include "utils_endian.h"
 
 // md5.c
-t_md5_digest md5_hash(const uint8_t *message, uint64_t message_len);
+void	digest_md5(const uint8_t* message, size_t bit_len);
+
+// sha_2.c
+void	digest_sha_2(const uint8_t* message, size_t bit_len);
+
+// utils_endian.h
+bool	is_little_endian(void);
 
 #endif

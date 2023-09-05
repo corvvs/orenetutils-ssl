@@ -1,5 +1,7 @@
 #include "ft_ssl_md5_internal.h"
 
+extern int g_is_little_endian;
+
 #define OF(a, b, c, d, k, s, i)	OPE(state->X, F, state->a, state->b, state->c, state->d, k, s, i)
 #define OG(a, b, c, d, k, s, i)	OPE(state->X, G, state->a, state->b, state->c, state->d, k, s, i)
 #define OH(a, b, c, d, k, s, i)	OPE(state->X, H, state->a, state->b, state->c, state->d, k, s, i)
@@ -10,6 +12,11 @@ void	_print_states(const char* prefix, md5_word_t abcd[5]) {
 }
 
 void	md5_block_rounds(t_md5_state* state) {
+	// X[0 ... 16] のエンディアン変換
+	for (size_t i = 0; i < 16; ++i) {
+		state->X[i] = PASS_LIT_END(state->X[i]);
+	}
+
 	// Round1: j = 1 .. 16
 	_print_states("[0]", (md5_word_t[]){ state->X[0], state->A, state->B, state->C, state->D });
 	OF(A, B, C, D,  0, 7,  0);

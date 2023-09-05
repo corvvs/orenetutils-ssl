@@ -3,7 +3,6 @@
 
 #include "ft_ssl_lib.h"
 
-#define OCTET_BIT_SIZE 8
 #define MD5_WORD_BLOCK_BIT_SIZE 512
 #define MD5_DIGEST_BIT_SIZE (MD5_WORD_BLOCK_BIT_SIZE / 4)
 

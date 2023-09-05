@@ -3,6 +3,7 @@
 
 #include "ft_ssl_lib.h"
 #include "ft_ssl_md5.h"
+#include "utils_endian.h"
 
 typedef uint32_t md5_word_t;
 
@@ -77,11 +78,6 @@ typedef struct s_md5_state
 	.C = C0,                                                    \
 	.D = D0,                                                    \
 })
-
-// md5_subbyte_manipulation.c
-void	set_bit_at(uint8_t* mem, uint64_t bit_pos, uint8_t bit);
-void	subbyte_memcpy(uint8_t* dst, const uint8_t* src, uint8_t bit_from, uint8_t bit_to);
-void	subbyte_memset(uint8_t* mem, const uint8_t bit, uint8_t bit_from, uint8_t bit_to);
 
 // md5_block_padding.c
 void	md5_block_padding(t_md5_state *state);

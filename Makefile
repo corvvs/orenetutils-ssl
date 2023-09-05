@@ -6,7 +6,11 @@ FILES	:=	\
 			md5.c\
 			md5_block_padding.c\
 			md5_block_rounds.c\
+			sha_2.c\
+			sha_256_block_padding.c\
+			sha_256_block_rounds.c\
 			subbyte_manipulation.c\
+			utils_endian.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
