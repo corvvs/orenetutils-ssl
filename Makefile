@@ -58,7 +58,7 @@ fclean:			clean
 .PHONY:	re
 re:				fclean all
 
-.PHONY:	test_md5
+.PHONY:	test_md5 test_sha_256
 test_md5: $(NAME)
 	bash test/md5_simple.sh ""
 	bash test/md5_simple.sh "h"
@@ -68,6 +68,16 @@ test_md5: $(NAME)
 	bash test/md5_simple.sh "hello"
 	bash test/md5_simple.sh "hello!"
 	bash test/md5_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
+
+test_sha_256: $(NAME)
+	bash test/sha_256_simple.sh ""
+	bash test/sha_256_simple.sh "h"
+	bash test/sha_256_simple.sh "he"
+	bash test/sha_256_simple.sh "hel"
+	bash test/sha_256_simple.sh "hell"
+	bash test/sha_256_simple.sh "hello"
+	bash test/sha_256_simple.sh "hello!"
+	bash test/sha_256_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
 
 .PHONY:	up
 up:
