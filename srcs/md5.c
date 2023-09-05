@@ -31,6 +31,20 @@ static bool	block_operation(t_md5_state* state) {
 	return state->block_from < state->padded_message_len;
 }
 
+static t_md5_digest	derive_digest(const t_md5_state* state) {
+	t_md5_digest	digest = {};
+	md5_word_t	ABCD[] = { state->A, state->B, state->C, state->D };
+	size_t		digest_index = 0;
+	for (size_t i = 0; i < sizeof(ABCD) / sizeof(md5_word_t); ++i) {
+		for (size_t j = 0; j < sizeof(md5_word_t); ++j) {
+			digest.digest[digest_index] = ABCD[i] % 256;
+			ABCD[i] /= 256;
+			digest_index += 1;
+		}
+	}
+	return digest;
+}
+
 t_md5_digest	md5_hash(const uint8_t* message, uint64_t message_len) {
 	// 状態の初期化
 	t_md5_state		state = MD5_INITIAL_STATE(message, message_len);
@@ -43,22 +57,11 @@ t_md5_digest	md5_hash(const uint8_t* message, uint64_t message_len) {
 	// バッチ処理
 	while (block_operation(&state));
 
-	// ダイジェストにして返す
-	t_md5_digest	digest = {};
-	md5_word_t	ABCD[] = { state.A, state.B, state.C, state.D };
-	size_t		digest_index = 0;
-	for (size_t i = 0; i < sizeof(ABCD) / sizeof(md5_word_t); ++i) {
-		for (size_t j = 0; j < sizeof(md5_word_t); ++j) {
-			digest.digest[digest_index] = ABCD[i] % 256;
-			ABCD[i] /= 256;
-			digest_index += 1;
-		}
-	}
-	return digest;
+	return derive_digest(&state);
 }
 
 void	digest_md5(const uint8_t* message, size_t bit_len) {
-	t_md5_digest digest =  md5_hash(message, bit_len);
+	t_md5_digest digest = md5_hash(message, bit_len);
 	printf("digest:\n");
 	for (size_t i = 0; i < sizeof(digest.digest) / sizeof(uint8_t); i++) {
 		printf("%02x", digest.digest[i]);

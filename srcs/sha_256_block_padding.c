@@ -50,9 +50,15 @@ static bool	do_message_copy(const t_sha_256_state* state) {
 static void	copy_message_data(t_sha_256_state* state) {
 	if (!do_message_copy(state)) { return; }
 	const size_t copy_bit_size = FT_MIN(512, state->message_len - state->block_from);
-	const size_t copy_byte_size = (copy_bit_size - 1) / OCTET_BIT_SIZE + 1;
-	ft_memcpy(state->X, state->message + state->block_from, copy_byte_size);
-	DEBUGOUT("COPY MESSAGE DATA from " U64T " to " U64T, state->block_from, state->block_from + copy_bit_size);
+	const uint64_t	copy_bit_from = state->block_from;
+	const uint64_t	copy_bit_to = state->block_from + copy_bit_size;
+	const uint64_t	copy_byte_from = copy_bit_from / OCTET_BIT_SIZE;
+	const uint64_t	copy_byte_to = (copy_bit_to - 1) / OCTET_BIT_SIZE + 1;
+	ft_memcpy(state->schedule.X, state->message + copy_byte_from, copy_byte_to - copy_byte_from);
+	DEBUGOUT(
+		"COPY MESSAGE DATA from b[" U64T ", " U64T ") B[" U64T ", " U64T ")",
+		copy_bit_from, copy_bit_to, copy_byte_from, copy_byte_to
+	);
 }
 
 static bool	do_one_padding(const t_sha_256_state* state) {
@@ -64,7 +70,7 @@ static void	one_padding(t_sha_256_state* state) {
 	if (!do_one_padding(state)) { return; }
 	const uint64_t	padding_bit_pos = state->message_len % SHA_2_WORD_BLOCK_BIT_SIZE;
 	const uint64_t	padding_byte_pos = padding_bit_pos / OCTET_BIT_SIZE;
-	set_bit_at((uint8_t*)state->X + padding_byte_pos, padding_bit_pos % OCTET_BIT_SIZE, 1);
+	set_bit_at((uint8_t*)state->schedule.X + padding_byte_pos, padding_bit_pos % OCTET_BIT_SIZE, 1);
 	DEBUGOUT("ONE PADDING at bit pos: " U64T, padding_bit_pos);
 }
 
@@ -82,12 +88,12 @@ static void	zero_padding(t_sha_256_state* state) {
 	if (do_zero_padding_former(state)) {
 		const uint64_t	set_from = FT_MAX(state->block_from, state->message_1bp_len);
 		const uint64_t	set_to = state->message_0bp_len;
-		bitwise_memset((uint8_t*)state->X, 0, set_from % SHA_2_WORD_BLOCK_BIT_SIZE, set_to - set_from);
+		bitwise_memset((uint8_t*)state->schedule.X, 0, set_from % SHA_2_WORD_BLOCK_BIT_SIZE, set_to - set_from);
 		DEBUGOUT("ZERO PADDING on bit range: [" U64T ", " U64T ")", set_from, set_to);
 	} else if (do_zero_padding_latter(state)) {
 		const uint64_t	set_from = state->message_1bp_len;
 		const uint64_t	set_to = ((state->message_1bp_len - 1) / SHA_2_WORD_BLOCK_BIT_SIZE + 1) * SHA_2_WORD_BLOCK_BIT_SIZE;
-		bitwise_memset((uint8_t*)state->X, 0, set_from % SHA_2_WORD_BLOCK_BIT_SIZE, set_to - set_from);
+		bitwise_memset((uint8_t*)state->schedule.X, 0, set_from % SHA_2_WORD_BLOCK_BIT_SIZE, set_to - set_from);
 		DEBUGOUT("ZERO PADDING on bit range: [" U64T ", " U64T ")", set_from, set_to);
 	}
 }
@@ -108,7 +114,7 @@ static void 	size_padding(t_sha_256_state* state) {
 	if (!do_size_padding(state)) { return; }
 	const uint64_t s_64 = state->message_len;
 	const uint64_t	size_from = SHA_2_WORD_BLOCK_BIT_SIZE - sizeof(uint64_t) * OCTET_BIT_SIZE;
-	uint64_t*	size = (uint64_t *)((uint8_t *)state->X + size_from / OCTET_BIT_SIZE);
+	uint64_t*	size = (uint64_t *)((uint8_t *)state->schedule.X + size_from / OCTET_BIT_SIZE);
 	DEBUGOUT("g_is_little_endian: %d", g_is_little_endian);
 	*size = PASS_BIG_END(s_64);
 	DEBUGOUT("SIZE PADDING: " U64T " into [" U64T ", " U64T ")",
@@ -128,14 +134,14 @@ static void	print_byte_array(const uint8_t* bytes, size_t len) {
 void	sha_256_block_padding(t_sha_256_state* state) {
 	// 入力データをブロックバッファにコピー
 	copy_message_data(state);
-	print_byte_array((const uint8_t*)state->X, 512 / 8);
+	print_byte_array((const uint8_t*)state->schedule.X, 512 / 8);
 	// 1パディングを行う
 	one_padding(state);
-	print_byte_array((const uint8_t*)state->X, 512 / 8);
+	print_byte_array((const uint8_t*)state->schedule.X, 512 / 8);
 	// 0パディングを行う
 	zero_padding(state);
-	print_byte_array((const uint8_t*)state->X, 512 / 8);
+	print_byte_array((const uint8_t*)state->schedule.X, 512 / 8);
 	// サイズパディングを行う
 	size_padding(state);
-	print_byte_array((const uint8_t*)state->X, 512 / 8);
+	print_byte_array((const uint8_t*)state->schedule.X, 512 / 8);
 }

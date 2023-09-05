@@ -103,9 +103,9 @@ static const sha_256_word_t SHA_256_H0[SHA_256_STATE_SIZE] = {
 #define SSIG0(x) (ROTR(7, x) ^ ROTR(18, x) ^ SHR(3, x))
 #define SSIG1(x) (ROTR(17, x) ^ ROTR(19, x) ^ SHR(10, x))
 
-#define OPE(a, b, c, d, e, f, g, h, K, W, i)     \
+#define OPE(a, b, c, d, e, f, g, h, W, i)     \
 	{                                         \
-		sha_256_word_t T1 = h + BSIG1(e) + CH(e, f, g) + K[i] + W[i]; \
+		sha_256_word_t T1 = h + BSIG1(e) + CH(e, f, g) + SHA_256_K[i] + W[i]; \
 		sha_256_word_t T2 = BSIG0(a) + MAJ(a, b, c); \
 		h = g;\
 		g = f;\
@@ -127,7 +127,10 @@ typedef struct s_sha_256_state
 	uint64_t block_from;
 
 	sha_256_word_t H[SHA_256_STATE_SIZE];
-	sha_256_word_t X[16 * 4];
+	union {
+		sha_256_word_t W[16 * 4];
+		sha_256_word_t X[16];
+	} schedule;
 } t_sha_256_state;
 
 #define SHA_256_INITIAL_STATE(message, message_len) ((t_sha_256_state){ \
@@ -142,5 +145,7 @@ typedef struct s_sha_256_state
 // sha_256_block_padding.c
 void	sha_256_block_padding(t_sha_256_state* state);
 
+// sha_256_block_rounds.c
+void	sha_256_block_rounds(t_sha_256_state* state);
 
 #endif
