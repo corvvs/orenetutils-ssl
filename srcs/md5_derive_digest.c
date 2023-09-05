@@ -8,10 +8,9 @@ t_md5_digest	md5_derive_digest(const t_md5_state* state) {
 	size_t		digest_index = 0;
 	for (size_t i = 0; i < sizeof(ABCD) / sizeof(md5_word_t); ++i) {
 		ABCD[i] = PASS_LIT_END(ABCD[i]);
-		for (size_t j = 0; j < sizeof(md5_word_t); ++j) {
-			digest.digest[digest_index] = ABCD[i] % 256;
-			ABCD[i] /= 256;
-			digest_index += 1;
+		for (size_t j = 0; j < sizeof(md5_word_t); ++j, ++digest_index) {
+			digest.digest[digest_index] = ABCD[i] & ((1u << OCTET_BIT_SIZE) - 1);
+			ABCD[i] >>= OCTET_BIT_SIZE;
 		}
 	}
 	return digest;

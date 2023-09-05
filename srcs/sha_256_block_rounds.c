@@ -2,19 +2,6 @@
 
 extern int g_is_little_endian;
 
-static void	_print_states(const char* prefix, sha_256_word_t H[8]) {
-	dprintf(2, "%s %08x %08x %08x %08x %08x %08x %08x %08x\n", prefix,
-		H[0], H[1], H[2], H[3], H[4], H[5], H[6], H[7]
-	);
-}
-
-static void	_print_x(unsigned int X[16]) {
-	for (size_t i = 0; i < 16; i++) {
-		dprintf(2, "%08x ", X[i]);
-	}
-	dprintf(2, "\n");
-}
-
 void	sha_256_block_rounds(t_sha_256_state* state) {
 	// W[0 ... 16] のエンディアン変換
 	for (size_t i = 0; i < 16; ++i) {
@@ -26,7 +13,6 @@ void	sha_256_block_rounds(t_sha_256_state* state) {
 			SSIG1(state->schedule.W[i-2]) + state->schedule.W[i-7] +
 			SSIG0(state->schedule.W[i-15]) + state->schedule.W[i-16];
 	}
-	_print_x(state->schedule.X);
 
 	sha_256_word_t
 		a = state->H[0],
@@ -38,11 +24,8 @@ void	sha_256_block_rounds(t_sha_256_state* state) {
 		g = state->H[6],
 		h = state->H[7];
 
-    _print_states("[*H]", (sha_256_word_t[]){a, b, c, d, e, f, g, h});
 	for (size_t i = 0; i < 64; ++i) {
 		OPE(a, b, c, d, e, f, g, h, state->schedule.W, i);
-		dprintf(2, "%zu: ", i);
-        _print_states("[#H]", (sha_256_word_t[]){a, b, c, d, e, f, g, h});
 	}
 
 	state->H[0] += a;
@@ -53,6 +36,4 @@ void	sha_256_block_rounds(t_sha_256_state* state) {
 	state->H[5] += f;
 	state->H[6] += g;
 	state->H[7] += h;
-
-	_print_states("[@H]", state->H);
 }
