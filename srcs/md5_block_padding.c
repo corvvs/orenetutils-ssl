@@ -6,10 +6,10 @@ extern int g_is_little_endian;
 // セット範囲: [mem + bit_offset, mem + bit_offset + bit_len)
 // セット値: bit
 static void	bitwise_memset(uint8_t* mem, const uint8_t bit, uint64_t bit_offset, uint64_t bit_len) {
-	DEBUGOUT("bitwise_memset: bit_offset: " U64T ", bit_len: " U64T, bit_offset, bit_len);
+	// DEBUGOUT("bitwise_memset: bit_offset: " U64T ", bit_len: " U64T, bit_offset, bit_len);
 	const uint64_t	bit_from = bit_offset;
 	const uint64_t	bit_to = bit_offset + bit_len;
-	DEBUGOUT("bitwise_memset: bit_from: " U64T ", bit_to: " U64T, bit_from, bit_to);
+	// DEBUGOUT("bitwise_memset: bit_from: " U64T ", bit_to: " U64T, bit_from, bit_to);
 
 	// 特殊ケース: コピー範囲が最初の１オクテットに収まっている
 	if (bit_to < OCTET_BIT_SIZE) {
@@ -32,7 +32,7 @@ static void	bitwise_memset(uint8_t* mem, const uint8_t bit, uint64_t bit_offset,
 
 	// バイトコピー
 	if (byte_to > byte_from) {
-		DEBUGOUT("memset: [" U64T ", " U64T ")", byte_from, byte_to);
+		// DEBUGOUT("memset: [" U64T ", " U64T ")", byte_from, byte_to);
 		ft_memset(&mem[byte_from], bit ? 255 : 0, byte_to - byte_from);
 	}
 	
@@ -50,9 +50,15 @@ static bool	do_message_copy(const t_md5_state* state) {
 static void	copy_message_data(t_md5_state* state) {
 	if (!do_message_copy(state)) { return; }
 	const size_t copy_bit_size = FT_MIN(512, state->message_len - state->block_from);
-	const size_t copy_byte_size = (copy_bit_size - 1) / OCTET_BIT_SIZE + 1;
-	ft_memcpy(state->X, state->message + state->block_from, copy_byte_size);
-	DEBUGOUT("COPY MESSAGE DATA from " U64T " to " U64T, state->block_from, state->block_from + copy_bit_size);
+	const uint64_t	copy_bit_from = state->block_from;
+	const uint64_t	copy_bit_to = state->block_from + copy_bit_size;
+	const uint64_t	copy_byte_from = copy_bit_from / OCTET_BIT_SIZE;
+	const uint64_t	copy_byte_to = (copy_bit_to - 1) / OCTET_BIT_SIZE + 1;
+	ft_memcpy(state->X, state->message + copy_byte_from, copy_byte_to - copy_byte_from);
+	DEBUGOUT(
+		"COPY MESSAGE DATA from b[" U64T ", " U64T ") B[" U64T ", " U64T ")",
+		copy_bit_from, copy_bit_to, copy_byte_from, copy_byte_to
+	);
 }
 
 static bool	do_one_padding(const t_md5_state* state) {
