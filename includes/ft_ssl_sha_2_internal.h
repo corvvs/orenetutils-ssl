@@ -140,6 +140,12 @@ static const sha_512_256_word_t SHA_512_256_H0[SHA_512_256_STATE_SIZE] = {
 #define SHA_512_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_512_WORD_BLOCK_BIT_SIZE)
 #define SHA_512_PADDING_BIT_LEN(len) (SHA_512_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
 
+#define SHA_512_224_WORD_BIT_SIZE (sizeof(sha_512_224_word_t) * OCTET_BIT_SIZE)
+#define SHA_512_224_ONE_PADDING_BIT_LEN(len) (len + 1)
+#define SHA_512_224_ZERO_PADDING_BIT_LEN(len) (SHA_512_224_ONE_PADDING_BIT_LEN(len) + SHA_512_224_ZERO_PADDING_BIT_SIZE(SHA_512_224_ONE_PADDING_BIT_LEN(len)))
+#define SHA_512_224_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_512_224_WORD_BLOCK_BIT_SIZE)
+#define SHA_512_224_PADDING_BIT_LEN(len) (SHA_512_224_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
+
 #define SHA_512_256_WORD_BIT_SIZE (sizeof(sha_512_256_word_t) * OCTET_BIT_SIZE)
 #define SHA_512_256_ONE_PADDING_BIT_LEN(len) (len + 1)
 #define SHA_512_256_ZERO_PADDING_BIT_LEN(len) (SHA_512_256_ONE_PADDING_BIT_LEN(len) + SHA_512_256_ZERO_PADDING_BIT_SIZE(SHA_512_256_ONE_PADDING_BIT_LEN(len)))
@@ -210,6 +216,22 @@ typedef struct s_sha_512_state
 	} schedule;
 } t_sha_512_state;
 
+typedef struct s_sha_512_224_state
+{
+	const uint8_t *message;
+	const uint64_t message_len;
+	const uint64_t message_1bp_len;
+	const uint64_t message_0bp_len;
+	const uint64_t padded_message_len;
+	uint64_t block_from;
+
+	sha_512_224_word_t H[SHA_512_224_STATE_SIZE];
+	union {
+		sha_512_224_word_t W[16 * 5];
+		sha_512_224_word_t X[16];
+	} schedule;
+} t_sha_512_224_state;
+
 typedef struct s_sha_512_256_state
 {
 	const uint8_t *message;
@@ -262,6 +284,15 @@ typedef struct s_sha_512_256_state
 	.block_from = 0,                                                    \
 })
 
+#define SHA_512_224_INITIAL_STATE(message, message_len) ((t_sha_512_224_state){ \
+	.message = message,                                                 \
+	.message_len = message_len,                                         \
+	.message_1bp_len = SHA_512_224_ONE_PADDING_BIT_LEN(message_len),        \
+	.message_0bp_len = SHA_512_224_ZERO_PADDING_BIT_LEN(message_len),       \
+	.padded_message_len = SHA_512_224_PADDING_BIT_LEN(message_len),         \
+	.block_from = 0,                                                    \
+})
+
 #define SHA_512_256_INITIAL_STATE(message, message_len) ((t_sha_512_256_state){ \
 	.message = message,                                                 \
 	.message_len = message_len,                                         \
@@ -271,49 +302,28 @@ typedef struct s_sha_512_256_state
 	.block_from = 0,                                                    \
 })
 
-// sha_256_block_padding.c
 void	sha_256_block_padding(t_sha_256_state* state);
-
-// sha_256_block_rounds.c
 void	sha_256_block_rounds(t_sha_256_state* state);
-
-// sha_256_derive_digest.c
 t_sha_256_digest	sha_256_derive_digest(const t_sha_256_state* state);
 
-// sha_224_block_padding.c
 void	sha_224_block_padding(t_sha_224_state* state);
-
-// sha_224_block_rounds.c
 void	sha_224_block_rounds(t_sha_224_state* state);
-
-// sha_224_derive_digest.c
 t_sha_224_digest	sha_224_derive_digest(const t_sha_224_state* state);
 
-// sha_384_block_padding.c
 void	sha_384_block_padding(t_sha_384_state* state);
-
-// sha_384_block_rounds.c
 void	sha_384_block_rounds(t_sha_384_state* state);
-
-// sha_384_derive_digest.c
 t_sha_384_digest	sha_384_derive_digest(const t_sha_384_state* state);
 
-// sha_512_block_padding.c
 void	sha_512_block_padding(t_sha_512_state* state);
-
-// sha_512_block_rounds.c
 void	sha_512_block_rounds(t_sha_512_state* state);
-
-// sha_512_derive_digest.c
 t_sha_512_digest	sha_512_derive_digest(const t_sha_512_state* state);
 
-// sha_512_256_block_padding.c
+void	sha_512_224_block_padding(t_sha_512_224_state* state);
+void	sha_512_224_block_rounds(t_sha_512_224_state* state);
+t_sha_512_224_digest	sha_512_224_derive_digest(const t_sha_512_224_state* state);
+
 void	sha_512_256_block_padding(t_sha_512_256_state* state);
-
-// sha_512_256_block_rounds.c
 void	sha_512_256_block_rounds(t_sha_512_256_state* state);
-
-// sha_512_256_derive_digest.c
 t_sha_512_256_digest	sha_512_256_derive_digest(const t_sha_512_256_state* state);
 
 #endif
