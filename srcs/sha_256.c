@@ -30,11 +30,7 @@ static bool	block_operation(t_sha_256_state* state) {
 // ハッシュフロー
 define_hash_flow(sha_256, SHA_256)
 
-static void print_digest(const t_sha_256_digest* digest) {
-	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
-		printf("%02x", digest->digest[i]);
-	}
-}
+define_print_digest(sha_256)
 
 define_print_digest_line(sha_256, "SHA2-256")
 

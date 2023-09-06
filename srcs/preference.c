@@ -38,7 +38,7 @@ int	parse_options(const t_master* master, char** argv, t_preference* pref_ptr) {
 					break;
 				}
 				default: {
-					dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
+					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
 					return -1;
 				}
 			}

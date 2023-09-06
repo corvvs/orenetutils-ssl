@@ -30,11 +30,7 @@ static bool	block_operation(t_sha_384_state* state) {
 // ハッシュフロー
 define_hash_flow(sha_384, SHA_384)
 
-static void print_digest(const t_sha_384_digest* digest) {
-	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
-		printf("%02x", digest->digest[i]);
-	}
-}
+define_print_digest(sha_384)
 
 define_print_digest_line(sha_384, "SHA2-384")
 

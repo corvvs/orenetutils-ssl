@@ -39,6 +39,7 @@ FILES	:=	\
 			utils_endian.c\
 			utils_error.c\
 			utils_print.c\
+			printf.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)

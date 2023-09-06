@@ -26,11 +26,7 @@ static bool	block_operation(t_md5_state* state) {
 // ハッシュフロー
 define_hash_flow(md5, MD5)
 
-static void print_digest(const t_md5_digest* digest) {
-	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
-		printf("%02x", digest->digest[i]);
-	}
-}
+define_print_digest(md5)
 
 define_print_digest_line(md5, "MD5")
 

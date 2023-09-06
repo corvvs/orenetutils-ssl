@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 	DEBUGOUT("g_is_little_endian: %d", g_is_little_endian);
 
 	if (argc < 2) {
-		printf("usage: ft_ssl command [command opts] [command args]\n");
+		ft_putstr_fd("usage: ft_ssl command [command opts] [command args]\n", STDOUT_FILENO);
 		return (0);
 	}
 	t_master	master = {
