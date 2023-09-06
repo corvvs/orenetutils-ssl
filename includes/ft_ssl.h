@@ -45,22 +45,12 @@ typedef struct s_master {
 // md5.c
 void digest_md5(const t_preference* pref, const t_message* message);
 
-// sha_224.c
+// sha_***.c
 void digest_sha_224(const t_preference* pref, const t_message* message);
-
-// sha_256.c
 void digest_sha_256(const t_preference* pref, const t_message* message);
-
-// sha_384.c
 void digest_sha_384(const t_preference* pref, const t_message* message);
-
-// sha_512.c
 void digest_sha_512(const t_preference* pref, const t_message* message);
-
-// sha_512_224.c
 void digest_sha_512_224(const t_preference* pref, const t_message* message);
-
-// sha_512_256.c
 void digest_sha_512_256(const t_preference* pref, const t_message* message);
 
 // preference.c
@@ -77,9 +67,10 @@ bool is_little_endian(void);
 
 // utils_error.c
 void print_error_by_message(const t_master* master, const char* message);
-void print_error_by_errno(const t_master* master);
 
 // utils_print.c
 void put_bytestream(int fd, const uint8_t* data, size_t len);
+
+#define PRINT_ERROR(master, format, ...) yoyo_dprintf(STDERR_FILENO, "%s: %s: " format, master->program_name, master->command_name, __VA_ARGS__)
 
 #endif

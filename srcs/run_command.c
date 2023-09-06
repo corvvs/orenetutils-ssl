@@ -35,7 +35,7 @@ static bool	create_message_argument(const t_master* master, t_message* message_p
 static bool	create_message_path(const t_master* master, t_message* message_ptr, const char* path) {
 	int	ifd = open(path, O_RDONLY);
 	if (ifd < 0) {
-		print_error_by_errno(master);
+		PRINT_ERROR(master, "%s: %s\n", path, strerror(errno));
 		return false;
 	}
 	const bool result = create_message_fd(master, message_ptr, ifd);
@@ -60,6 +60,7 @@ static int	run_digest(const t_master* master, char **argv, void (digest_func)(co
 	}
 	argv += parsed_count;
 
+	// 標準入力から
 	if ((*argv == NULL && pref.message_argument == NULL) || pref.is_echo) {
 		t_message	message;
 		if (!create_message_stdin(master, &message)) {
@@ -68,6 +69,8 @@ static int	run_digest(const t_master* master, char **argv, void (digest_func)(co
 		digest_func(&pref, &message);
 		destroy_message(&message);
 	}
+
+	// -s から
 	if (pref.message_argument != NULL) {
 		t_message	message;
 		if (!create_message_argument(master, &message, pref.message_argument)) {
@@ -77,10 +80,12 @@ static int	run_digest(const t_master* master, char **argv, void (digest_func)(co
 		destroy_message(&message);
 	}
 
+	// ファイル(argv)から
 	while (*argv != NULL) {
 		t_message	message;
 		if (!create_message_path(master, &message, *argv)) {
-			return 1;
+			argv += 1;
+			continue;
 		}
 		digest_func(&pref, &message);
 		destroy_message(&message);
@@ -91,27 +96,13 @@ static int	run_digest(const t_master* master, char **argv, void (digest_func)(co
 
 int	run_command(const t_master* master, char **argv) {
 	switch (master->command) {
-		case COMMAND_MD5: {
-			return run_digest(master, argv, digest_md5);
-		}
-		case COMMAND_SHA224: {
-			return run_digest(master, argv, digest_sha_224);
-		}
-		case COMMAND_SHA256: {
-			return run_digest(master, argv, digest_sha_256);
-		}
-		case COMMAND_SHA384: {
-			return run_digest(master, argv, digest_sha_384);
-		}
-		case COMMAND_SHA512: {
-			return run_digest(master, argv, digest_sha_512);
-		}
-		case COMMAND_SHA512_224: {
-			return run_digest(master, argv, digest_sha_512_224);
-		}
-		case COMMAND_SHA512_256: {
-			return run_digest(master, argv, digest_sha_512_256);
-		}
+		case COMMAND_MD5: 			return run_digest(master, argv, digest_md5);
+		case COMMAND_SHA224:		return run_digest(master, argv, digest_sha_224);
+		case COMMAND_SHA256:		return run_digest(master, argv, digest_sha_256);
+		case COMMAND_SHA384:		return run_digest(master, argv, digest_sha_384);
+		case COMMAND_SHA512:		return run_digest(master, argv, digest_sha_512);
+		case COMMAND_SHA512_224:	return run_digest(master, argv, digest_sha_512_224);
+		case COMMAND_SHA512_256:	return run_digest(master, argv, digest_sha_512_256);
 		default: {
 			yoyo_dprintf(STDERR_FILENO, "Invalid command '%s'; type \"help\" for a list.\n", master->command_name);
 			return 1;
