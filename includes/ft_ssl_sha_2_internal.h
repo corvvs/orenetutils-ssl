@@ -20,6 +20,7 @@ typedef sha_256_word_t sha_224_word_t;
 }
 
 typedef uint64_t sha_512_word_t;
+typedef sha_512_word_t sha_384_word_t;
 
 #define K_512 {\
 	0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL, 0xe9b5dba58189dbbcULL, 0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL, 0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL,\
@@ -34,13 +35,15 @@ typedef uint64_t sha_512_word_t;
 	0x28db77f523047d84ULL, 0x32caab7b40c72493ULL, 0x3c9ebe0a15c9bebcULL, 0x431d67c49c100d4cULL, 0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL, 0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL,\
 }
 
-static const sha_256_word_t SHA_256_K[64] = K_256;
 static const sha_224_word_t SHA_224_K[64] = K_256;
+static const sha_256_word_t SHA_256_K[64] = K_256;
+static const sha_384_word_t SHA_384_K[80] = K_512;
 static const sha_512_word_t SHA_512_K[80] = K_512;
 
 #define SHA_256_STATE_SIZE 8
 #define SHA_224_STATE_SIZE SHA_256_STATE_SIZE
 #define SHA_512_STATE_SIZE SHA_256_STATE_SIZE
+#define SHA_384_STATE_SIZE SHA_512_STATE_SIZE
 
 static const sha_256_word_t SHA_256_H0[SHA_256_STATE_SIZE] = {
 	0x6a09e667,
@@ -75,6 +78,17 @@ static const sha_512_word_t SHA_512_H0[SHA_512_STATE_SIZE] = {
     0x5be0cd19137e2179ULL,
 };
 
+static const sha_384_word_t SHA_384_H0[SHA_384_STATE_SIZE] = {
+	0xcbbb9d5dc1059ed8ULL,
+	0x629a292a367cd507ULL,
+	0x9159015a3070dd17ULL,
+	0x152fecd8f70e5939ULL,
+	0x67332667ffc00b31ULL,
+	0x8eb44a8768581511ULL,
+	0xdb0c2e0d64f98fa7ULL,
+	0x47b5481dbefa4fa4ULL,
+};
+
 #define SHA_256_WORD_BIT_SIZE (sizeof(sha_256_word_t) * OCTET_BIT_SIZE)
 #define SHA_256_ONE_PADDING_BIT_LEN(len) (len + 1)
 #define SHA_256_ZERO_PADDING_BIT_LEN(len) (SHA_256_ONE_PADDING_BIT_LEN(len) + SHA_256_ZERO_PADDING_BIT_SIZE(SHA_256_ONE_PADDING_BIT_LEN(len)))
@@ -92,6 +106,12 @@ static const sha_512_word_t SHA_512_H0[SHA_512_STATE_SIZE] = {
 #define SHA_512_ZERO_PADDING_BIT_LEN(len) (SHA_512_ONE_PADDING_BIT_LEN(len) + SHA_512_ZERO_PADDING_BIT_SIZE(SHA_512_ONE_PADDING_BIT_LEN(len)))
 #define SHA_512_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_512_WORD_BLOCK_BIT_SIZE)
 #define SHA_512_PADDING_BIT_LEN(len) (SHA_512_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
+
+#define SHA_384_WORD_BIT_SIZE (sizeof(sha_384_word_t) * OCTET_BIT_SIZE)
+#define SHA_384_ONE_PADDING_BIT_LEN(len) (len + 1)
+#define SHA_384_ZERO_PADDING_BIT_LEN(len) (SHA_384_ONE_PADDING_BIT_LEN(len) + SHA_384_ZERO_PADDING_BIT_SIZE(SHA_384_ONE_PADDING_BIT_LEN(len)))
+#define SHA_384_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_384_WORD_BLOCK_BIT_SIZE)
+#define SHA_384_PADDING_BIT_LEN(len) (SHA_384_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
 
 typedef struct s_sha_256_state
 {
@@ -141,6 +161,22 @@ typedef struct s_sha_512_state
 	} schedule;
 } t_sha_512_state;
 
+typedef struct s_sha_384_state
+{
+	const uint8_t *message;
+	const uint64_t message_len;
+	const uint64_t message_1bp_len;
+	const uint64_t message_0bp_len;
+	const uint64_t padded_message_len;
+	uint64_t block_from;
+
+	sha_384_word_t H[SHA_384_STATE_SIZE];
+	union {
+		sha_384_word_t W[16 * 5];
+		sha_384_word_t X[16];
+	} schedule;
+} t_sha_384_state;
+
 #define SHA_256_INITIAL_STATE(message, message_len) ((t_sha_256_state){ \
 	.message = message,                                                 \
 	.message_len = message_len,                                         \
@@ -165,6 +201,15 @@ typedef struct s_sha_512_state
 	.message_1bp_len = SHA_512_ONE_PADDING_BIT_LEN(message_len),        \
 	.message_0bp_len = SHA_512_ZERO_PADDING_BIT_LEN(message_len),       \
 	.padded_message_len = SHA_512_PADDING_BIT_LEN(message_len),         \
+	.block_from = 0,                                                    \
+})
+
+#define SHA_384_INITIAL_STATE(message, message_len) ((t_sha_384_state){ \
+	.message = message,                                                 \
+	.message_len = message_len,                                         \
+	.message_1bp_len = SHA_384_ONE_PADDING_BIT_LEN(message_len),        \
+	.message_0bp_len = SHA_384_ZERO_PADDING_BIT_LEN(message_len),       \
+	.padded_message_len = SHA_384_PADDING_BIT_LEN(message_len),         \
 	.block_from = 0,                                                    \
 })
 
@@ -194,5 +239,14 @@ void	sha_512_block_rounds(t_sha_512_state* state);
 
 // sha_512_derive_digest.c
 t_sha_512_digest	sha_512_derive_digest(const t_sha_512_state* state);
+
+// sha_384_block_padding.c
+void	sha_384_block_padding(t_sha_384_state* state);
+
+// sha_384_block_rounds.c
+void	sha_384_block_rounds(t_sha_384_state* state);
+
+// sha_384_derive_digest.c
+t_sha_384_digest	sha_384_derive_digest(const t_sha_384_state* state);
 
 #endif

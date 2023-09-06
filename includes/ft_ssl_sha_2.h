@@ -12,6 +12,8 @@
 #define SHA_512_WORD_BLOCK_BIT_SIZE 1024
 #define SHA_512_DIGEST_BIT_SIZE (SHA_512_WORD_BLOCK_BIT_SIZE / 2)
 
+#define SHA_384_WORD_BLOCK_BIT_SIZE SHA_512_WORD_BLOCK_BIT_SIZE
+#define SHA_384_DIGEST_BIT_SIZE ((SHA_384_WORD_BLOCK_BIT_SIZE / 2) - 128)
 
 typedef struct s_sha_256_digest
 {
@@ -27,6 +29,11 @@ typedef struct s_sha_512_digest
 {
 	uint8_t digest[SHA_512_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
 } t_sha_512_digest;
+
+typedef struct s_sha_384_digest
+{
+	uint8_t digest[SHA_384_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
+} t_sha_384_digest;
 
 typedef union u_bit_size {
 	struct {
