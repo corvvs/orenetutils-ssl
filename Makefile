@@ -7,7 +7,7 @@ FILES	:=	\
 			md5_block_padding.c\
 			md5_block_rounds.c\
 			md5_derive_digest.c\
-			sha_2.c\
+			sha_256.c\
 			sha_256_block_padding.c\
 			sha_256_block_rounds.c\
 			sha_256_derive_digest.c\
@@ -58,7 +58,10 @@ fclean:			clean
 .PHONY:	re
 re:				fclean all
 
-.PHONY:	test_md5 test_sha_256
+.PHONY: test_algos test_md5 test_sha_256
+
+test_algos: $(NAME) test_md5 test_sha_256
+
 test_md5: $(NAME)
 	bash test/md5_simple.sh ""
 	bash test/md5_simple.sh "h"
