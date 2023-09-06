@@ -94,6 +94,20 @@ static int	run_digest(const t_master* master, char **argv, void (digest_func)(co
 	return 0;
 }
 
+static void	show_help(void) {
+	yoyo_dprintf(STDERR_FILENO,
+		"Commands:\n"
+	);
+	for (unsigned int i = 0; i < sizeof(g_command_pairs) / sizeof(g_command_pairs[0]); ++i) {
+		yoyo_dprintf(STDERR_FILENO, "%s\n", g_command_pairs[i].name);
+	}
+	yoyo_dprintf(STDERR_FILENO, "\n");
+	yoyo_dprintf(STDERR_FILENO,
+		"Flags:\n"
+		"-p -q -r -s\n"
+	);
+}
+
 int	run_command(const t_master* master, char **argv) {
 	switch (master->command) {
 		case COMMAND_MD5: 			return run_digest(master, argv, digest_md5);
@@ -104,7 +118,9 @@ int	run_command(const t_master* master, char **argv) {
 		case COMMAND_SHA512_224:	return run_digest(master, argv, digest_sha_512_224);
 		case COMMAND_SHA512_256:	return run_digest(master, argv, digest_sha_512_256);
 		default: {
-			yoyo_dprintf(STDERR_FILENO, "Invalid command '%s'; type \"help\" for a list.\n", master->command_name);
+			yoyo_dprintf(STDERR_FILENO, "%s: Error: '%s' is an invalid command.\n", master->program_name, master->command_name);
+			yoyo_dprintf(STDERR_FILENO, "\n");
+			show_help();
 			return 1;
 		}
 	}
