@@ -3,16 +3,22 @@ OBJDIR	:=	objs
 INCDIR	:=	includes
 FILES	:=	\
 			main.c\
+			preference.c\
 			md5.c\
 			md5_block_padding.c\
 			md5_block_rounds.c\
 			md5_derive_digest.c\
-			sha_2.c\
+			sha_256.c\
 			sha_256_block_padding.c\
 			sha_256_block_rounds.c\
 			sha_256_derive_digest.c\
 			subbyte_manipulation.c\
+			read_file.c\
+			run_command.c\
+			elastic_buffer.c\
 			utils_endian.c\
+			utils_error.c\
+			utils_print.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
@@ -23,7 +29,6 @@ LIBFT_DIR	:=	libft
 CC			:=	gcc
 CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
 CFLAGS		=	$(CCOREFLAGS)\
-				-D DEBUG\
 				-g -fsanitize=address -fsanitize=undefined\
 
 RM			:=	rm -rf
@@ -58,7 +63,10 @@ fclean:			clean
 .PHONY:	re
 re:				fclean all
 
-.PHONY:	test_md5 test_sha_256
+.PHONY: test_algos test_md5 test_sha_256
+
+test_algos: $(NAME) test_md5 test_sha_256
+
 test_md5: $(NAME)
 	bash test/md5_simple.sh ""
 	bash test/md5_simple.sh "h"

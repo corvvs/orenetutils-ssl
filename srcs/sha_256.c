@@ -1,5 +1,7 @@
 #include "ft_ssl_sha_2_internal.h"
 #include "ft_ssl_common.h"
+#include "ft_ssl_structure.h"
+#include "ft_ssl.h"
 
 extern int g_is_little_endian;
 
@@ -26,12 +28,17 @@ static bool	block_operation(t_sha_256_state* state) {
 }
 
 // ハッシュフロー
-define_hash_flow(sha_256, SHA_256)
+declare_hash_flow(sha_256, SHA_256)
 
-void	digest_sha_2(const uint8_t* message, size_t bit_len) {
-	t_sha_256_digest digest = sha_256_hash(message, bit_len);
-	for (size_t i = 0; i < sizeof(digest.digest) / sizeof(uint8_t); i++) {
-		printf("%02x", digest.digest[i]);
+static void print_digest(const t_sha_256_digest* digest) {
+	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
+		printf("%02x", digest->digest[i]);
 	}
-	printf("\n");
+}
+
+declare_print_digest_line(sha_256, "SHA2-256")
+
+void	digest_sha_2(const t_preference* pref, const t_message* message) {
+	t_sha_256_digest digest = sha_256_hash(message->message, message->message_bit_len);
+	print_digest_line(pref, message, &digest);
 }

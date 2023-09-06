@@ -3,11 +3,15 @@
 
 #include "common.h"
 #include "libft.h"
+#include "elastic_buffer.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <fcntl.h>
+#include <string.h>
+#include <errno.h>
 
 // subbyte_manipulation.c
 void	set_bit_at(uint8_t* mem, uint64_t bit_pos, uint8_t bit);
