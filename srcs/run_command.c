@@ -94,8 +94,11 @@ int	run_command(const t_master* master, char **argv) {
 		case COMMAND_MD5: {
 			return run_digest(master, argv, digest_md5);
 		}
+		case COMMAND_SHA224: {
+			return run_digest(master, argv, digest_sha_224);
+		}
 		case COMMAND_SHA256: {
-			return run_digest(master, argv, digest_sha_2);
+			return run_digest(master, argv, digest_sha_256);
 		}
 		default: {
 			dprintf(STDERR_FILENO, "Invalid command '%s'; type \"help\" for a list.\n", master->command_name);
