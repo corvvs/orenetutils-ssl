@@ -4,8 +4,15 @@
 #define READ_BUFFER_SIZE (128 << 10)
 
 // ifd から全データを読み取り, 1つの文字列に結合して返す
-bool	read_file(int ifd, t_elastic_buffer* buffer_ptr) {
-	t_elastic_buffer	joined = {};
+bool	read_file(const t_master* master, int ifd, t_elastic_buffer* buffer_ptr) {
+	t_elastic_buffer	joined = {
+		.capacity = READ_BUFFER_SIZE,
+		.buffer = malloc(READ_BUFFER_SIZE),
+	};
+	if (joined.buffer == NULL) {
+		print_error_by_errno(master);
+		return false;
+	}
 	char	read_buffer[READ_BUFFER_SIZE];
 
 	while (true) {

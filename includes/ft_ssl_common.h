@@ -2,9 +2,9 @@
 #define FT_SSL_COMMON_H
 
 // ハッシュごとのフロー関数を定義する.
-// define_hash_flow(md5, MD5)
-// define_hash_flow(sha_256, SHA_256)
-#define define_hash_flow(hash_type, HASH_TYPE)                                            \
+// declare_hash_flow(md5, MD5)
+// declare_hash_flow(sha_256, SHA_256)
+#define declare_hash_flow(hash_type, HASH_TYPE)                                            \
 	t_##hash_type##_digest hash_type##_hash(const uint8_t *message, uint64_t message_len) \
 	{                                                                                     \
 		t_##hash_type##_state state = init_state(message, message_len);                   \
@@ -19,7 +19,7 @@
 		return hash_type##_derive_digest(&state);                                         \
 	}
 
-#define define_block_padding_functions(hash_type, HASH_TYPE, BLOCK_BUFFER)                                            \
+#define declare_block_padding_functions(hash_type, HASH_TYPE, BLOCK_BUFFER)                                            \
 	static void bitwise_memset(uint8_t *mem, const uint8_t bit, uint64_t bit_offset, uint64_t bit_len)                \
 	{                                                                                                                 \
 		const uint64_t bit_from = bit_offset;                                                                         \
@@ -136,6 +136,68 @@
 	static bool do_size_padding(const t_##hash_type##_state *state)                                                   \
 	{                                                                                                                 \
 		return state->block_from + HASH_TYPE##_WORD_BLOCK_BIT_SIZE == state->padded_message_len;                      \
+	}
+
+#define declare_print_digest_line(hash_type, hash_prefix)                                                                   \
+	static void print_digest_line(const t_preference *pref, const t_message *message, const t_##hash_type##_digest *digest) \
+	{                                                                                                                       \
+		const bool current_is_stdin = message->is_bytestream && message->file_path == NULL;                                 \
+		if (pref->is_quiet)                                                                                                 \
+		{                                                                                                                   \
+			if (pref->is_echo && current_is_stdin)                                                                          \
+			{                                                                                                               \
+				put_bytestream(STDOUT_FILENO,                                                                               \
+							   message->message,                                                                            \
+							   message->message_bit_len > 0                                                                 \
+								   ? (message->message_bit_len - 1) / OCTET_BIT_SIZE + 1                                    \
+								   : 0);                                                                                    \
+				printf("\n");                                                                                               \
+			}                                                                                                               \
+			print_digest(digest);                                                                                           \
+		}                                                                                                                   \
+		else if (pref->is_reverse && !current_is_stdin)                                                                                          \
+		{                                                                                                                   \
+			print_digest(digest);                                                                                           \
+			printf(" ");                                                                                                    \
+			if (message->is_bytestream)                                                                                     \
+			{                                                                                                               \
+				printf("%s", message->file_path ? message->file_path : "-");                                                \
+			}                                                                                                               \
+			else                                                                                                            \
+			{                                                                                                               \
+				printf("\"%s\"", message->message);                                                                         \
+			}                                                                                                               \
+		}                                                                                                                   \
+		else                                                                                                                \
+		{                                                                                                                   \
+			if (current_is_stdin)                                                                                           \
+			{                                                                                                               \
+				if (pref->is_echo)                                                                                          \
+				{                                                                                                           \
+					ft_putstr_fd("(\"", STDOUT_FILENO);                                                                                          \
+					put_bytestream(STDOUT_FILENO,                                                                           \
+								   message->message,                                                                        \
+								   message->message_bit_len > 0                                                             \
+									   ? (message->message_bit_len - 1) / OCTET_BIT_SIZE + 1                                \
+									   : 0);                                                                                \
+					ft_putstr_fd("\")= ", STDOUT_FILENO);                                                                                        \
+				}                                                                                                           \
+				else                                                                                                        \
+				{                                                                                                           \
+					ft_putstr_fd("(stdin)= ", STDOUT_FILENO);                                                                                    \
+				}                                                                                                           \
+			}                                                                                                               \
+			else if (message->is_bytestream)                                                                                \
+			{                                                                                                               \
+				printf(hash_prefix " (%s) = ", message->file_path);                                                         \
+			}                                                                                                               \
+			else                                                                                                            \
+			{                                                                                                               \
+				printf(hash_prefix " (\"%s\") = ", message->message);                                                       \
+			}                                                                                                               \
+			print_digest(digest);                                                                                           \
+		}                                                                                                                   \
+		printf("\n");                                                                                                       \
 	}
 
 #endif
