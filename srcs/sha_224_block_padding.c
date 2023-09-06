@@ -3,7 +3,7 @@
 
 extern int g_is_little_endian;
 
-declare_block_padding_functions(sha_224, SHA_224, schedule.X)
+define_block_padding_functions(sha_224, SHA_224, schedule.X)
 
 static void 	size_padding(t_sha_224_state* state) {
 	if (!do_size_padding(state)) { return; }

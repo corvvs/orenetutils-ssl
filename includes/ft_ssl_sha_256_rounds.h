@@ -1,6 +1,8 @@
 #ifndef FT_SSL_SHA_256_ROUNDS_H
 #define FT_SSL_SHA_256_ROUNDS_H
 
+// SHA-256系(256, 224)のブロック演算
+
 #define SHR(n, x) ((x) >> (n))
 #define ROTR(n, x) (((x) >> (n)) | ((x) << (SHA_256_WORD_BIT_SIZE - (n))))
 #define ROTL(n, x) (((x) << (n)) | ((x) >> (SHA_256_WORD_BIT_SIZE - (n))))

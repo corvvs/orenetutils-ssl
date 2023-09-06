@@ -2,9 +2,9 @@
 #define FT_SSL_COMMON_H
 
 // ハッシュごとのフロー関数を定義する.
-// declare_hash_flow(md5, MD5)
-// declare_hash_flow(sha_256, SHA_256)
-#define declare_hash_flow(hash_type, HASH_TYPE)                                            \
+// define_hash_flow(md5, MD5)
+// define_hash_flow(sha_256, SHA_256)
+#define define_hash_flow(hash_type, HASH_TYPE)                                            \
 	t_##hash_type##_digest hash_type##_hash(const uint8_t *message, uint64_t message_len) \
 	{                                                                                     \
 		t_##hash_type##_state state = init_state(message, message_len);                   \
@@ -19,7 +19,7 @@
 		return hash_type##_derive_digest(&state);                                         \
 	}
 
-#define declare_block_padding_functions(hash_type, HASH_TYPE, BLOCK_BUFFER)                                            \
+#define define_block_padding_functions(hash_type, HASH_TYPE, BLOCK_BUFFER)                                            \
 	static void bitwise_memset(uint8_t *mem, const uint8_t bit, uint64_t bit_offset, uint64_t bit_len)                \
 	{                                                                                                                 \
 		const uint64_t bit_from = bit_offset;                                                                         \
@@ -138,7 +138,7 @@
 		return state->block_from + HASH_TYPE##_WORD_BLOCK_BIT_SIZE == state->padded_message_len;                      \
 	}
 
-#define declare_print_digest_line(hash_type, hash_prefix)                                                                   \
+#define define_print_digest_line(hash_type, hash_prefix)                                                                   \
 	static void print_digest_line(const t_preference *pref, const t_message *message, const t_##hash_type##_digest *digest) \
 	{                                                                                                                       \
 		const bool current_is_stdin = message->is_bytestream && message->file_path == NULL;                                 \
@@ -199,26 +199,5 @@
 		}                                                                                                                   \
 		printf("\n");                                                                                                       \
 	}
-
-#define declare_sha2_derive_digest(hash_type, HASH_TYPE) \
-t_##hash_type##_digest	hash_type##_derive_digest(const t_##hash_type##_state* state) {\
-	t_##hash_type##_digest	digest = {};\
-	hash_type##_word_t		H[8];\
-	ft_memcpy(H, state->H, sizeof(H));\
-	size_t		digest_index = 0;\
-	size_t i;\
-	for (i = 0; digest_index < HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE; ++i) {\
-		H[i] = PASS_BIG_END(H[i]);\
-		for (\
-			size_t j = 0;\
-			j < sizeof(hash_type##_word_t) && digest_index < HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE;\
-			++j, ++digest_index\
-		) {\
-			digest.digest[digest_index] = H[i] & ((1u << OCTET_BIT_SIZE) - 1);\
-			H[i] >>= OCTET_BIT_SIZE;\
-		}\
-	}\
-	return digest;\
-}
 
 #endif

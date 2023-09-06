@@ -1,6 +1,8 @@
 #ifndef FT_SSL_SHA_512_ROUNDS_H
 #define FT_SSL_SHA_512_ROUNDS_H
 
+// SHA-512系(512, 384, 512/224, 512/256のブロック演算
+
 #define SHR(n, x) ((x) >> (n))
 #define ROTR(n, x) (((x) >> (n)) | ((x) << (SHA_512_WORD_BIT_SIZE - (n))))
 #define ROTL(n, x) (((x) << (n)) | ((x) >> (SHA_512_WORD_BIT_SIZE - (n))))

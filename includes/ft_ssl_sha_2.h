@@ -21,35 +21,19 @@
 #define SHA_512_224_WORD_BLOCK_BIT_SIZE SHA_512_WORD_BLOCK_BIT_SIZE
 #define SHA_512_224_DIGEST_BIT_SIZE SHA_224_DIGEST_BIT_SIZE
 
-typedef struct s_sha_224_digest
-{
-	uint8_t digest[SHA_224_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
-} t_sha_224_digest;
+// SHA-2ファミリーのダイジェスト構造体を定義するマクロ
+#define define_sha_2_digest_struct(Subtype)\
+typedef struct s_sha_##Subtype##_digest\
+{\
+	uint8_t digest[SHA_##Subtype##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];\
+} t_sha_##Subtype##_digest;
 
-typedef struct s_sha_256_digest
-{
-	uint8_t digest[SHA_256_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
-} t_sha_256_digest;
-
-typedef struct s_sha_384_digest
-{
-	uint8_t digest[SHA_384_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
-} t_sha_384_digest;
-
-typedef struct s_sha_512_digest
-{
-	uint8_t digest[SHA_512_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
-} t_sha_512_digest;
-
-typedef struct s_sha_512_224_digest
-{
-	uint8_t digest[SHA_512_224_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
-} t_sha_512_224_digest;
-
-typedef struct s_sha_512_256_digest
-{
-	uint8_t digest[SHA_512_256_DIGEST_BIT_SIZE / OCTET_BIT_SIZE];
-} t_sha_512_256_digest;
+define_sha_2_digest_struct(224);
+define_sha_2_digest_struct(256);
+define_sha_2_digest_struct(384);
+define_sha_2_digest_struct(512);
+define_sha_2_digest_struct(512_224);
+define_sha_2_digest_struct(512_256);
 
 typedef union u_bit_size {
 	struct {

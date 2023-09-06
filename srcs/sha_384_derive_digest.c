@@ -3,4 +3,4 @@
 
 extern int g_is_little_endian;
 
-declare_sha2_derive_digest(sha_384, SHA_384)
+define_sha2_derive_digest(sha_384, SHA_384)

@@ -28,7 +28,7 @@ static bool	block_operation(t_sha_512_224_state* state) {
 }
 
 // ハッシュフロー
-declare_hash_flow(sha_512_224, SHA_512_224)
+define_hash_flow(sha_512_224, SHA_512_224)
 
 static void print_digest(const t_sha_512_224_digest* digest) {
 	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
@@ -36,7 +36,7 @@ static void print_digest(const t_sha_512_224_digest* digest) {
 	}
 }
 
-declare_print_digest_line(sha_512_224, "SHA2-512/256")
+define_print_digest_line(sha_512_224, "SHA2-512/256")
 
 void	digest_sha_512_224(const t_preference* pref, const t_message* message) {
 	t_sha_512_224_digest digest = sha_512_224_hash(message->message, message->message_bit_len);

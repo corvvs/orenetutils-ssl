@@ -24,7 +24,7 @@ static bool	block_operation(t_md5_state* state) {
 }
 
 // ハッシュフロー
-declare_hash_flow(md5, MD5)
+define_hash_flow(md5, MD5)
 
 static void print_digest(const t_md5_digest* digest) {
 	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
@@ -32,7 +32,7 @@ static void print_digest(const t_md5_digest* digest) {
 	}
 }
 
-declare_print_digest_line(md5, "MD5")
+define_print_digest_line(md5, "MD5")
 
 void	digest_md5(const t_preference* pref, const t_message* message) {
 	(void)pref;
