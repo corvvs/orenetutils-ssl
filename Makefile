@@ -24,6 +24,10 @@ FILES	:=	\
 			sha_512_block_padding.c\
 			sha_512_block_rounds.c\
 			sha_512_derive_digest.c\
+			sha_512_224.c\
+			sha_512_224_block_padding.c\
+			sha_512_224_block_rounds.c\
+			sha_512_224_derive_digest.c\
 			sha_512_256.c\
 			sha_512_256_block_padding.c\
 			sha_512_256_block_rounds.c\
@@ -79,9 +83,9 @@ fclean:			clean
 .PHONY:	re
 re:				fclean all
 
-.PHONY: test_algos test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_256
+.PHONY: test_algos test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
 
-test_algos: $(NAME) test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_256
+test_algos: $(NAME) test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
 
 test_md5: $(NAME)
 	bash test/md5_simple.sh ""
@@ -132,6 +136,16 @@ test_sha_512: $(NAME)
 	bash test/sha_512_simple.sh "hello"
 	bash test/sha_512_simple.sh "hello!"
 	bash test/sha_512_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
+
+test_sha_512_224: $(NAME)
+	bash test/sha_512_224_simple.sh ""
+	bash test/sha_512_224_simple.sh "h"
+	bash test/sha_512_224_simple.sh "he"
+	bash test/sha_512_224_simple.sh "hel"
+	bash test/sha_512_224_simple.sh "hell"
+	bash test/sha_512_224_simple.sh "hello"
+	bash test/sha_512_224_simple.sh "hello!"
+	bash test/sha_512_224_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
 
 test_sha_512_256: $(NAME)
 	bash test/sha_512_256_simple.sh ""

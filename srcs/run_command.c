@@ -106,6 +106,9 @@ int	run_command(const t_master* master, char **argv) {
 		case COMMAND_SHA512: {
 			return run_digest(master, argv, digest_sha_512);
 		}
+		case COMMAND_SHA512_224: {
+			return run_digest(master, argv, digest_sha_512_224);
+		}
 		case COMMAND_SHA512_256: {
 			return run_digest(master, argv, digest_sha_512_256);
 		}
