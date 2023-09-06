@@ -4,11 +4,11 @@
 extern int g_is_little_endian;
 
 void	sha_224_block_rounds(t_sha_224_state* state) {
-	// W[0 ... 16] のエンディアン変換
+	/* W[0 ... 16] のエンディアン変換 */
 	for (size_t i = 0; i < 16; ++i) {
 		state->schedule.W[i] = PASS_BIG_END(state->schedule.W[i]);
 	}
-	// W[16 ... 64] の初期化
+	/* W[16 ... ] の初期化 */
 	for (size_t i = 16; i < 64; ++i) {
 		state->schedule.W[i] =
 			SSIG1(state->schedule.W[i-2]) + state->schedule.W[i-7] +

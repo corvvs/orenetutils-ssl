@@ -6,7 +6,7 @@
 extern int g_is_little_endian;
 
 static t_sha_512_state	init_state(const uint8_t *message, uint64_t message_len) {
-	t_sha_512_state state = SHA_512_INITIAL_STATE(message, message_len);
+	t_sha_512_state state = SHA_2_INITIAL_STATE(512, message, message_len);
 	ft_memcpy(state.H, SHA_512_H0, sizeof(SHA_512_H0));
 	return state;
 }
