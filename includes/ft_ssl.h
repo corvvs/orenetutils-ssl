@@ -69,7 +69,7 @@ bool is_little_endian(void);
 void print_error_by_message(const t_master* master, const char* message);
 
 // utils_print.c
-void put_bytestream(int fd, const uint8_t* data, size_t len);
+void put_bitstream(int fd, const uint8_t* data, size_t bit_len);
 
 #define PRINT_ERROR(master, format, ...) yoyo_dprintf(STDERR_FILENO, "%s: %s: " format, master->program_name, master->command_name, __VA_ARGS__)
 
