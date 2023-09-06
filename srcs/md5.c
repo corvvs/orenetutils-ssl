@@ -6,7 +6,7 @@ static t_md5_state	init_state(const uint8_t *message, uint64_t message_len) {
 }
 
 static bool	block_operation(t_md5_state* state) {
-	DEBUGWARN("BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + MD5_WORD_BLOCK_BIT_SIZE);
+	// DEBUGWARN("BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + MD5_WORD_BLOCK_BIT_SIZE);
 
 	// パディング
 	md5_block_padding(state);
@@ -16,7 +16,7 @@ static bool	block_operation(t_md5_state* state) {
 
 	// ブロックバッファをクリア
 	ft_memset(state->X, 0, sizeof(state->X));
-	DEBUGWARN("END BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + MD5_WORD_BLOCK_BIT_SIZE);
+	// DEBUGWARN("END BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + MD5_WORD_BLOCK_BIT_SIZE);
 	state->block_from += MD5_WORD_BLOCK_BIT_SIZE;
 	return state->block_from < state->padded_message_len;
 }

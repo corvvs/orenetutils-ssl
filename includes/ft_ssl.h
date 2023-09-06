@@ -3,6 +3,7 @@
 
 #include "ft_ssl_md5.h"
 #include "utils_endian.h"
+#include "ft_ssl_structure.h"
 
 typedef enum e_command {
 	COMMAND_MD5,
@@ -27,6 +28,9 @@ void digest_md5(const uint8_t *message, size_t bit_len);
 
 // sha_256.c
 void digest_sha_2(const uint8_t *message, size_t bit_len);
+
+// read_file.c
+bool	read_file(int ifd, t_elastic_buffer* buffer_ptr);
 
 // utils_endian.h
 bool is_little_endian(void);

@@ -28,26 +28,13 @@ static void 	size_padding(t_md5_state* state) {
 		size_from, size_from + sizeof(uint64_t) * OCTET_BIT_SIZE);
 }
 
-static void	print_byte_array(const uint8_t* bytes, size_t len) {
-	for (size_t i = 0; i < len; i++) {
-		if (0 < i && i % 8 == 0) { dprintf(2, " "); }
-		if (0 < i && i % 16 == 0) { dprintf(2, " "); }
-		dprintf(2, "%02x", bytes[i]);
-	}
-	dprintf(2, "\n");
-}
-
 void	md5_block_padding(t_md5_state* state) {
 	// 入力データをブロックバッファにコピー
 	copy_message_data(state);
-	print_byte_array((const uint8_t*)state->X, sizeof(state->X));
 	// 1パディングを行う
 	one_padding(state);
-	print_byte_array((const uint8_t*)state->X, sizeof(state->X));
 	// 0パディングを行う
 	zero_padding(state);
-	print_byte_array((const uint8_t*)state->X, sizeof(state->X));
 	// サイズパディングを行う
 	size_padding(state);
-	print_byte_array((const uint8_t*)state->X, sizeof(state->X));
 }
