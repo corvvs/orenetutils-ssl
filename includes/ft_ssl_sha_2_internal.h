@@ -50,6 +50,20 @@ static const sha_512_256_word_t SHA_512_256_K[80] = K_512;
 #define SHA_512_224_STATE_SIZE 8
 #define SHA_512_256_STATE_SIZE 8
 
+#define SHA_224_BLOCK_SIZE 16
+#define SHA_256_BLOCK_SIZE 16
+#define SHA_384_BLOCK_SIZE 16
+#define SHA_512_BLOCK_SIZE 16
+#define SHA_512_224_BLOCK_SIZE 16
+#define SHA_512_256_BLOCK_SIZE 16
+
+#define SHA_224_SCHEDULE_SIZE 64
+#define SHA_256_SCHEDULE_SIZE 64
+#define SHA_384_SCHEDULE_SIZE 80
+#define SHA_512_SCHEDULE_SIZE 80
+#define SHA_512_224_SCHEDULE_SIZE 80
+#define SHA_512_256_SCHEDULE_SIZE 80
+
 static const sha_224_word_t SHA_224_H0[SHA_224_STATE_SIZE] = {
     0xc1059ed8,
     0x367cd507,
@@ -152,155 +166,115 @@ static const sha_512_256_word_t SHA_512_256_H0[SHA_512_256_STATE_SIZE] = {
 #define SHA_512_256_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_512_256_WORD_BLOCK_BIT_SIZE)
 #define SHA_512_256_PADDING_BIT_LEN(len) (SHA_512_256_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
 
-typedef struct s_sha_224_state
-{
-	const uint8_t *message;
-	const uint64_t message_len;
-	const uint64_t message_1bp_len;
-	const uint64_t message_0bp_len;
-	const uint64_t padded_message_len;
-	uint64_t block_from;
+// SHA-2ファミリーの内部状態構造体を定義するマクロ
+#define define_sha_2_state_struct(Subtype)\
+typedef struct s_sha_##Subtype##_state\
+{\
+	const uint8_t *message;\
+	const uint64_t message_len;\
+	const uint64_t message_1bp_len;\
+	const uint64_t message_0bp_len;\
+	const uint64_t padded_message_len;\
+	uint64_t block_from;\
+\
+	sha_##Subtype##_word_t H[SHA_##Subtype##_STATE_SIZE];\
+	union {\
+		sha_##Subtype##_word_t W[SHA_##Subtype##_SCHEDULE_SIZE];\
+		sha_##Subtype##_word_t X[SHA_##Subtype##_BLOCK_SIZE];\
+	} schedule;\
+} t_sha_##Subtype##_state
 
-	sha_224_word_t H[SHA_224_STATE_SIZE];
-	union {
-		sha_224_word_t W[16 * 4];
-		sha_224_word_t X[16];
-	} schedule;
-} t_sha_224_state;
+define_sha_2_state_struct(224);
+define_sha_2_state_struct(256);
+define_sha_2_state_struct(384);
+define_sha_2_state_struct(512);
+define_sha_2_state_struct(512_224);
+define_sha_2_state_struct(512_256);
 
-typedef struct s_sha_256_state
-{
-	const uint8_t *message;
-	const uint64_t message_len;
-	const uint64_t message_1bp_len;
-	const uint64_t message_0bp_len;
-	const uint64_t padded_message_len;
-	uint64_t block_from;
-
-	sha_256_word_t H[SHA_256_STATE_SIZE];
-	union {
-		sha_256_word_t W[16 * 4];
-		sha_256_word_t X[16];
-	} schedule;
-} t_sha_256_state;
-
-typedef struct s_sha_384_state
-{
-	const uint8_t *message;
-	const uint64_t message_len;
-	const uint64_t message_1bp_len;
-	const uint64_t message_0bp_len;
-	const uint64_t padded_message_len;
-	uint64_t block_from;
-
-	sha_384_word_t H[SHA_384_STATE_SIZE];
-	union {
-		sha_384_word_t W[16 * 5];
-		sha_384_word_t X[16];
-	} schedule;
-} t_sha_384_state;
-
-typedef struct s_sha_512_state
-{
-	const uint8_t *message;
-	const uint64_t message_len;
-	const uint64_t message_1bp_len;
-	const uint64_t message_0bp_len;
-	const uint64_t padded_message_len;
-	uint64_t block_from;
-
-	sha_512_word_t H[SHA_512_STATE_SIZE];
-	union {
-		sha_512_word_t W[16 * 5];
-		sha_512_word_t X[16];
-	} schedule;
-} t_sha_512_state;
-
-typedef struct s_sha_512_224_state
-{
-	const uint8_t *message;
-	const uint64_t message_len;
-	const uint64_t message_1bp_len;
-	const uint64_t message_0bp_len;
-	const uint64_t padded_message_len;
-	uint64_t block_from;
-
-	sha_512_224_word_t H[SHA_512_224_STATE_SIZE];
-	union {
-		sha_512_224_word_t W[16 * 5];
-		sha_512_224_word_t X[16];
-	} schedule;
-} t_sha_512_224_state;
-
-typedef struct s_sha_512_256_state
-{
-	const uint8_t *message;
-	const uint64_t message_len;
-	const uint64_t message_1bp_len;
-	const uint64_t message_0bp_len;
-	const uint64_t padded_message_len;
-	uint64_t block_from;
-
-	sha_512_256_word_t H[SHA_512_256_STATE_SIZE];
-	union {
-		sha_512_256_word_t W[16 * 5];
-		sha_512_256_word_t X[16];
-	} schedule;
-} t_sha_512_256_state;
-
-#define SHA_224_INITIAL_STATE(message, message_len) ((t_sha_224_state){ \
+// SHA-2ファミリーの初期内部状態を返すマクロ
+#define SHA_2_INITIAL_STATE(Subtype, message, message_len) ((t_sha_##Subtype##_state){ \
 	.message = message,                                                 \
 	.message_len = message_len,                                         \
-	.message_1bp_len = SHA_224_ONE_PADDING_BIT_LEN(message_len),        \
-	.message_0bp_len = SHA_224_ZERO_PADDING_BIT_LEN(message_len),       \
-	.padded_message_len = SHA_224_PADDING_BIT_LEN(message_len),         \
+	.message_1bp_len = SHA_##Subtype##_ONE_PADDING_BIT_LEN(message_len),        \
+	.message_0bp_len = SHA_##Subtype##_ZERO_PADDING_BIT_LEN(message_len),       \
+	.padded_message_len = SHA_##Subtype##_PADDING_BIT_LEN(message_len),         \
 	.block_from = 0,                                                    \
 })
 
-#define SHA_256_INITIAL_STATE(message, message_len) ((t_sha_256_state){ \
-	.message = message,                                                 \
-	.message_len = message_len,                                         \
-	.message_1bp_len = SHA_256_ONE_PADDING_BIT_LEN(message_len),        \
-	.message_0bp_len = SHA_256_ZERO_PADDING_BIT_LEN(message_len),       \
-	.padded_message_len = SHA_256_PADDING_BIT_LEN(message_len),         \
-	.block_from = 0,                                                    \
-})
+// SHA-2ファミリーのブロック演算を定義するマクロ
+#define OPE(Subtype, a, b, c, d, e, f, g, h, W, i)     \
+	{                                         \
+		sha_##Subtype##_word_t T1 = h + BSIG1(e) + CH(e, f, g) + SHA_##Subtype##_K[i] + W[i]; \
+		sha_##Subtype##_word_t T2 = BSIG0(a) + MAJ(a, b, c); \
+		h = g;\
+		g = f;\
+		f = e;\
+		e = d + T1;\
+		d = c;\
+		c = b;\
+		b = a;\
+		a = T1 + T2;\
+	}
 
-#define SHA_384_INITIAL_STATE(message, message_len) ((t_sha_384_state){ \
-	.message = message,                                                 \
-	.message_len = message_len,                                         \
-	.message_1bp_len = SHA_384_ONE_PADDING_BIT_LEN(message_len),        \
-	.message_0bp_len = SHA_384_ZERO_PADDING_BIT_LEN(message_len),       \
-	.padded_message_len = SHA_384_PADDING_BIT_LEN(message_len),         \
-	.block_from = 0,                                                    \
-})
+// SHA-2ファミリーのブロック処理関数を定義するマクロ
+#define define_sha2_block_rounds(Subtype)\
+void	sha_##Subtype##_block_rounds(t_sha_##Subtype##_state* state) {\
+	/* W[0 ... 16] のエンディアン変換 */\
+	for (size_t i = 0; i < SHA_##Subtype##_BLOCK_SIZE; ++i) {\
+		state->schedule.W[i] = PASS_BIG_END(state->schedule.W[i]);\
+	}\
+	/* W[16 ... ] の初期化 */\
+	for (size_t i = SHA_##Subtype##_BLOCK_SIZE; i < SHA_##Subtype##_SCHEDULE_SIZE; ++i) {\
+		state->schedule.W[i] =\
+			SSIG1(state->schedule.W[i-2]) + state->schedule.W[i-7] +\
+			SSIG0(state->schedule.W[i-15]) + state->schedule.W[i-16];\
+	}\
+\
+	sha_##Subtype##_word_t\
+		a = state->H[0],\
+		b = state->H[1],\
+		c = state->H[2],\
+		d = state->H[3],\
+		e = state->H[4],\
+		f = state->H[5],\
+		g = state->H[6],\
+		h = state->H[7];\
+\
+	for (size_t i = 0; i < SHA_##Subtype##_SCHEDULE_SIZE; ++i) {\
+		OPE(Subtype, a, b, c, d, e, f, g, h, state->schedule.W, i);\
+	}\
+\
+	state->H[0] += a;\
+	state->H[1] += b;\
+	state->H[2] += c;\
+	state->H[3] += d;\
+	state->H[4] += e;\
+	state->H[5] += f;\
+	state->H[6] += g;\
+	state->H[7] += h;\
+}
 
-#define SHA_512_INITIAL_STATE(message, message_len) ((t_sha_512_state){ \
-	.message = message,                                                 \
-	.message_len = message_len,                                         \
-	.message_1bp_len = SHA_512_ONE_PADDING_BIT_LEN(message_len),        \
-	.message_0bp_len = SHA_512_ZERO_PADDING_BIT_LEN(message_len),       \
-	.padded_message_len = SHA_512_PADDING_BIT_LEN(message_len),         \
-	.block_from = 0,                                                    \
-})
-
-#define SHA_512_224_INITIAL_STATE(message, message_len) ((t_sha_512_224_state){ \
-	.message = message,                                                 \
-	.message_len = message_len,                                         \
-	.message_1bp_len = SHA_512_224_ONE_PADDING_BIT_LEN(message_len),        \
-	.message_0bp_len = SHA_512_224_ZERO_PADDING_BIT_LEN(message_len),       \
-	.padded_message_len = SHA_512_224_PADDING_BIT_LEN(message_len),         \
-	.block_from = 0,                                                    \
-})
-
-#define SHA_512_256_INITIAL_STATE(message, message_len) ((t_sha_512_256_state){ \
-	.message = message,                                                 \
-	.message_len = message_len,                                         \
-	.message_1bp_len = SHA_512_256_ONE_PADDING_BIT_LEN(message_len),        \
-	.message_0bp_len = SHA_512_256_ZERO_PADDING_BIT_LEN(message_len),       \
-	.padded_message_len = SHA_512_256_PADDING_BIT_LEN(message_len),         \
-	.block_from = 0,                                                    \
-})
+// SHA-2ファミリーのダイジェスト算出関数を定義するマクロ
+#define define_sha2_derive_digest(hash_type, HASH_TYPE) \
+t_##hash_type##_digest	hash_type##_derive_digest(const t_##hash_type##_state* state) {\
+	t_##hash_type##_digest	digest = {};\
+	hash_type##_word_t		H[8];\
+	ft_memcpy(H, state->H, sizeof(H));\
+	size_t		digest_index = 0;\
+	size_t i;\
+	for (i = 0; digest_index < HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE; ++i) {\
+		H[i] = PASS_BIG_END(H[i]);\
+		for (\
+			size_t j = 0;\
+			j < sizeof(hash_type##_word_t) && digest_index < HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE;\
+			++j, ++digest_index\
+		) {\
+			digest.digest[digest_index] = H[i] & ((1u << OCTET_BIT_SIZE) - 1);\
+			H[i] >>= OCTET_BIT_SIZE;\
+		}\
+	}\
+	return digest;\
+}
 
 void	sha_256_block_padding(t_sha_256_state* state);
 void	sha_256_block_rounds(t_sha_256_state* state);

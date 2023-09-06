@@ -6,7 +6,7 @@
 extern int g_is_little_endian;
 
 static t_sha_384_state	init_state(const uint8_t *message, uint64_t message_len) {
-	t_sha_384_state state = SHA_384_INITIAL_STATE(message, message_len);
+	t_sha_384_state state = SHA_2_INITIAL_STATE(384, message, message_len);
 	ft_memcpy(state.H, SHA_384_H0, sizeof(SHA_384_H0));
 	return state;
 }
@@ -28,7 +28,7 @@ static bool	block_operation(t_sha_384_state* state) {
 }
 
 // ハッシュフロー
-declare_hash_flow(sha_384, SHA_384)
+define_hash_flow(sha_384, SHA_384)
 
 static void print_digest(const t_sha_384_digest* digest) {
 	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {
@@ -36,7 +36,7 @@ static void print_digest(const t_sha_384_digest* digest) {
 	}
 }
 
-declare_print_digest_line(sha_384, "SHA2-384")
+define_print_digest_line(sha_384, "SHA2-384")
 
 void	digest_sha_384(const t_preference* pref, const t_message* message) {
 	t_sha_384_digest digest = sha_384_hash(message->message, message->message_bit_len);
