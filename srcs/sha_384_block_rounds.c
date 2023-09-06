@@ -12,20 +12,6 @@ extern int g_is_little_endian;
 #define SSIG0(x) (ROTR(1, x) ^ ROTR(8, x) ^ SHR(7, x))
 #define SSIG1(x) (ROTR(19, x) ^ ROTR(61, x) ^ SHR(6, x))
 
-#define OPE(a, b, c, d, e, f, g, h, W, i)     \
-	{                                         \
-		sha_384_word_t T1 = h + BSIG1(e) + CH(e, f, g) + SHA_384_K[i] + W[i]; \
-		sha_384_word_t T2 = BSIG0(a) + MAJ(a, b, c); \
-		h = g;\
-		g = f;\
-		f = e;\
-		e = d + T1;\
-		d = c;\
-		c = b;\
-		b = a;\
-		a = T1 + T2;\
-	}
-
 void	sha_384_block_rounds(t_sha_384_state* state) {
 	// W[0 ... 16] のエンディアン変換
 	for (size_t i = 0; i < 16; ++i) {
@@ -49,7 +35,7 @@ void	sha_384_block_rounds(t_sha_384_state* state) {
 		h = state->H[7];
 
 	for (size_t i = 0; i < 80; ++i) {
-		OPE(a, b, c, d, e, f, g, h, state->schedule.W, i);
+		OPE(384, a, b, c, d, e, f, g, h, state->schedule.W, i);
 	}
 
 	state->H[0] += a;

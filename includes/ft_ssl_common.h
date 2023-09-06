@@ -200,4 +200,25 @@
 		printf("\n");                                                                                                       \
 	}
 
+#define declare_sha2_derive_digest(hash_type, HASH_TYPE) \
+t_##hash_type##_digest	hash_type##_derive_digest(const t_##hash_type##_state* state) {\
+	t_##hash_type##_digest	digest = {};\
+	hash_type##_word_t		H[8];\
+	ft_memcpy(H, state->H, sizeof(H));\
+	size_t		digest_index = 0;\
+	size_t i;\
+	for (i = 0; digest_index < HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE; ++i) {\
+		H[i] = PASS_BIG_END(H[i]);\
+		for (\
+			size_t j = 0;\
+			j < sizeof(hash_type##_word_t) && digest_index < HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE;\
+			++j, ++digest_index\
+		) {\
+			digest.digest[digest_index] = H[i] & ((1u << OCTET_BIT_SIZE) - 1);\
+			H[i] >>= OCTET_BIT_SIZE;\
+		}\
+	}\
+	return digest;\
+}
+
 #endif

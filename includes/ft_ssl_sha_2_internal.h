@@ -302,6 +302,20 @@ typedef struct s_sha_512_256_state
 	.block_from = 0,                                                    \
 })
 
+#define OPE(Subtype, a, b, c, d, e, f, g, h, W, i)     \
+	{                                         \
+		sha_##Subtype##_word_t T1 = h + BSIG1(e) + CH(e, f, g) + SHA_##Subtype##_K[i] + W[i]; \
+		sha_##Subtype##_word_t T2 = BSIG0(a) + MAJ(a, b, c); \
+		h = g;\
+		g = f;\
+		f = e;\
+		e = d + T1;\
+		d = c;\
+		c = b;\
+		b = a;\
+		a = T1 + T2;\
+	}
+
 void	sha_256_block_padding(t_sha_256_state* state);
 void	sha_256_block_rounds(t_sha_256_state* state);
 t_sha_256_digest	sha_256_derive_digest(const t_sha_256_state* state);
