@@ -113,7 +113,7 @@ int	run_command(const t_master* master, char **argv) {
 			return run_digest(master, argv, digest_sha_512_256);
 		}
 		default: {
-			dprintf(STDERR_FILENO, "Invalid command '%s'; type \"help\" for a list.\n", master->command_name);
+			yoyo_dprintf(STDERR_FILENO, "Invalid command '%s'; type \"help\" for a list.\n", master->command_name);
 			return 1;
 		}
 	}

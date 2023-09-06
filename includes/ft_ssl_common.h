@@ -138,6 +138,14 @@
 		return state->block_from + HASH_TYPE##_WORD_BLOCK_BIT_SIZE == state->padded_message_len;                      \
 	}
 
+#define define_print_digest(hash_type)                                                                   \
+static void print_digest(const t_##hash_type##_digest* digest) {\
+	for (size_t i = 0; i < sizeof(digest->digest) / sizeof(uint8_t); i++) {\
+		yoyo_dprintf(STDOUT_FILENO, "%x", digest->digest[i] / 16);\
+		yoyo_dprintf(STDOUT_FILENO, "%x", digest->digest[i] % 16);\
+	}\
+}
+
 #define define_print_digest_line(hash_type, hash_prefix)                                                                   \
 	static void print_digest_line(const t_preference *pref, const t_message *message, const t_##hash_type##_digest *digest) \
 	{                                                                                                                       \
@@ -151,21 +159,21 @@
 							   message->message_bit_len > 0                                                                 \
 								   ? (message->message_bit_len - 1) / OCTET_BIT_SIZE + 1                                    \
 								   : 0);                                                                                    \
-				printf("\n");                                                                                               \
+				yoyo_dprintf(STDOUT_FILENO, "\n");                                                                                               \
 			}                                                                                                               \
 			print_digest(digest);                                                                                           \
 		}                                                                                                                   \
 		else if (pref->is_reverse && !current_is_stdin)                                                                                          \
 		{                                                                                                                   \
 			print_digest(digest);                                                                                           \
-			printf(" ");                                                                                                    \
+			yoyo_dprintf(STDOUT_FILENO, " ");                                                                                                    \
 			if (message->is_bytestream)                                                                                     \
 			{                                                                                                               \
-				printf("%s", message->file_path ? message->file_path : "-");                                                \
+				yoyo_dprintf(STDOUT_FILENO, "%s\n", message->file_path ? message->file_path : "-");                                                \
 			}                                                                                                               \
 			else                                                                                                            \
 			{                                                                                                               \
-				printf("\"%s\"", message->message);                                                                         \
+				yoyo_dprintf(STDOUT_FILENO, "\"%s\"\n", message->message);                                                                         \
 			}                                                                                                               \
 		}                                                                                                                   \
 		else                                                                                                                \
@@ -174,30 +182,30 @@
 			{                                                                                                               \
 				if (pref->is_echo)                                                                                          \
 				{                                                                                                           \
-					ft_putstr_fd("(\"", STDOUT_FILENO);                                                                                          \
+					yoyo_dprintf(STDOUT_FILENO, "(\"");                                                                                          \
 					put_bytestream(STDOUT_FILENO,                                                                           \
 								   message->message,                                                                        \
 								   message->message_bit_len > 0                                                             \
 									   ? (message->message_bit_len - 1) / OCTET_BIT_SIZE + 1                                \
 									   : 0);                                                                                \
-					ft_putstr_fd("\")= ", STDOUT_FILENO);                                                                                        \
+					yoyo_dprintf(STDOUT_FILENO, "\")= ");                                                                                        \
 				}                                                                                                           \
 				else                                                                                                        \
 				{                                                                                                           \
-					ft_putstr_fd("(stdin)= ", STDOUT_FILENO);                                                                                    \
+					yoyo_dprintf(STDOUT_FILENO, "(stdin)= ");                                                                                    \
 				}                                                                                                           \
 			}                                                                                                               \
 			else if (message->is_bytestream)                                                                                \
 			{                                                                                                               \
-				printf(hash_prefix " (%s) = ", message->file_path);                                                         \
+				yoyo_dprintf(STDOUT_FILENO, hash_prefix " (%s) = ", message->file_path);                                                         \
 			}                                                                                                               \
 			else                                                                                                            \
 			{                                                                                                               \
-				printf(hash_prefix " (\"%s\") = ", message->message);                                                       \
+				yoyo_dprintf(STDOUT_FILENO, hash_prefix " (\"%s\") = ", message->message);                                                       \
 			}                                                                                                               \
 			print_digest(digest);                                                                                           \
 		}                                                                                                                   \
-		printf("\n");                                                                                                       \
+		yoyo_dprintf(STDOUT_FILENO, "\n");                                                                                                       \
 	}
 
 #endif

@@ -31,7 +31,7 @@
 
 #define YOYO_DPRINTF(...)                    \
 	{                                        \
-		dprintf(STDERR_FILENO, __VA_ARGS__); \
+		yoyo_dprintf(STDERR_FILENO, __VA_ARGS__); \
 	}
 
 #ifdef DEBUG

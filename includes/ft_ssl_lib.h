@@ -4,6 +4,7 @@
 #include "common.h"
 #include "libft.h"
 #include "elastic_buffer.h"
+#include "printf.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <unistd.h>
