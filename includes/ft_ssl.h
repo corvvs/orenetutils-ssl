@@ -10,6 +10,7 @@ typedef enum e_command {
 	COMMAND_MD5,
 	COMMAND_SHA224,
 	COMMAND_SHA256,
+	COMMAND_SHA384,
 	COMMAND_SHA512,
 	COMMAND_UNKNOWN
 }	t_command;
@@ -25,6 +26,7 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("md5", COMMAND_MD5),
 	DEF_COMMAND_PAIR("sha224", COMMAND_SHA224),
 	DEF_COMMAND_PAIR("sha256", COMMAND_SHA256),
+	DEF_COMMAND_PAIR("sha384", COMMAND_SHA384),
 	DEF_COMMAND_PAIR("sha512", COMMAND_SHA512),
 };
 
@@ -44,6 +46,9 @@ void digest_sha_224(const t_preference* pref, const t_message* message);
 
 // sha_256.c
 void digest_sha_256(const t_preference* pref, const t_message* message);
+
+// sha_384.c
+void digest_sha_384(const t_preference* pref, const t_message* message);
 
 // sha_512.c
 void digest_sha_512(const t_preference* pref, const t_message* message);
