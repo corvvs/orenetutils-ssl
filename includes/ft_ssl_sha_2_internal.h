@@ -93,30 +93,6 @@ static const sha_256_word_t SHA_256_H0[SHA_256_STATE_SIZE] = {
 #define SHA_256_ZERO_PADDING_BIT_SIZE(len) (-(len + sizeof(uint64_t) * OCTET_BIT_SIZE) % SHA_256_WORD_BLOCK_BIT_SIZE)
 #define SHA_256_PADDING_BIT_LEN(len) (SHA_256_ZERO_PADDING_BIT_LEN(len) + sizeof(uint64_t) * OCTET_BIT_SIZE)
 
-#define SHR(n, x) ((x) >> (n))
-#define ROTR(n, x) (((x) >> (n)) | ((x) << (SHA_256_WORD_BIT_SIZE - (n))))
-#define ROTL(n, x) (((x) << (n)) | ((x) >> (SHA_256_WORD_BIT_SIZE - (n))))
-#define CH(x, y, z) (((x) & (y)) ^ (~(x) & (z)))
-#define MAJ(x, y, z) (((x) & (y)) ^ ((x) & (z)) ^ ((y) & (z)))
-#define BSIG0(x) (ROTR(2, x) ^ ROTR(13, x) ^ ROTR(22, x))
-#define BSIG1(x) (ROTR(6, x) ^ ROTR(11, x) ^ ROTR(25, x))
-#define SSIG0(x) (ROTR(7, x) ^ ROTR(18, x) ^ SHR(3, x))
-#define SSIG1(x) (ROTR(17, x) ^ ROTR(19, x) ^ SHR(10, x))
-
-#define OPE(a, b, c, d, e, f, g, h, W, i)     \
-	{                                         \
-		sha_256_word_t T1 = h + BSIG1(e) + CH(e, f, g) + SHA_256_K[i] + W[i]; \
-		sha_256_word_t T2 = BSIG0(a) + MAJ(a, b, c); \
-		h = g;\
-		g = f;\
-		f = e;\
-		e = d + T1;\
-		d = c;\
-		c = b;\
-		b = a;\
-		a = T1 + T2;\
-	}
-
 typedef struct s_sha_256_state
 {
 	const uint8_t *message;

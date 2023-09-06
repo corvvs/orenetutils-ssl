@@ -3,7 +3,7 @@
 
 extern int g_is_little_endian;
 
-define_block_padding_functions(md5, MD5, X)
+declare_block_padding_functions(md5, MD5, X)
 
 typedef union u_bit_size {
 	struct {
