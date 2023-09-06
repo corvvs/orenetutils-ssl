@@ -169,11 +169,11 @@ static void print_digest(const t_##hash_type##_digest* digest) {\
 			yoyo_dprintf(STDOUT_FILENO, " ");                                                                                                    \
 			if (message->is_bytestream)                                                                                     \
 			{                                                                                                               \
-				yoyo_dprintf(STDOUT_FILENO, "%s\n", message->file_path ? message->file_path : "-");                                                \
+				yoyo_dprintf(STDOUT_FILENO, "%s", message->file_path ? message->file_path : "-");                                                \
 			}                                                                                                               \
 			else                                                                                                            \
 			{                                                                                                               \
-				yoyo_dprintf(STDOUT_FILENO, "\"%s\"\n", message->message);                                                                         \
+				yoyo_dprintf(STDOUT_FILENO, "\"%s\"", message->message);                                                                         \
 			}                                                                                                               \
 		}                                                                                                                   \
 		else                                                                                                                \
