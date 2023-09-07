@@ -26,7 +26,6 @@ int main(int argc, char **argv) {
 	}
 	t_master	master = {
 		.program_name = *argv,
-		.pref = {},
 	};
 	++argv;
 

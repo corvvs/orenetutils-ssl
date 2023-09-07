@@ -52,31 +52,34 @@ static void	destroy_message(t_message* message) {
 	}
 }
 
-static int	run_digest(const t_master* master, char **argv, void (digest_func)(const t_preference*, const t_message*)) {
-	t_preference	pref = {};
-	int parsed_count = parse_options(master, argv, &pref);
+static int	run_digest(const t_master* master, char **argv, void (digest_func)(const t_preference_digest*, const t_message*)) {
+	t_master_digest	m = {
+		.master = *master,
+	};
+	t_preference_digest*	pref = &m.pref;
+	int parsed_count = parse_options_digest(master, argv, pref);
 	if (parsed_count < 0) {
 		return 1;
 	}
 	argv += parsed_count;
 
 	// 標準入力から
-	if ((*argv == NULL && pref.message_argument == NULL) || pref.is_echo) {
+	if ((*argv == NULL && pref->message_argument == NULL) || pref->is_echo) {
 		t_message	message;
 		if (!create_message_stdin(master, &message)) {
 			return 1;
 		}
-		digest_func(&pref, &message);
+		digest_func(pref, &message);
 		destroy_message(&message);
 	}
 
 	// -s から
-	if (pref.message_argument != NULL) {
+	if (pref->message_argument != NULL) {
 		t_message	message;
-		if (!create_message_argument(master, &message, pref.message_argument)) {
+		if (!create_message_argument(master, &message, pref->message_argument)) {
 			return 1;
 		}
-		digest_func(&pref, &message);
+		digest_func(pref, &message);
 		destroy_message(&message);
 	}
 
@@ -87,7 +90,7 @@ static int	run_digest(const t_master* master, char **argv, void (digest_func)(co
 			argv += 1;
 			continue;
 		}
-		digest_func(&pref, &message);
+		digest_func(pref, &message);
 		destroy_message(&message);
 		argv += 1;
 	}
