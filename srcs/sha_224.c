@@ -34,7 +34,7 @@ define_print_digest(sha_224)
 
 define_print_digest_line(sha_224, "SHA2-224")
 
-void	digest_sha_224(const t_preference_digest* pref, const t_message* message) {
+void	digest_sha_224(const t_preference* pref, const t_message* message) {
 	t_sha_224_digest digest = sha_224_hash(message->message, message->message_bit_len);
 	print_digest_line(pref, message, &digest);
 }

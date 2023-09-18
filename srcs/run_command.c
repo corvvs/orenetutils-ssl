@@ -52,11 +52,11 @@ static void	destroy_message(t_message* message) {
 	}
 }
 
-static int	run_digest(const t_master* master, char **argv, void (digest_func)(const t_preference_digest*, const t_message*)) {
+static int	run_digest(const t_master* master, char **argv, t_digest_func* digest_func) {
 	t_master_digest	m = {
 		.master = *master,
 	};
-	t_preference_digest*	pref = &m.pref;
+	t_preference*	pref = &m.pref;
 	int parsed_count = parse_options_digest(master, argv, pref);
 	if (parsed_count < 0) {
 		return 1;
@@ -112,19 +112,11 @@ static void	show_help(void) {
 }
 
 int	run_command(const t_master* master, char **argv) {
-	switch (master->command) {
-		case COMMAND_MD5: 			return run_digest(master, argv, digest_md5);
-		case COMMAND_SHA224:		return run_digest(master, argv, digest_sha_224);
-		case COMMAND_SHA256:		return run_digest(master, argv, digest_sha_256);
-		case COMMAND_SHA384:		return run_digest(master, argv, digest_sha_384);
-		case COMMAND_SHA512:		return run_digest(master, argv, digest_sha_512);
-		case COMMAND_SHA512_224:	return run_digest(master, argv, digest_sha_512_224);
-		case COMMAND_SHA512_256:	return run_digest(master, argv, digest_sha_512_256);
-		default: {
-			yoyo_dprintf(STDERR_FILENO, "%s: Error: '%s' is an invalid command.\n", master->program_name, master->command_name);
-			yoyo_dprintf(STDERR_FILENO, "\n");
-			show_help();
-			return 1;
-		}
+	if (master->command.func == NULL) {
+		yoyo_dprintf(STDERR_FILENO, "%s: Error: '%s' is an invalid command.\n", master->program_name, master->command_name);
+		yoyo_dprintf(STDERR_FILENO, "\n");
+		show_help();
+		return 1;
 	}
+	return run_digest(master, argv, master->command.func);
 }
