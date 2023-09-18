@@ -30,7 +30,9 @@ define_print_digest(md5)
 
 define_print_digest_line(md5, "MD5")
 
-void	digest_md5(const t_preference_digest* pref, const t_message* message) {
+static void	digest_md5(const t_preference* pref, const t_message* message) {
 	t_md5_digest digest = md5_hash(message->message, message->message_bit_len);
 	print_digest_line(pref, message, &digest);
 }
+
+define_hash_runner(md5)

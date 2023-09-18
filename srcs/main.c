@@ -4,15 +4,19 @@
 int	g_is_little_endian;
 // NOTE: エンディアン変換時に参照する
 
-static t_command	get_command(const char* arg) {
+static t_command_pair	get_command(const char* arg) {
+	size_t n = sizeof(g_command_pairs) / sizeof(g_command_pairs[0]);
 	if (arg != NULL) {
-		for (unsigned int i = 0; i < sizeof(g_command_pairs) / sizeof(g_command_pairs[0]); ++i) {
+		for (unsigned int i = 0; i < n; ++i) {
+			if (g_command_pairs[i].name == NULL) {
+				break;
+			}
 			if (ft_strcmp(arg, g_command_pairs[i].name) == 0) {
-				return g_command_pairs[i].algo;
+				return g_command_pairs[i];
 			}
 		}
 	}
-	return COMMAND_UNKNOWN;
+	return g_command_pairs[n - 1];
 }
 
 int main(int argc, char **argv) {

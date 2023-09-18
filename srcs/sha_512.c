@@ -34,7 +34,9 @@ define_print_digest(sha_512)
 
 define_print_digest_line(sha_512, "SHA2-512")
 
-void	digest_sha_512(const t_preference_digest* pref, const t_message* message) {
+static void	digest_sha_512(const t_preference* pref, const t_message* message) {
 	t_sha_512_digest digest = sha_512_hash(message->message, message->message_bit_len);
 	print_digest_line(pref, message, &digest);
 }
+
+define_hash_runner(sha_512)
