@@ -1,6 +1,60 @@
 #ifndef FT_SSL_COMMON_H
 #define FT_SSL_COMMON_H
 
+#define define_hash_runner(hash_type)                                               \
+	int run_##hash_type(const t_master *master, char **argv)                        \
+	{                                                                               \
+		t_master_digest m = {                                                       \
+			.master = *master,                                                      \
+		};                                                                          \
+		t_preference *pref = &m.pref;                                               \
+		int parsed_count = parse_options_digest(master, argv, pref);                \
+		if (parsed_count < 0)                                                       \
+		{                                                                           \
+			return 1;                                                               \
+		}                                                                           \
+		argv += parsed_count;                                                       \
+                                                                                    \
+		/* 標準入力から */                                                    \
+		if ((*argv == NULL && pref->message_argument == NULL) || pref->is_echo)     \
+		{                                                                           \
+			t_message message;                                                      \
+			if (!create_message_stdin(master, &message))                            \
+			{                                                                       \
+				return 1;                                                           \
+			}                                                                       \
+			digest_##hash_type(pref, &message);                                     \
+			destroy_message(&message);                                              \
+		}                                                                           \
+                                                                                    \
+		/* -s から */                                                             \
+		if (pref->message_argument != NULL)                                         \
+		{                                                                           \
+			t_message message;                                                      \
+			if (!create_message_argument(master, &message, pref->message_argument)) \
+			{                                                                       \
+				return 1;                                                           \
+			}                                                                       \
+			digest_##hash_type(pref, &message);                                     \
+			destroy_message(&message);                                              \
+		}                                                                           \
+                                                                                    \
+		/* ファイル(argv)から */                                              \
+		while (*argv != NULL)                                                       \
+		{                                                                           \
+			t_message message;                                                      \
+			if (!create_message_path(master, &message, *argv))                      \
+			{                                                                       \
+				argv += 1;                                                          \
+				continue;                                                           \
+			}                                                                       \
+			digest_##hash_type(pref, &message);                                     \
+			destroy_message(&message);                                              \
+			argv += 1;                                                              \
+		}                                                                           \
+		return 0;                                                                   \
+	}
+
 // ハッシュごとのフロー関数を定義する.
 // define_hash_flow(md5, MD5)
 // define_hash_flow(sha_256, SHA_256)

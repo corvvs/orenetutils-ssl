@@ -34,7 +34,10 @@ define_print_digest(sha_256)
 
 define_print_digest_line(sha_256, "SHA2-256")
 
-void	digest_sha_256(const t_preference* pref, const t_message* message) {
+static void	digest_sha_256(const t_preference* pref, const t_message* message) {
 	t_sha_256_digest digest = sha_256_hash(message->message, message->message_bit_len);
 	print_digest_line(pref, message, &digest);
 }
+
+define_hash_runner(sha_256)
+

@@ -29,11 +29,13 @@ typedef enum e_command {
 	COMMAND_UNKNOWN
 }	t_command;
 
-typedef void (t_digest_func)(const t_preference*, const t_message*);
+struct s_master;
+
+typedef int (t_runner_func)(const struct s_master *master, char **);
 
 typedef struct e_command_pair {
 	const char* 	name;
-	t_digest_func*	func;
+	t_runner_func*	func;
 }	t_command_pair;
 
 #define DEF_COMMAND_PAIR(n, f) (t_command_pair){ .name = n, .func = f }

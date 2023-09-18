@@ -35,6 +35,7 @@ FILES	:=	\
 			subbyte_manipulation.c\
 			read_file.c\
 			run_command.c\
+			run_digest_helper.c\
 			elastic_buffer.c\
 			utils_endian.c\
 			utils_error.c\
