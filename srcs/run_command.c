@@ -5,6 +5,9 @@ static void	show_help(void) {
 		"Commands:\n"
 	);
 	for (unsigned int i = 0; i < sizeof(g_command_pairs) / sizeof(g_command_pairs[0]); ++i) {
+		if (g_command_pairs[i].name == NULL) {
+			break;
+		}
 		yoyo_dprintf(STDERR_FILENO, "%s\n", g_command_pairs[i].name);
 	}
 	yoyo_dprintf(STDERR_FILENO, "\n");

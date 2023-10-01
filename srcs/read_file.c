@@ -31,7 +31,7 @@ bool	read_file(const t_master* master, int ifd, t_elastic_buffer* buffer_ptr) {
 
 		// 読み取ったデータを elastic_buffer に追加する
 		errno = 0;
-		if (!push_to_elastic_buffer(&joined, read_buffer, read_size, sizeof(read_buffer))) {
+		if (!eb_push(&joined, read_buffer, read_size, sizeof(read_buffer))) {
 			PRINT_ERROR(master, "%s\n", strerror(errno));
 			free(joined.buffer);
 			return (NULL);

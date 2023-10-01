@@ -41,7 +41,7 @@ void print_error_by_message(const t_master* master, const char* message);
 // utils_print.c
 void put_bitstream(int fd, const uint8_t* data, size_t bit_len);
 
-#define PRINT_ERROR(master, format, ...) yoyo_dprintf(STDERR_FILENO, "%s: %s: " format, master->program_name, master->command_name, __VA_ARGS__)
+#define PRINT_ERROR(master, format, ...) yoyo_dprintf(STDERR_FILENO, "%s: %s: " format, (master)->program_name, (master)->command_name, __VA_ARGS__)
 
 static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("md5", run_md5),
