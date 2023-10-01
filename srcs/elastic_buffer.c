@@ -62,6 +62,7 @@ bool	eb_push(
 }
 
 void	eb_refresh(t_elastic_buffer* elastic_buffer) {
+	free(elastic_buffer->buffer);
 	*elastic_buffer = (t_elastic_buffer){
 		.eof_reached = elastic_buffer->eof_reached,
 	};

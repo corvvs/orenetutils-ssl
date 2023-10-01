@@ -44,13 +44,12 @@ int main(int argc, char **argv) {
 		unsigned char	read_buffer[4096];
 		if (!eb_init(&master.repl, sizeof(read_buffer))) {
 			PRINT_ERROR(&master, "%s\n", strerror(errno));
+			free(master.repl.buffer);
 			return 1;
 		}
 		while (!master.repl.eof_reached || master.repl.used > 0) {
 			// show prompt
 			yoyo_dprintf(STDOUT_FILENO, "ft_ssl> ");
-			// refrech buffer
-			eb_refresh(&master.repl);
 			DEBUGINFO("master.repl.used: %zu", master.repl.used);
 			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
 			DEBUGINFO("master.repl.eof_reached: %s", master.repl.eof_reached ? "Y" : "N");
@@ -110,6 +109,8 @@ int main(int argc, char **argv) {
 			run_command(&master, argv);
 			master.repl.eof_reached = master.stdin_eof_reached;
 			free(command_arg);
+			// refrech buffer
+			eb_refresh(&master.repl);
 		}
 
 	} else {

@@ -4,9 +4,11 @@ static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd) 
 	t_elastic_buffer	message_buffer;
 	if (master->in_repl) {
 		message_buffer = master->repl;
+		master->repl.buffer = NULL;
 	} else {
 		if (!eb_init(&message_buffer, READ_BUFFER_SIZE)) {
 			PRINT_ERROR(master, "%s\n", strerror(errno));
+			free(message_buffer.buffer);
 			return false;
 		}
 	}
@@ -22,11 +24,13 @@ static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd) 
 			.message = (uint8_t*)message_buffer.buffer,
 			.message_bit_len = message_buffer.used * 8,
 		};
+		message_buffer.buffer = NULL;
 		result = true;
 	}
 	if (message_buffer.eof_reached) {
 		master->stdin_eof_reached = true;
 	}
+	free(message_buffer.buffer);
 	return result;
 }
 
