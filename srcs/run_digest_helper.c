@@ -1,23 +1,36 @@
 #include "ft_ssl.h"
 
-static bool	create_message_fd(const t_master* master, t_message* message_ptr, int fd) {
+static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd) {
 	t_elastic_buffer	message_buffer;
+	if (master->in_repl) {
+		message_buffer = master->repl;
+	} else {
+		if (!eb_init(&message_buffer, READ_BUFFER_SIZE)) {
+			PRINT_ERROR(master, "%s\n", strerror(errno));
+			return false;
+		}
+	}
+	bool	result;
 	if (!read_file(master, fd, &message_buffer)) {
-		return false;
+		result = false;
+	} else if (message_buffer.buffer == NULL) {
+		result = false;
+	} else {
+		*message_ptr = (t_message){
+			.file_path = NULL,
+			.is_bytestream = true,
+			.message = (uint8_t*)message_buffer.buffer,
+			.message_bit_len = message_buffer.used * 8,
+		};
+		result = true;
 	}
-	if (message_buffer.buffer == NULL) {
-		return false;
+	if (message_buffer.eof_reached) {
+		master->stdin_eof_reached = true;
 	}
-	*message_ptr = (t_message){
-		.file_path = NULL,
-		.is_bytestream = true,
-		.message = (uint8_t*)message_buffer.buffer,
-		.message_bit_len = message_buffer.used * 8,
-	};
-	return true;
+	return result;
 }
 
-bool	create_message_stdin(const t_master* master, t_message* message_ptr) {
+bool	create_message_stdin(t_master* master, t_message* message_ptr) {
 	return create_message_fd(master, message_ptr, STDIN_FILENO);
 }
 
@@ -32,7 +45,7 @@ bool	create_message_argument(const t_master* master, t_message* message_ptr, cha
 	return true;
 }
 
-bool	create_message_path(const t_master* master, t_message* message_ptr, const char* path) {
+bool	create_message_path(t_master* master, t_message* message_ptr, const char* path) {
 	int	ifd = open(path, O_RDONLY);
 	if (ifd < 0) {
 		PRINT_ERROR(master, "%s: %s\n", path, strerror(errno));

@@ -30,6 +30,18 @@ static bool	extend_elastic_buffer(
 	return (true);
 }
 
+bool	eb_init(t_elastic_buffer* buffer, size_t capacity) {
+	errno = 0;
+	*buffer = (t_elastic_buffer){
+		.capacity = capacity,
+		.buffer = malloc(capacity),
+	};
+	if (buffer->buffer == NULL) {
+		return false;
+	}
+	return true;
+}
+
 // elastic_buffer にデータを保存する
 // (必要に応じて elastic_buffer を拡張する)
 bool	eb_push(

@@ -40,38 +40,38 @@ int main(int argc, char **argv) {
 	++argv;
 	if (*argv == NULL) {
 		// REPL mode
+		master.in_repl = true;
 		unsigned char	read_buffer[4096];
-		t_elastic_buffer	repl_buffer = {
-			.capacity = sizeof(read_buffer),
-			.buffer = malloc(sizeof(read_buffer)),
-		};
-		if (repl_buffer.buffer == NULL) {
+		if (!eb_init(&master.repl, sizeof(read_buffer))) {
 			PRINT_ERROR(&master, "%s\n", strerror(errno));
 			return 1;
 		}
-		while (!repl_buffer.eof_reached || repl_buffer.used > 0) {
+		while (!master.repl.eof_reached || master.repl.used > 0) {
 			// show prompt
 			yoyo_dprintf(STDOUT_FILENO, "ft_ssl> ");
 			// refrech buffer
-			eb_refresh(&repl_buffer);
+			eb_refresh(&master.repl);
+			DEBUGINFO("master.repl.used: %zu", master.repl.used);
+			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
+			DEBUGINFO("master.repl.eof_reached: %s", master.repl.eof_reached ? "Y" : "N");
 
 			ssize_t	command_candidate_len = 0;
 			while (true) {
 				ssize_t	read_size = read(STDIN_FILENO, read_buffer, sizeof(read_buffer));
 				if (read_size < 0) {
 					PRINT_ERROR(&master, "%s\n", strerror(errno));
-					free(repl_buffer.buffer);
+					free(master.repl.buffer);
 					return 1;
 				}
 				if (read_size == 0) {
-					repl_buffer.eof_reached = true;
+					master.repl.eof_reached = true;
 					break;
 				}
 				// 読み取ったデータを elastic_buffer に追加する
 				errno = 0;
-				if (!eb_push(&repl_buffer, read_buffer, read_size, sizeof(read_buffer))) {
+				if (!eb_push(&master.repl, read_buffer, read_size, sizeof(read_buffer))) {
 					PRINT_ERROR(&master, "%s\n", strerror(errno));
-					free(repl_buffer.buffer);
+					free(master.repl.buffer);
 					return 1;
 				}
 				ssize_t	nl_len = memlen_until_nl(read_buffer, read_size);
@@ -79,34 +79,36 @@ int main(int argc, char **argv) {
 					command_candidate_len += nl_len;
 					break;
 				}
-				command_candidate_len = repl_buffer.used;
+				command_candidate_len = master.repl.used;
 			}
-			if (repl_buffer.eof_reached) {
-			errno = 0;
-			if (!eb_push(&repl_buffer, "\0", 1, 1)) {
-				PRINT_ERROR(&master, "%s\n", strerror(errno));
-				free(repl_buffer.buffer);
-				return (1);
-			}
+			if (master.repl.eof_reached) {
+				errno = 0;
+				if (!eb_push(&master.repl, "\0", 1, 1)) {
+					PRINT_ERROR(&master, "%s\n", strerror(errno));
+					free(master.repl.buffer);
+					return (1);
+				}
 			} else {
-				((char*)repl_buffer.buffer)[command_candidate_len] = '\0';
+				((char*)master.repl.buffer)[command_candidate_len] = '\0';
 			}
-			char*	command_arg = ft_strdup(repl_buffer.buffer);
+			char*	command_arg = ft_strdup(master.repl.buffer);
 			if (command_arg == NULL) {
 				PRINT_ERROR(&master, "%s\n", strerror(errno));
-				free(repl_buffer.buffer);
+				free(master.repl.buffer);
 				return 1;
 			}
 			DEBUGINFO("command_candidate_len: %zd", command_candidate_len);
-			DEBUGINFO("repl_buffer.used: %zu", repl_buffer.used);
-			DEBUGINFO("repl_buffer.capacity: %zu", repl_buffer.capacity);
+			DEBUGINFO("master.repl.used: %zu", master.repl.used);
+			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
 			DEBUGINFO("command_arg: \"%s\"", command_arg);
-			eb_truncate_front(&repl_buffer, command_candidate_len + 1);
-			DEBUGINFO("repl_buffer.used: %zu", repl_buffer.used);
-			DEBUGINFO("repl_buffer.capacity: %zu", repl_buffer.capacity);
+			eb_truncate_front(&master.repl, command_candidate_len + 1);
+			DEBUGINFO("master.repl.used: %zu", master.repl.used);
+			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
+			DEBUGINFO("master.repl.eof_reached: %s", master.repl.eof_reached ? "Y" : "N");
 			master.command = get_command(command_arg);
 			master.command_name = command_arg;
 			run_command(&master, argv);
+			master.repl.eof_reached = master.stdin_eof_reached;
 			free(command_arg);
 		}
 

@@ -6,30 +6,32 @@
 #include "ft_ssl_structure.h"
 #include "ft_ssl_lib.h"
 
+#define READ_BUFFER_SIZE (128 << 10)
+
 // md5.c
-int run_md5(const t_master *master, char **argv);
+int run_md5(t_master *master, char **argv);
 
 // sha_***.c
-int run_sha_224(const t_master *master, char **argv);
-int run_sha_256(const t_master *master, char **argv);
-int run_sha_384(const t_master *master, char **argv);
-int run_sha_512(const t_master *master, char **argv);
-int run_sha_512_224(const t_master *master, char **argv);
-int run_sha_512_256(const t_master *master, char **argv);
+int run_sha_224(t_master *master, char **argv);
+int run_sha_256(t_master *master, char **argv);
+int run_sha_384(t_master *master, char **argv);
+int run_sha_512(t_master *master, char **argv);
+int run_sha_512_224(t_master *master, char **argv);
+int run_sha_512_256(t_master *master, char **argv);
 
 // preference.c
 int	parse_options_digest(const t_master* master, char** argv, t_preference* pref_ptr);
 
 // read_file.c
-bool	read_file(const t_master* master, int ifd, t_elastic_buffer* buffer_ptr);
+bool	read_file(t_master* master, int ifd, t_elastic_buffer* joined);
 
 // run_command.c
-int	run_command(const t_master* master, char **argv);
+int	run_command(t_master* master, char **argv);
 
 // run_digest_helper.c
-bool	create_message_stdin(const t_master* master, t_message* message_ptr);
+bool	create_message_stdin(t_master* master, t_message* message_ptr);
 bool	create_message_argument(const t_master* master, t_message* message_ptr, char *arg);
-bool	create_message_path(const t_master* master, t_message* message_ptr, const char* path);
+bool	create_message_path(t_master* master, t_message* message_ptr, const char* path);
 void	destroy_message(t_message* message);
 
 // utils_endian.c

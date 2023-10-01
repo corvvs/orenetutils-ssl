@@ -31,7 +31,7 @@ typedef enum e_command {
 
 struct s_master;
 
-typedef int (t_runner_func)(const struct s_master *master, char **);
+typedef int (t_runner_func)(struct s_master *master, char **);
 
 typedef struct e_command_pair {
 	const char* 	name;
@@ -44,6 +44,10 @@ typedef struct s_master {
 	const char*		program_name;
 	t_command_pair	command;
 	const char*		command_name;
+
+	bool				in_repl;
+	t_elastic_buffer	repl;
+	bool				stdin_eof_reached;
 }	t_master;
 
 typedef struct s_master_digest {
