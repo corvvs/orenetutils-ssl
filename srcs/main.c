@@ -47,15 +47,15 @@ int main(int argc, char **argv) {
 			free(master.repl.buffer);
 			return 1;
 		}
-		while (!master.repl.eof_reached || master.repl.used > 0) {
+		while (true) {
 			// show prompt
-			yoyo_dprintf(STDOUT_FILENO, "ft_ssl> ");
+			yoyo_dprintf(STDOUT_FILENO, "%s> ", master.program_name);
 			DEBUGINFO("master.repl.used: %zu", master.repl.used);
 			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
 			DEBUGINFO("master.repl.eof_reached: %s", master.repl.eof_reached ? "Y" : "N");
 
 			ssize_t	command_candidate_len = 0;
-			while (true) {
+			while (!master.repl.eof_reached) {
 				ssize_t	read_size = read(STDIN_FILENO, read_buffer, sizeof(read_buffer));
 				if (read_size < 0) {
 					PRINT_ERROR(&master, "%s\n", strerror(errno));
@@ -104,12 +104,17 @@ int main(int argc, char **argv) {
 			DEBUGINFO("master.repl.used: %zu", master.repl.used);
 			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
 			DEBUGINFO("master.repl.eof_reached: %s", master.repl.eof_reached ? "Y" : "N");
+			const bool	command_is_blank = *command_arg == '\0';
 			master.command = get_command(command_arg);
 			master.command_name = command_arg;
 			run_command(&master, argv);
-			master.repl.eof_reached = master.stdin_eof_reached;
+			master.repl.eof_reached = master.repl.eof_reached || master.stdin_eof_reached;
 			free(command_arg);
-			// refrech buffer
+			if (command_is_blank && master.repl.eof_reached && master.repl.used == 0) {
+				break;
+			}
+
+			// refresh buffer
 			eb_refresh(&master.repl);
 		}
 

@@ -19,9 +19,11 @@ static void	show_help(void) {
 
 int	run_command(t_master* master, char **argv) {
 	if (master->command.func == NULL) {
-		yoyo_dprintf(STDERR_FILENO, "%s: Error: '%s' is an invalid command.\n", master->program_name, master->command_name);
-		yoyo_dprintf(STDERR_FILENO, "\n");
-		show_help();
+		if (*master->command_name) {
+			yoyo_dprintf(STDERR_FILENO, "%s: Error: '%s' is an invalid command.\n", master->program_name, master->command_name);
+			yoyo_dprintf(STDERR_FILENO, "\n");
+			show_help();
+		}
 		return 1;
 	}
 	return master->command.func(master, argv);
