@@ -14,16 +14,12 @@ int main(int argc, char **argv) {
 		.program_name = *argv,
 	};
 	++argv;
-	if (*argv == NULL) {
+	const char*	command_name = *argv;
+	if (command_name == NULL) {
 		// REPL mode
 		return run_in_repl(&master);
 	} else {
 		// ARGV mode
-		const char*	command_arg = *argv;
-		master.command = get_command(command_arg);
-		master.command_name = command_arg;
-		++argv;
-
-		return run_command(&master, argv);
+		return run_command(&master, command_name, argv + 1);
 	}
 }

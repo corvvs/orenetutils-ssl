@@ -31,8 +31,7 @@ int	parse_options_digest(const t_master* master, char** argv, t_preference* pref
 bool	read_file(t_master* master, int ifd, t_elastic_buffer* joined);
 
 // run_command.c
-t_command_pair	get_command(const char* arg);
-int				run_command(t_master* master, char **argv);
+int		run_command(t_master* master, const char* command_name, char** const arguments);
 
 // run_digest_helper.c
 bool	create_message_stdin(t_master* master, t_message* message_ptr);

@@ -15,10 +15,9 @@ typedef struct	s_elastic_buffer {
 }				t_elastic_buffer;
 
 // elastic_buffer.c
-bool	eb_init(t_elastic_buffer* buffer, size_t capacity);
 bool	eb_push(t_elastic_buffer* elastic_buffer, const void *data, size_t data_size, size_t minimum_cap);
-void	eb_refresh(t_elastic_buffer* elastic_buffer);
 void	eb_truncate_front(t_elastic_buffer* elastic_buffer, size_t data_size);
+t_elastic_buffer	eb_release(t_elastic_buffer* from);
 
 
 #endif

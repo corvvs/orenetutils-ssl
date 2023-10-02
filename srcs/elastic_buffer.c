@@ -30,18 +30,6 @@ static bool	extend_elastic_buffer(
 	return (true);
 }
 
-bool	eb_init(t_elastic_buffer* buffer, size_t capacity) {
-	errno = 0;
-	*buffer = (t_elastic_buffer){
-		.capacity = capacity,
-		.buffer = malloc(capacity),
-	};
-	if (buffer->buffer == NULL) {
-		return false;
-	}
-	return true;
-}
-
 // elastic_buffer にデータを保存する
 // (必要に応じて elastic_buffer を拡張する)
 bool	eb_push(
@@ -61,16 +49,17 @@ bool	eb_push(
 	return true;
 }
 
-void	eb_refresh(t_elastic_buffer* elastic_buffer) {
-	free(elastic_buffer->buffer);
-	*elastic_buffer = (t_elastic_buffer){
-		.eof_reached = elastic_buffer->eof_reached,
-	};
-}
-
 void	eb_truncate_front(t_elastic_buffer* elastic_buffer, size_t data_size) {
 	if (elastic_buffer->used > data_size) {
 		ft_memmove(elastic_buffer->buffer, elastic_buffer->buffer + data_size, elastic_buffer->used - data_size);
 	}
 	elastic_buffer->used -= data_size;
+}
+
+t_elastic_buffer	eb_release(t_elastic_buffer* from) {
+	t_elastic_buffer	out = *from;
+	*from = (t_elastic_buffer) {
+		.eof_reached = from->eof_reached,
+	};
+	return out;
 }

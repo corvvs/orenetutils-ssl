@@ -1,21 +1,12 @@
 #include "ft_ssl.h"
 
 static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd, bool from_stdin) {
-	t_elastic_buffer	message_buffer;
+	t_elastic_buffer	message_buffer = {};
 	if (master->in_repl && from_stdin) {
-		message_buffer = master->repl;
-		master->repl.buffer = NULL;
-	} else {
-		if (!eb_init(&message_buffer, READ_BUFFER_SIZE)) {
-			PRINT_ERROR(master, "%s\n", strerror(errno));
-			free(message_buffer.buffer);
-			return false;
-		}
+		message_buffer = eb_release(&master->repl);
 	}
 	bool	result;
 	if (!read_file(master, fd, &message_buffer)) {
-		result = false;
-	} else if (message_buffer.buffer == NULL) {
 		result = false;
 	} else {
 		*message_ptr = (t_message){
@@ -38,13 +29,13 @@ bool	create_message_stdin(t_master* master, t_message* message_ptr) {
 	return create_message_fd(master, message_ptr, STDIN_FILENO, true);
 }
 
-bool	create_message_argument(const t_master* master, t_message* message_ptr, char *arg) {
+bool	create_message_argument(const t_master* master, t_message* message_ptr, char *argument) {
 	(void)master;
 	*message_ptr = (t_message){
 		.file_path = NULL,
 		.is_bytestream = false,
-		.message = (uint8_t*)arg,
-		.message_bit_len = ft_strlen(arg) * 8,
+		.message = (uint8_t*)argument,
+		.message_bit_len = ft_strlen(argument) * 8,
 	};
 	return true;
 }
