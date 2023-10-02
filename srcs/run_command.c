@@ -16,6 +16,7 @@ static void	show_help(void) {
 		"-p -q -r -s\n"
 	);
 }
+
 int run_help(t_master *master, char **argv) {
 	(void)argv;
 	if (!master->in_repl) {
