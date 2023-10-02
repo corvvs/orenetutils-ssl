@@ -6,7 +6,7 @@
 /*   By: corvvs <corvvs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 22:37:50 by corvvs            #+#    #+#             */
-/*   Updated: 2023/02/27 17:10:32 by corvvs           ###   ########.fr       */
+/*   Updated: 2023/10/02 11:09:10 by corvvs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,4 +90,11 @@ char	**ft_split(char const *s, char c)
 		return (NULL);
 	}
 	return (fill_words(s, c, words));
+}
+
+void ft_destroy_splitted(char **arr) {
+	for (char** av = arr; *av; ++av) {
+		free(*av);
+	}
+	free(arr);
 }

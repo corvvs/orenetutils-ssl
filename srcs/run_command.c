@@ -27,6 +27,21 @@ int run_help(t_master *master, char **argv) {
 	return 0;
 }
 
+t_command_pair	get_command(const char* arg) {
+	size_t n = sizeof(g_command_pairs) / sizeof(g_command_pairs[0]);
+	if (arg != NULL) {
+		for (unsigned int i = 0; i < n; ++i) {
+			if (g_command_pairs[i].name == NULL) {
+				break;
+			}
+			if (ft_strcmp(arg, g_command_pairs[i].name) == 0) {
+				return g_command_pairs[i];
+			}
+		}
+	}
+	return g_command_pairs[n - 1];
+}
+
 int	run_command(t_master* master, char **argv) {
 	if (master->command.func == NULL) {
 		if (*master->command_name) {
