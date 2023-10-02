@@ -8,6 +8,8 @@
 
 #define READ_BUFFER_SIZE (128 << 10)
 
+int run_help(t_master *master, char **argv);
+
 // md5.c
 int run_md5(t_master *master, char **argv);
 
@@ -46,6 +48,7 @@ void put_bitstream(int fd, const uint8_t* data, size_t bit_len);
 #define PRINT_ERROR(master, format, ...) yoyo_dprintf(STDERR_FILENO, "%s: %s: " format, (master)->program_name, (master)->command_name, __VA_ARGS__)
 
 static const t_command_pair g_command_pairs[] = {
+	DEF_COMMAND_PAIR("help", run_help),
 	DEF_COMMAND_PAIR("md5", run_md5),
 	DEF_COMMAND_PAIR("sha224", run_sha_224),
 	DEF_COMMAND_PAIR("sha256", run_sha_256),
