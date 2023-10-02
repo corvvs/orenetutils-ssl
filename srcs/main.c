@@ -80,6 +80,8 @@ int main(int argc, char **argv) {
 				}
 				command_candidate_len = master.repl.used;
 			}
+
+			// NUL終端作業
 			if (master.repl.eof_reached) {
 				errno = 0;
 				if (!eb_push(&master.repl, "\0", 1, 1)) {
@@ -90,12 +92,14 @@ int main(int argc, char **argv) {
 			} else {
 				((char*)master.repl.buffer)[command_candidate_len] = '\0';
 			}
-			char*	command_arg = ft_strdup(master.repl.buffer);
-			if (command_arg == NULL) {
+
+			char**	pseudo_argv = ft_split(master.repl.buffer, ' ');
+			if (pseudo_argv == NULL) {
 				PRINT_ERROR(&master, "%s\n", strerror(errno));
 				free(master.repl.buffer);
 				return 1;
 			}
+			const char*	command_arg = *pseudo_argv;
 			DEBUGINFO("command_candidate_len: %zd", command_candidate_len);
 			DEBUGINFO("master.repl.used: %zu", master.repl.used);
 			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
@@ -104,14 +108,22 @@ int main(int argc, char **argv) {
 			DEBUGINFO("master.repl.used: %zu", master.repl.used);
 			DEBUGINFO("master.repl.capacity: %zu", master.repl.capacity);
 			DEBUGINFO("master.repl.eof_reached: %s", master.repl.eof_reached ? "Y" : "N");
-			const bool	command_is_blank = *command_arg == '\0';
-			master.command = get_command(command_arg);
-			master.command_name = command_arg;
-			run_command(&master, argv);
-			master.repl.eof_reached = master.repl.eof_reached || master.stdin_eof_reached;
-			free(command_arg);
-			if (command_is_blank && master.repl.eof_reached && master.repl.used == 0) {
-				break;
+			if (command_arg == NULL) {
+				free(pseudo_argv);
+				if (master.repl.eof_reached && master.repl.used == 0) {
+					free(master.repl.buffer);
+					break;
+				}
+			} else {
+				master.command = get_command(command_arg);
+				master.command_name = command_arg;
+				run_command(&master, pseudo_argv + 1);
+				master.repl.eof_reached = master.repl.eof_reached || master.stdin_eof_reached;
+
+				for (char** av = pseudo_argv; *av; ++av) {
+					free(*av);
+				}
+				free(pseudo_argv);
 			}
 
 			// refresh buffer

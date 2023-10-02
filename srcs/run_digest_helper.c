@@ -1,8 +1,8 @@
 #include "ft_ssl.h"
 
-static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd) {
+static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd, bool from_stdin) {
 	t_elastic_buffer	message_buffer;
-	if (master->in_repl) {
+	if (master->in_repl && from_stdin) {
 		message_buffer = master->repl;
 		master->repl.buffer = NULL;
 	} else {
@@ -27,7 +27,7 @@ static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd) 
 		message_buffer.buffer = NULL;
 		result = true;
 	}
-	if (message_buffer.eof_reached) {
+	if (from_stdin && message_buffer.eof_reached) {
 		master->stdin_eof_reached = true;
 	}
 	free(message_buffer.buffer);
@@ -35,7 +35,7 @@ static bool	create_message_fd(t_master* master, t_message* message_ptr, int fd) 
 }
 
 bool	create_message_stdin(t_master* master, t_message* message_ptr) {
-	return create_message_fd(master, message_ptr, STDIN_FILENO);
+	return create_message_fd(master, message_ptr, STDIN_FILENO, true);
 }
 
 bool	create_message_argument(const t_master* master, t_message* message_ptr, char *arg) {
@@ -55,7 +55,7 @@ bool	create_message_path(t_master* master, t_message* message_ptr, const char* p
 		PRINT_ERROR(master, "%s: %s\n", path, strerror(errno));
 		return false;
 	}
-	const bool result = create_message_fd(master, message_ptr, ifd);
+	const bool result = create_message_fd(master, message_ptr, ifd, false);
 	if (result) {
 		message_ptr->file_path = path;
 	}
