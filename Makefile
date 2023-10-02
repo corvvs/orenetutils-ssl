@@ -3,6 +3,7 @@ OBJDIR	:=	objs
 INCDIR	:=	includes
 FILES	:=	\
 			main.c\
+			repl.c\
 			preference.c\
 			md5.c\
 			md5_block_padding.c\

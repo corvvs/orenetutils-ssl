@@ -6,7 +6,7 @@
 /*   By: corvvs <corvvs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/10 18:59:27 by corvvs            #+#    #+#             */
-/*   Updated: 2023/07/29 18:56:17 by corvvs           ###   ########.fr       */
+/*   Updated: 2023/10/02 11:09:20 by corvvs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ char	*ft_substr(char const *s, unsigned int start, size_t len);
 char	*ft_strjoin(char const *s1, char const *s2);
 char	*ft_strtrim(char const *s1, char const *set);
 char	**ft_split(char const *s, char c);
+void 	ft_destroy_splitted(char **arr);
 char	*ft_itoa(int n);
 
 typedef struct s_list

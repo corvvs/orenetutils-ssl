@@ -2,7 +2,7 @@
 #define FT_SSL_COMMON_H
 
 #define define_hash_runner(hash_type)                                               \
-	int run_##hash_type(const t_master *master, char **argv)                        \
+	int run_##hash_type(t_master *master, char **argv)                        \
 	{                                                                               \
 		t_master_digest m = {                                                       \
 			.master = *master,                                                      \

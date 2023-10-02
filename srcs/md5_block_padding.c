@@ -22,9 +22,8 @@ static void 	size_padding(t_md5_state* state) {
 	uint32_t*	big = little + 1;
 	*little = PASS_LIT_END(bs.s_32.little);
 	*big = PASS_LIT_END(bs.s_32.big);
-	DEBUGOUT("SIZE PADDING: " U64T " (%08x, %08x) into [" U64T ", " U64T ")",
+	DEBUGOUT("SIZE PADDING: " U64T " into [" U64T ", " U64T ")",
 		bs.s_64,
-		bs.s_32.little, bs.s_32.big,
 		size_from, size_from + sizeof(uint64_t) * OCTET_BIT_SIZE);
 }
 

@@ -32,7 +32,7 @@ static bool	extend_elastic_buffer(
 
 // elastic_buffer にデータを保存する
 // (必要に応じて elastic_buffer を拡張する)
-bool	push_to_elastic_buffer(
+bool	eb_push(
 	t_elastic_buffer* elastic_buffer,
 	const void* data,
 	size_t data_size,
@@ -47,4 +47,19 @@ bool	push_to_elastic_buffer(
 	ft_memcpy(elastic_buffer->buffer + elastic_buffer->used, data, data_size);
 	elastic_buffer->used += data_size;
 	return true;
+}
+
+void	eb_truncate_front(t_elastic_buffer* elastic_buffer, size_t data_size) {
+	if (elastic_buffer->used > data_size) {
+		ft_memmove(elastic_buffer->buffer, elastic_buffer->buffer + data_size, elastic_buffer->used - data_size);
+	}
+	elastic_buffer->used -= data_size;
+}
+
+t_elastic_buffer	eb_release(t_elastic_buffer* from) {
+	t_elastic_buffer	out = *from;
+	*from = (t_elastic_buffer) {
+		.eof_reached = from->eof_reached,
+	};
+	return out;
 }

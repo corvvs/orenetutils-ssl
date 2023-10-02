@@ -79,6 +79,9 @@ static bool	resolve_c(t_yoyo_printf_buffer* buffer, t_yoyo_conversion* conversio
 
 static bool	resolve_s(t_yoyo_printf_buffer* buffer, t_yoyo_conversion* conversion, const char* s) {
 	(void)conversion;
+	if (s == NULL) {
+		return resolve_s(buffer, conversion, "(null)");
+	}
 	write_into_buffer(buffer, s, yoyo_strlen(s));
 	return true;
 }
