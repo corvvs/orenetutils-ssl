@@ -14,7 +14,7 @@
 		argv += 1;                                                                \
 		if (*argv == NULL)                                                        \
 		{                                                                         \
-			print_error_by_message(master, "option requires an argument -- s\n"); \
+			print_error_by_message(master, "option requires an argument -- " #opt "\n"); \
 			return -1;                                                            \
 		}                                                                         \
 		pref.field = *argv;                                                       \

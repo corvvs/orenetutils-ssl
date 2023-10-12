@@ -10,6 +10,10 @@ int	run_base64(t_master* master, char **argv) {
 		return 1;
 	}
 	argv += parsed_count;
+	if (*argv != NULL) {
+		PRINT_ERROR(master, "unexpected argument: %s\n", *argv);
+		return 1;
+	}
 
 	// ここでメッセージを取得する
 	int result = 0;
