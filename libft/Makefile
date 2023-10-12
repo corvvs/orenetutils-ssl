@@ -11,6 +11,7 @@ FUNCS	=	ft_strlen\
 			ft_isalnum\
 			ft_isprint\
 			ft_isascii\
+			ft_isspace\
 			ft_toupper\
 			ft_tolower\
 			ft_strlcpy\

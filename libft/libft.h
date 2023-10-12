@@ -6,7 +6,7 @@
 /*   By: corvvs <corvvs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/10 18:59:27 by corvvs            #+#    #+#             */
-/*   Updated: 2023/10/02 11:09:20 by corvvs           ###   ########.fr       */
+/*   Updated: 2023/10/11 13:10:48 by corvvs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,7 @@ int		ft_isdigit(int ch);
 int		ft_isalnum(int ch);
 int		ft_isprint(int ch);
 int		ft_isascii(int ch);
+int		ft_isspace(int ch);
 int		ft_toupper(int ch);
 int		ft_tolower(int ch);
 size_t	ft_strlcpy(char *dst, const char *src, size_t n);

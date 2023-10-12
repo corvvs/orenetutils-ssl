@@ -21,11 +21,19 @@ int run_sha_512(t_master *master, char **argv);
 int run_sha_512_224(t_master *master, char **argv);
 int run_sha_512_256(t_master *master, char **argv);
 
+// base64
+int	base64_encode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
+int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
+int	run_base64(t_master* master, char **argv);
+
 // repl.c
 int run_in_repl(t_master* master);
 
 // preference.c
 int	parse_options_digest(const t_master* master, char** argv, t_preference* pref_ptr);
+
+// base64_preference.c
+int	parse_options_base64(const t_master* master, char** argv, t_preference* pref_ptr);
 
 // read_file.c
 bool	read_file(t_master* master, int ifd, t_elastic_buffer* joined);
@@ -38,6 +46,12 @@ bool	create_message_stdin(t_master* master, t_message* message_ptr);
 bool	create_message_argument(const t_master* master, t_message* message_ptr, char *arg);
 bool	create_message_path(t_master* master, t_message* message_ptr, const char* path);
 void	destroy_message(t_message* message);
+
+// elastic_buffer_helper.c
+bool	create_buffer_stdin(t_master* master, t_elastic_buffer* message_ptr);
+bool	create_buffer_path(t_master* master, t_elastic_buffer* message_ptr, const char* path);
+void	destroy_buffer(t_elastic_buffer* message);
+
 
 // utils_endian.c
 bool is_little_endian(void);
@@ -59,6 +73,7 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512", run_sha_512),
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
+	DEF_COMMAND_PAIR("base64", run_base64),
 	DEF_COMMAND_PAIR(NULL, NULL),
 };
 

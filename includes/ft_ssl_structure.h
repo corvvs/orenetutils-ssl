@@ -16,6 +16,11 @@ typedef struct s_preference {
 	bool	is_quiet;			// -q option
 	bool	is_reverse;			// -r option
 	char*	message_argument;	// -s option
+
+	char*	path_input;			// -i option
+	char*	path_output;		// -o option
+
+	bool	is_decode;
 }	t_preference;
 
 typedef enum e_command {
@@ -51,8 +56,13 @@ typedef struct s_master {
 }	t_master;
 
 typedef struct s_master_digest {
-	t_master			master;
+	t_master		master;
 	t_preference	pref;
 }	t_master_digest;
+
+typedef struct s_master_base64 {
+	t_master		master;
+	t_preference	pref;
+}	t_master_base64;
 
 #endif
