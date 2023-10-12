@@ -17,6 +17,9 @@ typedef struct s_preference {
 	bool	is_reverse;			// -r option
 	char*	message_argument;	// -s option
 
+	char*	path_input;			// -i option
+	char*	path_output;		// -o option
+
 	bool	is_decode;
 }	t_preference;
 

@@ -23,7 +23,7 @@ int run_sha_512_256(t_master *master, char **argv);
 
 // base64
 int	base64_encode(t_master_base64* m);
-int	base64_decode(t_master_base64* m);
+int	base64_decode(t_master_base64* m, t_elastic_buffer* message, int out_fd);
 int	run_base64(t_master* master, char **argv);
 
 // repl.c
@@ -46,6 +46,12 @@ bool	create_message_stdin(t_master* master, t_message* message_ptr);
 bool	create_message_argument(const t_master* master, t_message* message_ptr, char *arg);
 bool	create_message_path(t_master* master, t_message* message_ptr, const char* path);
 void	destroy_message(t_message* message);
+
+// elastic_buffer_helper.c
+bool	create_buffer_stdin(t_master* master, t_elastic_buffer* message_ptr);
+bool	create_buffer_path(t_master* master, t_elastic_buffer* message_ptr, const char* path);
+void	destroy_buffer(t_elastic_buffer* message);
+
 
 // utils_endian.c
 bool is_little_endian(void);

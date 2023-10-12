@@ -1,4 +1,5 @@
 #include "ft_ssl.h"
+#include "ft_ssl_preference.h"
 
 int	parse_options_base64(const t_master* master, char** argv, t_preference* pref_ptr) {
 	(void)master;
@@ -18,7 +19,8 @@ int	parse_options_base64(const t_master* master, char** argv, t_preference* pref
 					pref.is_decode = false;
 					break;
 				}
-				// TODO: -i, -o
+				PARSE_PREFERENCE_WITH_1_ARGUMENT('i', i, path_input)
+				PARSE_PREFERENCE_WITH_1_ARGUMENT('o', o, path_output)
 				default: {
 					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
 					return -1;

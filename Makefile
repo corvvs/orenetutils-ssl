@@ -33,7 +33,7 @@ FILES	:=	\
 			sha_512_256_block_padding.c\
 			sha_512_256_block_rounds.c\
 			sha_512_256_derive_digest.c\
-			run_base64.c\
+			base64.c\
 			base64_encode.c\
 			base64_decode.c\
 			base64_preference.c\
@@ -42,6 +42,7 @@ FILES	:=	\
 			run_command.c\
 			run_digest_helper.c\
 			elastic_buffer.c\
+			elastic_buffer_helper.c\
 			utils_endian.c\
 			utils_error.c\
 			utils_print.c\

@@ -23,8 +23,7 @@ typedef struct s_base64_encode_state
 
 typedef struct s_base64_decode_state
 {
-	int in_fd;
-	t_elastic_buffer	input_buffer;
+	t_elastic_buffer*	input_buffer;
 
 	int out_fd;
 	t_elastic_buffer	output_buffer;

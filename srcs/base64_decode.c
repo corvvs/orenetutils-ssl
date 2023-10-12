@@ -74,8 +74,8 @@ bool	is_decodable_as_base64(const t_master_base64* m, const t_base64_decode_stat
 	// - 全体の長さが4の倍数であること
 
 	(void)m;
-	const char* 	buffer = state->input_buffer.buffer;
-	const size_t	buffer_len = state->input_buffer.used;
+	const char* 	buffer = state->input_buffer->buffer;
+	const size_t	buffer_len = state->input_buffer->used;
 	size_t			data_len = 0;
 	size_t			equals = 0;
 	bool			has_encountered_equal = false;
@@ -118,8 +118,8 @@ bool	run_decode(const t_master_base64* m, t_base64_decode_state* state) {
 	// メモリアロケーションの方がコストが重そう, という判断.
 	// (測れや...)
 
-	const char* 	source = state->input_buffer.buffer;
-	const size_t	source_len = state->input_buffer.used;
+	const char* 	source = state->input_buffer->buffer;
+	const size_t	source_len = state->input_buffer->used;
 
 	(void)m;
 	// もう1度長さを測る
@@ -187,22 +187,12 @@ bool	run_decode(const t_master_base64* m, t_base64_decode_state* state) {
 	return true;
 }
 
-
-int	base64_decode(t_master_base64* m) {
-	
+int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
+	chomp_buffer(input);
 	t_base64_decode_state	state = {
-		.in_fd = STDIN_FILENO,
-		.out_fd = STDOUT_FILENO,
+		.input_buffer = input,
+		.out_fd = out_fd,
 	};
-
-
-	DEBUGOUT("in_fd: %d", state.in_fd);
-
-	if (!read_file(&m->master, state.in_fd, &state.input_buffer)) {
-		return 1;
-	}
-
-	chomp_buffer(&state.input_buffer);
 
 	if (!is_decodable_as_base64(m, &state)) {
 		return 1;
