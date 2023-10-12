@@ -21,11 +21,19 @@ int run_sha_512(t_master *master, char **argv);
 int run_sha_512_224(t_master *master, char **argv);
 int run_sha_512_256(t_master *master, char **argv);
 
+// base64
+int	base64_encode(t_master_base64* m);
+int	base64_decode(t_master_base64* m);
+int	run_base64(t_master* master, char **argv);
+
 // repl.c
 int run_in_repl(t_master* master);
 
 // preference.c
 int	parse_options_digest(const t_master* master, char** argv, t_preference* pref_ptr);
+
+// base64_preference.c
+int	parse_options_base64(const t_master* master, char** argv, t_preference* pref_ptr);
 
 // read_file.c
 bool	read_file(t_master* master, int ifd, t_elastic_buffer* joined);
@@ -59,6 +67,7 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512", run_sha_512),
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
+	DEF_COMMAND_PAIR("base64", run_base64),
 	DEF_COMMAND_PAIR(NULL, NULL),
 };
 

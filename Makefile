@@ -33,6 +33,10 @@ FILES	:=	\
 			sha_512_256_block_padding.c\
 			sha_512_256_block_rounds.c\
 			sha_512_256_derive_digest.c\
+			run_base64.c\
+			base64_encode.c\
+			base64_decode.c\
+			base64_preference.c\
 			subbyte_manipulation.c\
 			read_file.c\
 			run_command.c\

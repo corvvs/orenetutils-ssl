@@ -6,7 +6,7 @@
 /*   By: corvvs <corvvs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 18:43:05 by corvvs            #+#    #+#             */
-/*   Updated: 2023/02/19 16:10:48 by corvvs           ###   ########.fr       */
+/*   Updated: 2023/10/11 13:10:25 by corvvs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,11 +61,6 @@ static int	is_of(long num, long d, int sign)
 		return ((num > -(LONG_MIN / 10))
 			|| (num == -(LONG_MIN / 10) && d > -(LONG_MIN + num * 10)));
 	}
-}
-
-static int	ft_isspace(unsigned char ch)
-{
-	return (!((unsigned int)ch & ~63u) && (0x100003e00ull & (1ull << ch)));
 }
 
 static int	atoi_isdigit(unsigned char ch)
