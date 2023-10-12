@@ -22,8 +22,8 @@ int run_sha_512_224(t_master *master, char **argv);
 int run_sha_512_256(t_master *master, char **argv);
 
 // base64
-int	base64_encode(t_master_base64* m);
-int	base64_decode(t_master_base64* m, t_elastic_buffer* message, int out_fd);
+int	base64_encode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
+int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
 int	run_base64(t_master* master, char **argv);
 
 // repl.c

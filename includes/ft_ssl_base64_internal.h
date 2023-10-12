@@ -11,14 +11,10 @@
 
 typedef struct s_base64_encode_state
 {
-	int in_fd;
-	uint8_t input_buffer[BASE64_ENCODE_INPUT_BUFFFER_SIZE];
-	size_t input_used;
-	bool input_exhausted;
+	t_elastic_buffer*	input_buffer;
 
 	int out_fd;
-	char output_buffer[BASE64_ENCODE_OUTPUT_BUFFFER_SIZE];
-	size_t output_used;
+	t_elastic_buffer	output_buffer;
 } t_base64_encode_state;
 
 typedef struct s_base64_decode_state

@@ -143,8 +143,6 @@ bool	run_decode(const t_master_base64* m, t_base64_decode_state* state) {
 	// デコード実施
 	unsigned char*	dest = state->output_buffer.buffer;
 	unsigned char	decoded_bit = 0;
-	DEBUGOUT("data_len: %zu", data_len);
-	DEBUGOUT("decoded_len: %zu", decoded_len);
 	size_t	di = 0;
 	for (size_t i = 0; i < source_len; ++i) {
 		char	c = source[i];
@@ -155,34 +153,28 @@ bool	run_decode(const t_master_base64* m, t_base64_decode_state* state) {
 			break;
 		}
 		const uint8_t	sextet = base64_decode_table[(uint8_t)c];
-		// DEBUGOUT("di: %zu, sextet: %b used: %zu", di, sextet, state->output_buffer.used);
 		switch (di % 4) {
 			case 0:
 				decoded_bit |= (sextet << 2);
 				break;
 			case 1:
 				decoded_bit |= sextet >> 4;
-				// DEBUGOUT("decoded_bit: %u", decoded_bit);
 				dest[state->output_buffer.used++] = decoded_bit;
 				decoded_bit = sextet << 4;
 				break;
 			case 2:
 				decoded_bit |= sextet >> 2;
-				// DEBUGOUT("decoded_bit: %u", decoded_bit);
 				dest[state->output_buffer.used++] = decoded_bit;
 				decoded_bit = sextet << 6;
 				break;
 			case 3:
 				decoded_bit |= sextet;
-				// DEBUGOUT("decoded_bit: %u", decoded_bit);
 				dest[state->output_buffer.used++] = decoded_bit;
 				decoded_bit = 0;
 				break;
 		}
 		di += 1;
 	}
-	DEBUGOUT("used: %zu", state->output_buffer.used);
-	DEBUGOUT("decoded_bit: %u", decoded_bit);
 
 	return true;
 }
@@ -202,5 +194,6 @@ int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
 	}
 
 	write_buffer(&state);
+	destroy_buffer(&state.output_buffer);
 	return 0;
 }

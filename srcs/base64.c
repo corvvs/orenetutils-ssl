@@ -40,7 +40,7 @@ int	run_base64(t_master* master, char **argv) {
 	if (result == 0 && out_fd >= 0) {
 		result = (pref->is_decode)
 			? base64_decode(&m, &input, out_fd)
-			: base64_encode(&m);
+			: base64_encode(&m, &input, out_fd);
 	}
 	destroy_buffer(&input);
 	if (open_out_fd && out_fd >= 0) {
