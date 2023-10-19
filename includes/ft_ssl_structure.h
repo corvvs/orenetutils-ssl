@@ -65,4 +65,5 @@ typedef struct s_master_base64 {
 	t_preference	pref;
 }	t_master_base64;
 
+
 #endif

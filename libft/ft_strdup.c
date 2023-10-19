@@ -6,7 +6,7 @@
 /*   By: corvvs <corvvs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/16 19:27:36 by corvvs            #+#    #+#             */
-/*   Updated: 2023/02/27 17:10:04 by corvvs           ###   ########.fr       */
+/*   Updated: 2023/10/18 11:17:44 by corvvs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,4 +30,12 @@ char	*ft_strndup(const char *s1, size_t n)
 		dup[len] = '\0';
 	}
 	return (dup);
+}
+
+void*	ft_memdup(const void* mem, size_t len) {
+	void*	dup = malloc(len);
+	if (dup != NULL) {
+		ft_memcpy(dup, mem, len);
+	}
+	return dup;
 }

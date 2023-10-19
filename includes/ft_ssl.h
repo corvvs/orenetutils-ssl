@@ -2,9 +2,11 @@
 #define FT_SSL_H
 
 #include "ft_ssl_md5.h"
+#include "ft_ssl_sha_2.h"
 #include "utils_endian.h"
 #include "ft_ssl_structure.h"
 #include "ft_ssl_lib.h"
+#include "ft_ssl_hmac.h"
 
 #define READ_BUFFER_SIZE (128 << 10)
 
@@ -25,6 +27,12 @@ int run_sha_512_256(t_master *master, char **argv);
 int	base64_encode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
 int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
 int	run_base64(t_master* master, char **argv);
+
+int	run_test(t_master* master, char **argv);
+
+// digest core
+t_md5_digest md5_hash(const uint8_t *message, uint64_t message_len);
+t_sha_256_digest sha_256_hash(const uint8_t *message, uint64_t message_len);
 
 // repl.c
 int run_in_repl(t_master* master);
@@ -52,7 +60,6 @@ bool	create_buffer_stdin(t_master* master, t_elastic_buffer* message_ptr);
 bool	create_buffer_path(t_master* master, t_elastic_buffer* message_ptr, const char* path);
 void	destroy_buffer(t_elastic_buffer* message);
 
-
 // utils_endian.c
 bool is_little_endian(void);
 
@@ -74,6 +81,8 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
 	DEF_COMMAND_PAIR("base64", run_base64),
+	DEF_COMMAND_PAIR("test", run_test),
+
 	DEF_COMMAND_PAIR(NULL, NULL),
 };
 

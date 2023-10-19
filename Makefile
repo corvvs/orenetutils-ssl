@@ -37,6 +37,9 @@ FILES	:=	\
 			base64_encode.c\
 			base64_decode.c\
 			base64_preference.c\
+			hmac.c\
+			hmac_digest_interface.c\
+			generic_message.c\
 			subbyte_manipulation.c\
 			read_file.c\
 			run_command.c\
@@ -47,6 +50,7 @@ FILES	:=	\
 			utils_error.c\
 			utils_print.c\
 			printf.c\
+			test.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
