@@ -54,6 +54,9 @@ t_generic_message	hmac(
 ) {
 	if (is_key_reshaping_needed(&hi->algorithm, key)) {
 		// 鍵の reshape
+		DEBUGOUT("func: %p", hi->algorithm.func);
+		DEBUGOUT("block_byte_size: %zu", hi->algorithm.block_byte_size);
+		DEBUGOUT("hash_byte_size: %zu", hi->algorithm.hash_byte_size);
 		t_generic_message	reshaped_key = reshape_key(&hi->algorithm, key);
 		t_generic_message	result = hmac(hi, &reshaped_key, text);
 		destroy_generic_message(&reshaped_key);

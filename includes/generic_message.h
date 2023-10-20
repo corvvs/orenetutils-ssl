@@ -18,5 +18,6 @@ void				join_assign_generic_message(t_generic_message* a, const t_generic_messag
 void				xor_assign_generic_message(t_generic_message* a, const t_generic_message* b);
 void				destroy_generic_message(t_generic_message* message);
 void				print_generic_message(const t_generic_message* message, int fd);
+void				print_generic_message_ascii(const t_generic_message* message, int fd);
 
 #endif

@@ -66,6 +66,12 @@ void	print_generic_message(const t_generic_message* message, int fd) {
 	for (size_t i = 0; i < message->byte_size; ++i) {
 		dprintf(fd, "%02x", ((uint8_t*)message->message)[i]);
 	}
-	// write(fd, message->message, message->byte_size);
 	write(fd, "\n", 1);
+}
+
+void	print_generic_message_ascii(const t_generic_message* message, int fd) {
+	dprintf(fd, "byte_size: %zu, \t", message->byte_size);
+	dprintf(fd, "data: \"");
+	write(fd, message->message, message->byte_size);
+	write(fd, "\"\n", 2);
 }

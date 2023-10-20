@@ -31,8 +31,13 @@ int	run_base64(t_master* master, char **argv);
 int	run_test(t_master* master, char **argv);
 
 // digest core
-t_md5_digest md5_hash(const uint8_t *message, uint64_t message_len);
-t_sha_256_digest sha_256_hash(const uint8_t *message, uint64_t message_len);
+t_md5_digest			md5_hash(const uint8_t *message, uint64_t message_len);
+t_sha_224_digest		sha_224_hash(const uint8_t *message, uint64_t message_len);
+t_sha_256_digest		sha_256_hash(const uint8_t *message, uint64_t message_len);
+t_sha_384_digest		sha_384_hash(const uint8_t *message, uint64_t message_len);
+t_sha_512_digest		sha_512_hash(const uint8_t *message, uint64_t message_len);
+t_sha_512_224_digest	sha_512_224_hash(const uint8_t *message, uint64_t message_len);
+t_sha_512_256_digest	sha_512_256_hash(const uint8_t *message, uint64_t message_len);
 
 // repl.c
 int run_in_repl(t_master* master);
@@ -85,5 +90,22 @@ static const t_command_pair g_command_pairs[] = {
 
 	DEF_COMMAND_PAIR(NULL, NULL),
 };
+
+#define define_hash_algorithm(hash_type, HASH_TYPE)                          \
+	(t_hash_algorithm)                                                       \
+	{                                                                        \
+		.name = #hash_type,                                                  \
+		.func = generic_digest_##hash_type,                                  \
+		.block_byte_size = HASH_TYPE##_WORD_BLOCK_BIT_SIZE / OCTET_BIT_SIZE, \
+		.hash_byte_size = HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE,      \
+	}
+
+const static t_hash_algorithm	g_hash_md5 = define_hash_algorithm(md5, MD5);
+const static t_hash_algorithm	g_hash_sha_224 = define_hash_algorithm(sha_224, SHA_224);
+const static t_hash_algorithm	g_hash_sha_256 = define_hash_algorithm(sha_256, SHA_256);
+const static t_hash_algorithm	g_hash_sha_384 = define_hash_algorithm(sha_384, SHA_384);
+const static t_hash_algorithm	g_hash_sha_512 = define_hash_algorithm(sha_512, SHA_512);
+const static t_hash_algorithm	g_hash_sha_512_224 = define_hash_algorithm(sha_512_224, SHA_512_224);
+const static t_hash_algorithm	g_hash_sha_512_256 = define_hash_algorithm(sha_512_256, SHA_512_256);
 
 #endif
