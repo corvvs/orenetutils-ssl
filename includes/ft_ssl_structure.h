@@ -2,6 +2,7 @@
 #define FT_SSL_STRUCTURE_H
 
 #include "common.h"
+#include "generic_message.h"
 
 typedef struct s_message
 {
@@ -11,16 +12,35 @@ typedef struct s_message
 	size_t message_bit_len;
 } t_message;
 
+typedef	void	(generic_hash_function)(t_generic_message* result, const t_generic_message* text);
+
+typedef struct s_hash_algorithm {
+	const char*				name;
+	generic_hash_function*	func;
+	size_t					block_byte_size;
+	size_t					hash_byte_size;
+}	t_hash_algorithm;
+
+typedef struct s_hmac_hash_interface {
+	const char*			name;
+	t_hash_algorithm	algorithm;
+	t_generic_message	ipad;
+	t_generic_message	opad;
+}	t_hmac_hash_interface;
+
+// TODO: サブコマンドごとの構造体に分けること
 typedef struct s_preference {
-	bool	is_echo;			// -p option
-	bool	is_quiet;			// -q option
-	bool	is_reverse;			// -r option
-	char*	message_argument;	// -s option
+	bool	is_echo;			// -p option	for hashes
+	bool	is_quiet;			// -q option	for hashes
+	bool	is_reverse;			// -r option	for hashes
+	char*	message_argument;	// -s option	for hashes
 
-	char*	path_input;			// -i option
-	char*	path_output;		// -o option
+	char*	path_input;			// -i option	for base64
+	char*	path_output;		// -o option	for base64
+	bool	is_decode;			// -e/-d option for base64
 
-	bool	is_decode;
+	char*	path_key;			// -k for hmac
+	t_hmac_hash_interface*	hi;	// -a for hmac
 }	t_preference;
 
 typedef enum e_command {
@@ -64,6 +84,11 @@ typedef struct s_master_base64 {
 	t_master		master;
 	t_preference	pref;
 }	t_master_base64;
+
+typedef struct s_master_hmac {
+	t_master		master;
+	t_preference	pref;
+}	t_master_hmac;
 
 
 #endif

@@ -86,6 +86,7 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
 	DEF_COMMAND_PAIR("base64", run_base64),
+	DEF_COMMAND_PAIR("hmac", run_hmac),
 	DEF_COMMAND_PAIR("test", run_test),
 
 	DEF_COMMAND_PAIR(NULL, NULL),
@@ -100,12 +101,12 @@ static const t_command_pair g_command_pairs[] = {
 		.hash_byte_size = HASH_TYPE##_DIGEST_BIT_SIZE / OCTET_BIT_SIZE,      \
 	}
 
-const static t_hash_algorithm	g_hash_md5 = define_hash_algorithm(md5, MD5);
-const static t_hash_algorithm	g_hash_sha_224 = define_hash_algorithm(sha_224, SHA_224);
-const static t_hash_algorithm	g_hash_sha_256 = define_hash_algorithm(sha_256, SHA_256);
-const static t_hash_algorithm	g_hash_sha_384 = define_hash_algorithm(sha_384, SHA_384);
-const static t_hash_algorithm	g_hash_sha_512 = define_hash_algorithm(sha_512, SHA_512);
-const static t_hash_algorithm	g_hash_sha_512_224 = define_hash_algorithm(sha_512_224, SHA_512_224);
-const static t_hash_algorithm	g_hash_sha_512_256 = define_hash_algorithm(sha_512_256, SHA_512_256);
+static const t_hash_algorithm	g_hash_md5 = define_hash_algorithm(md5, MD5);
+static const t_hash_algorithm	g_hash_sha_224 = define_hash_algorithm(sha_224, SHA_224);
+static const t_hash_algorithm	g_hash_sha_256 = define_hash_algorithm(sha_256, SHA_256);
+static const t_hash_algorithm	g_hash_sha_384 = define_hash_algorithm(sha_384, SHA_384);
+static const t_hash_algorithm	g_hash_sha_512 = define_hash_algorithm(sha_512, SHA_512);
+static const t_hash_algorithm	g_hash_sha_512_224 = define_hash_algorithm(sha_512_224, SHA_512_224);
+static const t_hash_algorithm	g_hash_sha_512_256 = define_hash_algorithm(sha_512_256, SHA_512_256);
 
 #endif
