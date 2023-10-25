@@ -30,28 +30,28 @@ int	parse_options_hmac(const t_master* master, char** argv, t_preference* pref_p
 		++option;
 		while (*option) {
 			switch (*option) {
-			case 'a': {
-				/* option に後続がある場合はアウト */
-				if (option[1]) {
-					print_error_by_message(master, "illegal option -- a\n");
-					return -1;
-				}
-				/* argv に後続がない場合はアウト */
-				argv += 1;
-				if (*argv == NULL) {
-					print_error_by_message(master, "option requires an argument -- a\n");
-					return -1;
-				}
+				case 'a': {
+					/* option に後続がある場合はアウト */
+					if (option[1]) {
+						print_error_by_message(master, "illegal option -- a\n");
+						return -1;
+					}
+					/* argv に後続がない場合はアウト */
+					argv += 1;
+					if (*argv == NULL) {
+						print_error_by_message(master, "option requires an argument -- a\n");
+						return -1;
+					}
 
-				t_hmac_hash_interface*	hi = select_hi(*argv);
-				if (hi == NULL) {
-					print_error_by_message(master, "unexpected hash algorithm name\n");
-					return -1;
+					t_hmac_hash_interface*	hi = select_hi(*argv);
+					if (hi == NULL) {
+						print_error_by_message(master, "unexpected hash algorithm name\n");
+						return -1;
+					}
+					pref.hi = hi;
+					parsed_count += 1;
+					break;
 				}
-				pref.hi = hi;
-				parsed_count += 1;
-				break;
-			}
 				PARSE_PREFERENCE_WITH_1_ARGUMENT('k', k, path_key)
 				default: {
 					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
@@ -62,6 +62,10 @@ int	parse_options_hmac(const t_master* master, char** argv, t_preference* pref_p
 		}
 		argv += 1;
 		parsed_count += 1;
+	}
+	if (pref.hi == NULL) {
+		// set default
+		pref.hi = &g_hi_sha_256;
 	}
 	*pref_ptr = pref;
 	return parsed_count;

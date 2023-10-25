@@ -35,6 +35,8 @@
 	}
 
 #ifdef DEBUG
+// vargs がないとコンパイルが通らない。
+// vargs がいらない時は適当に空文字列なり入れるとよい。
 #define DEBUGSTRN(format) YOYO_DPRINTF("%s[%s:%d %s] " format "%s", TX_GRY, __FILE__, __LINE__, __func__, TX_RST)
 #define DEBUGSTR(format) YOYO_DPRINTF("%s[%s:%d %s] " format "%s\n", TX_GRY, __FILE__, __LINE__, __func__, TX_RST)
 #define DEBUGOUT(format, ...) YOYO_DPRINTF("%s[D] [%s:%d %s] " format "%s\n", TX_GRY, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)

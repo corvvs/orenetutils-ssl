@@ -12,6 +12,8 @@ t_generic_message	new_generic_message_path(t_master* master, const char* path) {
 	t_message	message = {};
 	if (create_message_path(master, &message, path)) {
 		message_to_gm(&gm, &message);
+	} else {
+		mark_faild_generic_message(&gm);
 	}
 	return gm;
 }
@@ -21,6 +23,8 @@ t_generic_message	new_generic_message_stdin(t_master* master) {
 	t_message	message = {};
 	if (create_message_stdin(master, &message)) {
 		message_to_gm(&gm, &message);
+	} else {
+		mark_faild_generic_message(&gm);
 	}
 	return gm;
 }

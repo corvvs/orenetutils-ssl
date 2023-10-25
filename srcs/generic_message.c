@@ -2,13 +2,28 @@
 #include "libft.h"
 #include <assert.h>
 
+#define FAILED_GENERIC_MESSAGE (t_generic_message){ \
+	.message = NULL, \
+	.byte_size = 0, \
+	.is_failed = true, \
+}
+
+bool	is_failed_generic_message(const t_generic_message* message) {
+	return message->is_failed;
+}
+
+void	mark_faild_generic_message(t_generic_message* message) {
+	message->is_failed = true;
+}
+
 t_generic_message	new_generic_message(size_t byte_size) {
 	void*	data = malloc(byte_size);
+	if (data == NULL) {
+		return FAILED_GENERIC_MESSAGE;
+	}
 	return (t_generic_message) {
 		.message = data,
-		.byte_size = data != NULL
-			? byte_size
-			: 0,
+		.byte_size = byte_size,
 	};
 }
 
@@ -19,33 +34,37 @@ void	copy_generic_message(t_generic_message* dest, const t_generic_message* src)
 
 t_generic_message	dup_generic_message(const t_generic_message* src) {
 	void*	duplicated = ft_memdup(src->message, src->byte_size);
+	if (duplicated == NULL) {
+		return FAILED_GENERIC_MESSAGE;
+	}
 	return (t_generic_message){
 		.message = duplicated,
-		.byte_size = duplicated != NULL
-			? src->byte_size
-			: 0,
+		.byte_size = src->byte_size,
 	};
 }
 
 // データ連結を行う: a = a + b
-void	join_assign_generic_message(t_generic_message* a, const t_generic_message* b) {
+bool	join_assign_generic_message(t_generic_message* a, const t_generic_message* b) {
 	size_t	joined_size = a->byte_size + b->byte_size;
 	void*	joined = malloc(joined_size);
 	if (joined == NULL) {
-		joined_size = 0;
-	} else {
-		ft_memmove(joined, a->message, a->byte_size);
-		ft_memmove(joined + a->byte_size, b->message, b->byte_size);
+		return false;
 	}
+	ft_memmove(joined, a->message, a->byte_size);
+	ft_memmove(joined + a->byte_size, b->message, b->byte_size);
 	free(a->message);
 	*a = (t_generic_message){
 		.message = joined,
 		.byte_size = joined_size,
 	};
+	return true;
 }
 
 // ビットワイズXORを行う: a = a ^ b
 void	xor_assign_generic_message(t_generic_message* a, const t_generic_message* b) {
+	if (is_failed_generic_message(a) || is_failed_generic_message(b)) {
+		return;
+	}
 	assert(a->byte_size == b->byte_size);
 	uint8_t*		va = a->message;
 	const uint8_t*	vb = b->message;
