@@ -6,7 +6,7 @@
 /*   By: corvvs <corvvs@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/10 18:59:27 by corvvs            #+#    #+#             */
-/*   Updated: 2023/10/11 13:10:48 by corvvs           ###   ########.fr       */
+/*   Updated: 2023/10/18 11:17:42 by corvvs           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,6 +49,7 @@ void	ft_putendl_fd(char *str, int fd);
 void	ft_putnbr_fd(int n, int fd);
 char	*ft_strdup(const char *s1);
 char	*ft_strndup(const char *s1, size_t n);
+void	*ft_memdup(const void* mem, size_t len);
 char	*ft_substr(char const *s, unsigned int start, size_t len);
 char	*ft_strjoin(char const *s1, char const *s2);
 char	*ft_strtrim(char const *s1, char const *set);

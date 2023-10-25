@@ -37,6 +37,12 @@ FILES	:=	\
 			base64_encode.c\
 			base64_decode.c\
 			base64_preference.c\
+			hmac.c\
+			hmac_digest_interface.c\
+			hmac_frontend.c\
+			hmac_preference.c\
+			generic_message.c\
+			generic_message_io.c\
 			subbyte_manipulation.c\
 			read_file.c\
 			run_command.c\
@@ -47,6 +53,7 @@ FILES	:=	\
 			utils_error.c\
 			utils_print.c\
 			printf.c\
+			test.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
@@ -57,7 +64,9 @@ LIBFT_DIR	:=	libft
 CC			:=	gcc
 CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
 CFLAGS		=	$(CCOREFLAGS)\
-				-O2\
+				-g -fsanitize=address -fsanitize=undefined\
+				-O2 \
+				-D DEBUG
 
 RM			:=	rm -rf
 
@@ -174,6 +183,10 @@ test_pdf: $(NAME)
 	@bash test/pdf_test.sh sha512
 	@bash test/pdf_test.sh sha512-224
 	@bash test/pdf_test.sh sha512-256
+
+PHONY: test_hmac
+test_hmac:
+	@ruby test/hmac.rb
 
 .PHONY:	up
 up:
