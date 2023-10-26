@@ -2,12 +2,6 @@
 #include "libft.h"
 #include <assert.h>
 
-#define FAILED_GENERIC_MESSAGE (t_generic_message){ \
-	.message = NULL, \
-	.byte_size = 0, \
-	.is_failed = true, \
-}
-
 bool	is_failed_generic_message(const t_generic_message* message) {
 	return message->is_failed;
 }
@@ -17,6 +11,12 @@ void	mark_faild_generic_message(t_generic_message* message) {
 }
 
 t_generic_message	new_generic_message(size_t byte_size) {
+	if (byte_size == 0) {
+		return (t_generic_message){
+			.byte_size = 0,
+			.message = NULL,
+		};
+	}
 	void*	data = malloc(byte_size);
 	if (data == NULL) {
 		return FAILED_GENERIC_MESSAGE;

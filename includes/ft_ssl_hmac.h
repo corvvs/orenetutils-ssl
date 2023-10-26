@@ -30,6 +30,7 @@ t_generic_message	hmac(
 int	parse_options_hmac(const t_master* master, char** argv, t_preference* pref_ptr);
 t_generic_message	new_generic_message_path(t_master* master, const char* path);
 t_generic_message	new_generic_message_stdin(t_master* master);
+t_generic_message	new_generic_message_str(t_master* master, const char* str);
 
 int	run_hmac(t_master* master, char **argv);
 

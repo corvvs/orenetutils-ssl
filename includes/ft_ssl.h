@@ -7,8 +7,12 @@
 #include "ft_ssl_structure.h"
 #include "ft_ssl_lib.h"
 #include "ft_ssl_hmac.h"
+#include "ft_ssl_pbkdf2.h"
 
 #define READ_BUFFER_SIZE (128 << 10)
+
+// startup.c
+bool	on_startup(void);
 
 int run_help(t_master *master, char **argv);
 
@@ -87,6 +91,7 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
 	DEF_COMMAND_PAIR("base64", run_base64),
 	DEF_COMMAND_PAIR("hmac", run_hmac),
+	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2),
 	DEF_COMMAND_PAIR("test", run_test),
 
 	DEF_COMMAND_PAIR(NULL, NULL),

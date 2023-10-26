@@ -12,7 +12,9 @@ typedef struct s_message
 	size_t message_bit_len;
 } t_message;
 
-typedef	void	(generic_hash_function)(t_generic_message* result, const t_generic_message* text);
+typedef	void				(generic_hash_function)(t_generic_message* result, const t_generic_message* text);
+typedef t_generic_message	(hmac_function)(const t_generic_message *key, const t_generic_message *text);
+typedef	t_generic_message	(pseudo_random_function)(const t_generic_message* arg1, const t_generic_message* arg2);
 
 typedef struct s_hash_algorithm {
 	const char*				name;
@@ -28,12 +30,18 @@ typedef struct s_hmac_hash_interface {
 	t_generic_message	opad;
 }	t_hmac_hash_interface;
 
+typedef struct s_pbkdf2_prf {
+	const char*				name;
+	pseudo_random_function*	func;
+	size_t					hlen;
+}	t_pbkdf2_prf;
+
 // TODO: サブコマンドごとの構造体に分けること
 typedef struct s_preference {
 	bool	is_echo;			// -p option	for hashes
 	bool	is_quiet;			// -q option	for hashes
 	bool	is_reverse;			// -r option	for hashes
-	char*	message_argument;	// -s option	for hashes
+	char*	message_argument;	// -s option	for hashes, -S for pbkdf2
 
 	char*	path_input;			// -i option	for base64
 	char*	path_output;		// -o option	for base64
@@ -41,6 +49,9 @@ typedef struct s_preference {
 
 	char*	path_key;			// -k for hmac
 	t_hmac_hash_interface*	hi;	// -a for hmac
+	char*	path_salt;			// -s for pbdf2
+	t_pbkdf2_prf*		prf;	// -a for pbkdf2
+
 }	t_preference;
 
 typedef enum e_command {
@@ -89,6 +100,12 @@ typedef struct s_master_hmac {
 	t_master		master;
 	t_preference	pref;
 }	t_master_hmac;
+
+typedef struct s_master_pbkdf2 {
+	t_master		master;
+	t_preference	pref;
+
+}	t_master_pbkdf2;
 
 
 #endif

@@ -3,6 +3,7 @@ OBJDIR	:=	objs
 INCDIR	:=	includes
 FILES	:=	\
 			main.c\
+			startup.c\
 			repl.c\
 			preference.c\
 			md5.c\
@@ -41,6 +42,9 @@ FILES	:=	\
 			hmac_digest_interface.c\
 			hmac_frontend.c\
 			hmac_preference.c\
+			pbkdf2.c\
+			pbkdf2_preference.c\
+			pbkdf2_hmac_interface.c\
 			generic_message.c\
 			generic_message_io.c\
 			subbyte_manipulation.c\
