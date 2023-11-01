@@ -22,7 +22,10 @@ static t_pbkdf2_prf*	select_prf(const char* algo_name) {
 
 int	parse_options_pbkdf2(const t_master* master, char** argv, t_preference* pref_ptr) {
 	(void)master;
-	t_preference	pref = {};
+	t_preference	pref = {
+		.stretch = 1,
+		.dklen = 20,
+	};
 	int parsed_count = 0;
 	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
 
@@ -54,6 +57,48 @@ int	parse_options_pbkdf2(const t_master* master, char** argv, t_preference* pref
 				}
 				PARSE_PREFERENCE_WITH_1_ARGUMENT('s', s, path_salt)
 				PARSE_PREFERENCE_WITH_1_ARGUMENT('S', S, message_argument)
+				case 'c': {
+					/* option に後続がある場合はアウト */
+					if (option[1]) {
+						print_error_by_message(master, "illegal option -- c\n");
+						return -1;
+					}
+					/* argv に後続がない場合はアウト */
+					argv += 1;
+					if (*argv == NULL) {
+						print_error_by_message(master, "option requires an argument -- c\n");
+						return -1;
+					}
+					uint64_t	stretch;
+					if (parse_uint64(master, *argv, &stretch, 1, UINT32_MAX)) {
+						print_error_by_message(master, "invalid stretch count\n");
+						return -1;
+					}
+					pref.stretch = stretch;
+					parsed_count += 1;
+					break;
+				}
+				case 'l': {
+					/* option に後続がある場合はアウト */
+					if (option[1]) {
+						print_error_by_message(master, "illegal option -- l\n");
+						return -1;
+					}
+					/* argv に後続がない場合はアウト */
+					argv += 1;
+					if (*argv == NULL) {
+						print_error_by_message(master, "option requires an argument -- l\n");
+						return -1;
+					}
+					uint64_t	dklen;
+					if (parse_uint64(master, *argv, &dklen, 1, UINT32_MAX)) {
+						print_error_by_message(master, "invalid dklen\n");
+						return -1;
+					}
+					pref.dklen = dklen;
+					parsed_count += 1;
+					break;
+				}
 				default: {
 					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
 					return -1;

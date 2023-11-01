@@ -8,6 +8,7 @@
 #include "ft_ssl_lib.h"
 #include "ft_ssl_hmac.h"
 #include "ft_ssl_pbkdf2.h"
+#include "option_parser.h"
 
 #define READ_BUFFER_SIZE (128 << 10)
 

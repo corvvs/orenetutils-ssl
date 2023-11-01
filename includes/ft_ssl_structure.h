@@ -51,7 +51,8 @@ typedef struct s_preference {
 	t_hmac_hash_interface*	hi;	// -a for hmac
 	char*	path_salt;			// -s for pbdf2
 	t_pbkdf2_prf*		prf;	// -a for pbkdf2
-
+	uint32_t	stretch;		// -c for pbkdf2; stretch count
+	uint64_t	dklen;			// -l for pbkdf2; derived key length
 }	t_preference;
 
 typedef enum e_command {

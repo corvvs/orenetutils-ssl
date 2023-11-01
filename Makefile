@@ -57,6 +57,7 @@ FILES	:=	\
 			utils_error.c\
 			utils_print.c\
 			printf.c\
+			option_parser.c\
 			test.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)

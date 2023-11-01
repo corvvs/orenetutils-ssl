@@ -43,7 +43,8 @@ t_generic_message	f(
 		destroy_generic_message(&u);
 		return FAILED_GENERIC_MESSAGE;
 	}
-	for (uint32_t i = 1; i < c; ++i) {
+	ft_bzero(t.message, t.byte_size);
+	for (uint32_t i = 1; i <= c; ++i) {
 		DEBUGOUT("|u|: \t%zu", u.byte_size);
 		t_generic_message next_u = prf->func(password, &u);
 		if (is_failed_generic_message(&next_u)) {
@@ -153,7 +154,7 @@ int	run_pbkdf2(t_master* master, char **argv) {
 	}
 	DEBUGINFO("password size: %zu", password.byte_size);
 
-	t_generic_message	dk =  pbkdf2(pref->prf, &password, &salt, 100, 300);
+	t_generic_message	dk =  pbkdf2(pref->prf, &password, &salt, pref->stretch, pref->dklen);
 	if (dk.message != NULL) {
 		print_generic_message_hex(&dk, STDOUT_FILENO);
 		yoyo_dprintf(STDOUT_FILENO, "\n");
