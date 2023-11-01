@@ -12,6 +12,12 @@ typedef struct s_generic_message {
 	bool	is_failed;
 }	t_generic_message;
 
+#define FAILED_GENERIC_MESSAGE (t_generic_message){ \
+	.message = NULL, \
+	.byte_size = 0, \
+	.is_failed = true, \
+}
+
 bool				is_failed_generic_message(const t_generic_message* message);
 void				mark_faild_generic_message(t_generic_message* message);
 t_generic_message	new_generic_message(size_t byte_size);
