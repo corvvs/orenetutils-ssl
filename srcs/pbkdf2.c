@@ -37,7 +37,7 @@ t_generic_message	f(
 	if (is_failed_generic_message(&u)) {
 		return FAILED_GENERIC_MESSAGE;
 	}
-	yoyo_dprintf(STDOUT_FILENO, "u0: \t"); print_generic_message_hex(&u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+	// yoyo_dprintf(STDOUT_FILENO, "u0: \t"); print_generic_message_hex(&u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
 	t_generic_message t = new_generic_message(prf->hlen);
 	if (is_failed_generic_message(&t)) {
 		destroy_generic_message(&u);
@@ -45,23 +45,23 @@ t_generic_message	f(
 	}
 	ft_bzero(t.message, t.byte_size);
 	for (uint32_t i = 1; i <= c; ++i) {
-		DEBUGOUT("|u|: \t%zu", u.byte_size);
+		// DEBUGOUT("|u|: \t%zu", u.byte_size);
 		t_generic_message next_u = prf->func(password, &u);
 		if (is_failed_generic_message(&next_u)) {
 			destroy_generic_message(&u);
 			return FAILED_GENERIC_MESSAGE;
 		}
-		yoyo_dprintf(STDOUT_FILENO, "u%u: \t", i); print_generic_message_hex(&next_u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
-		DEBUGOUT("hlen of %s = %zu, |t| = %zu, |next_u| = %zu", prf->name, prf->hlen, t.byte_size, next_u.byte_size);
+		// yoyo_dprintf(STDOUT_FILENO, "u%u: \t", i); print_generic_message_hex(&next_u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+		// DEBUGOUT("hlen of %s = %zu, |t| = %zu, |next_u| = %zu", prf->name, prf->hlen, t.byte_size, next_u.byte_size);
 		xor_assign_generic_message(&t, &next_u);
 		u = next_u;
-		yoyo_dprintf(STDOUT_FILENO, "t: \t"); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+		// yoyo_dprintf(STDOUT_FILENO, "t: \t"); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
 	}
 
 	return t;
 }
 
-t_generic_message	pbkdf2(
+t_generic_message	prf_pbkdf2(
 	const t_pbkdf2_prf* prf,
 	const t_generic_message* password,
 	const t_generic_message* salt,
@@ -96,7 +96,7 @@ t_generic_message	pbkdf2(
 			destroy_generic_message(&dk);
 			return FAILED_GENERIC_MESSAGE;
 		}
-		yoyo_dprintf(STDOUT_FILENO, "t%zu: \t", i); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n");
+		// yoyo_dprintf(STDOUT_FILENO, "t%zu: \t", i); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n");
 		if (!join_assign_generic_message(&dk, &t)) {
 			destroy_generic_message(&t);
 			destroy_generic_message(&dk);
@@ -154,7 +154,7 @@ int	run_pbkdf2(t_master* master, char **argv) {
 	}
 	DEBUGINFO("password size: %zu", password.byte_size);
 
-	t_generic_message	dk =  pbkdf2(pref->prf, &password, &salt, pref->stretch, pref->dklen);
+	t_generic_message	dk =  prf_pbkdf2(pref->prf, &password, &salt, pref->stretch, pref->dklen);
 	if (dk.message != NULL) {
 		print_generic_message_hex(&dk, STDOUT_FILENO);
 		yoyo_dprintf(STDOUT_FILENO, "\n");
