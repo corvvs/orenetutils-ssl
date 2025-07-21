@@ -68,6 +68,8 @@ t_generic_message	prf_pbkdf2(
 	size_t c,
 	size_t dklen
 ) {
+	DEBUGOUT("prf_pbkdf2: prf: %s, password size: %zu, salt size: %zu, c: %zu, dklen: %zu",
+		prf->name, password->byte_size, salt->byte_size, c, dklen);
 
 	if (c < 1) {
 		DEBUGERR("c is too small: %zu", c);

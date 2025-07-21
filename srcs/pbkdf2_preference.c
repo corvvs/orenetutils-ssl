@@ -2,6 +2,7 @@
 #include "ft_ssl_preference.h"
 
 extern t_pbkdf2_prf	g_prf_hmac_md5;
+extern t_pbkdf2_prf	g_prf_hmac_sha_1;
 extern t_pbkdf2_prf	g_prf_hmac_sha_224;
 extern t_pbkdf2_prf	g_prf_hmac_sha_256;
 extern t_pbkdf2_prf	g_prf_hmac_sha_384;
@@ -11,6 +12,7 @@ extern t_pbkdf2_prf	g_prf_hmac_sha_512_256;
 
 static t_pbkdf2_prf*	select_prf(const char* algo_name) {
 	if (ft_strcmp(algo_name, "md5") == 0) { return &g_prf_hmac_md5; }
+	if (ft_strcmp(algo_name, "sha1") == 0) { return &g_prf_hmac_sha_1; }
 	if (ft_strcmp(algo_name, "sha224") == 0) { return &g_prf_hmac_sha_224; }
 	if (ft_strcmp(algo_name, "sha256") == 0) { return &g_prf_hmac_sha_256; }
 	if (ft_strcmp(algo_name, "sha384") == 0) { return &g_prf_hmac_sha_384; }
@@ -111,7 +113,7 @@ int	parse_options_pbkdf2(const t_master* master, char** argv, t_preference* pref
 	}
 	if (pref.prf == NULL) {
 		// set default
-		pref.prf = &g_prf_hmac_sha_256;
+		pref.prf = &g_prf_hmac_sha_1;
 	}
 	*pref_ptr = pref;
 	return parsed_count;
