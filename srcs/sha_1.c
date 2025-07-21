@@ -12,7 +12,7 @@ static t_sha_1_state	init_state(const uint8_t *message, uint64_t message_len) {
 }
 
 static bool	block_operation(t_sha_1_state* state) {
-	DEBUGWARN("BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + SHA_1_WORD_BLOCK_BIT_SIZE);
+	// DEBUGWARN("BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + SHA_1_WORD_BLOCK_BIT_SIZE);
 
 	// パディング
 	sha_1_block_padding(state);
@@ -22,7 +22,7 @@ static bool	block_operation(t_sha_1_state* state) {
 
 	// ブロックバッファをクリア
 	ft_memset(state->schedule.W, 0, sizeof(state->schedule.W));
-	DEBUGWARN("END BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + SHA_1_WORD_BLOCK_BIT_SIZE);
+	// DEBUGWARN("END BLOCK OPERATION for [" U64T ", " U64T ")", state->block_from, state->block_from + SHA_1_WORD_BLOCK_BIT_SIZE);
 	state->block_from += SHA_1_WORD_BLOCK_BIT_SIZE;
 	return state->block_from < state->padded_message_len;
 }

@@ -73,9 +73,9 @@ LIBFT_DIR	:=	libft
 CC			:=	gcc
 CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
 CFLAGS		=	$(CCOREFLAGS)\
-				-g -fsanitize=address -fsanitize=undefined\
 				-O2 \
-				-D DEBUG
+				-D DEBUG\
+# 				-g -fsanitize=address -fsanitize=undefined\
 
 RM			:=	rm -rf
 
@@ -206,6 +206,10 @@ test_pdf: $(NAME)
 PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
+
+PHONY: test_pbkdf2
+test_pbkdf2:
+	@ruby test/pbkdf2.rb
 
 .PHONY:	up
 up:
