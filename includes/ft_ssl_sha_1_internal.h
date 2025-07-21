@@ -53,7 +53,7 @@ typedef struct s_sha_1_state
 	sha_1_word_t H[SHA_1_STATE_SIZE];
 	union {
 		sha_1_word_t W[SHA_1_SCHEDULE_SIZE];
-		uint64_t X[SHA_1_BLOCK_SIZE];
+		uint64_t X[SHA_1_BLOCK_SIZE]; // TODO: サイズミスマッチ直す
 	} schedule;
 } t_sha_1_state;
 

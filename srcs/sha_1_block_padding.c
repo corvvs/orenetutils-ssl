@@ -9,7 +9,7 @@ static void 	size_padding(t_sha_1_state* state) {
 	if (!do_size_padding(state)) { return; }
 	const uint64_t s_64 = state->message_len;
 	const uint64_t	size_from = SHA_1_WORD_BLOCK_BIT_SIZE - sizeof(uint64_t) * OCTET_BIT_SIZE;
-	uint64_t*	size = (uint64_t *)((uint8_t *)state->schedule.W + size_from / OCTET_BIT_SIZE);
+	uint64_t*	size = (uint64_t *)((uint8_t *)state->schedule.X + size_from / OCTET_BIT_SIZE);
 	*size = PASS_BIG_END(s_64);
 	// DEBUGOUT("SIZE PADDING: " U64T " into [" U64T ", " U64T ")",
 	// 	s_64,
