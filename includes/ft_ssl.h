@@ -2,6 +2,7 @@
 #define FT_SSL_H
 
 #include "ft_ssl_md5.h"
+#include "ft_ssl_sha_1.h"
 #include "ft_ssl_sha_2.h"
 #include "utils_endian.h"
 #include "ft_ssl_structure.h"
@@ -40,6 +41,7 @@ int	run_test(t_master* master, char **argv);
 
 // digest core
 t_md5_digest			md5_hash(const uint8_t *message, uint64_t message_len);
+t_sha_1_digest			sha_1_hash(const uint8_t *message, uint64_t message_len);
 t_sha_224_digest		sha_224_hash(const uint8_t *message, uint64_t message_len);
 t_sha_256_digest		sha_256_hash(const uint8_t *message, uint64_t message_len);
 t_sha_384_digest		sha_384_hash(const uint8_t *message, uint64_t message_len);
@@ -112,6 +114,7 @@ static const t_command_pair g_command_pairs[] = {
 	}
 
 static const t_hash_algorithm	g_hash_md5 = define_hash_algorithm(md5, MD5);
+static const t_hash_algorithm	g_hash_sha_1 = define_hash_algorithm(sha_1, SHA_1);
 static const t_hash_algorithm	g_hash_sha_224 = define_hash_algorithm(sha_224, SHA_224);
 static const t_hash_algorithm	g_hash_sha_256 = define_hash_algorithm(sha_256, SHA_256);
 static const t_hash_algorithm	g_hash_sha_384 = define_hash_algorithm(sha_384, SHA_384);

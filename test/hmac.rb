@@ -58,6 +58,76 @@ Cases = [
 
   {
     input: {
+      key:  str2hex("0b" * 20),
+      data: "Hi There",
+    },
+    answers: {
+      "sha1":    "b617318655057264e28bc0b6fb378c8ef146be00",
+    },
+  },
+
+  {
+    input: {
+      key:  "Jefe",
+      data: "what do ya want for nothing?",
+    },
+    answers: {
+      "sha1":    "effcdf6ae5eb2fa2d27416d5f184df9c259a7c79",
+    },
+  },
+
+  {
+    input: {
+      key:  str2hex("aa" * 20),
+      data:  str2hex("dd" * 50),
+    },
+    answers: {
+      "sha1":    "125d7342b9ac11cd91a39af48aa17b4f63f175d3",
+    },
+  },
+
+  {
+    input: {
+      key:  str2hex("0102030405060708090a0b0c0d0e0f10111213141516171819"),
+      data:  str2hex("cd" * 50),
+    },
+    answers: {
+      "sha1":    "4c9007f4026250c6bc8414f9bf50c86c2d7235da",
+    },
+  },
+
+  {
+    input: {
+      key:  str2hex("0c" * 20),
+      data: "Test With Truncation",
+    },
+    answers: {
+      "sha1":    "4c1a03424b55e07fe7f27be1d58bb9324a9a5a04",
+    },
+  },
+
+  {
+    input: {
+      key:  str2hex("aa" * 80),
+      data: "Test Using Larger Than Block-Size Key - Hash Key First",
+    },
+    answers: {
+      "sha1":    "aa4ae5e15272d00e95705637ce8a3b55ed402112",
+    },
+  },
+
+  {
+    input: {
+      key:  str2hex("aa" * 80),
+      data: "Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data",
+    },
+    answers: {
+      "sha1":    "e8e99d0f45237d786d6bbaa7965c7808bbff1a91",
+    },
+  },
+
+  {
+    input: {
       key:  str2hex("0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b"),
       data: str2hex("4869205468657265"),
     },
@@ -184,7 +254,7 @@ Cases.each_with_index{ |c, i|
 
 all_ok = kos == 0
 puts "<summary>"
-puts all_ok ? (COLOR_POSITIVE + "ok" + COLOR_RESET) : (COLOR_NEGATIVE +"KO" + COLOR_RESET)
+puts all_ok ? (COLOR_POSITIVE + "ok" + COLOR_RESET) : (COLOR_NEGATIVE + "KO" + COLOR_RESET)
 puts "passed #{oks} / #{oks + kos} cases"
 if !all_ok
   exit 1
