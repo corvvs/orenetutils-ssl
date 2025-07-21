@@ -20,6 +20,9 @@ int run_help(t_master *master, char **argv);
 // md5.c
 int run_md5(t_master *master, char **argv);
 
+// sha_1.c
+int run_sha_1(t_master *master, char **argv);
+
 // sha_***.c
 int run_sha_224(t_master *master, char **argv);
 int run_sha_256(t_master *master, char **argv);
@@ -84,6 +87,7 @@ void put_bitstream(int fd, const uint8_t* data, size_t bit_len);
 static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("help", run_help),
 	DEF_COMMAND_PAIR("md5", run_md5),
+	DEF_COMMAND_PAIR("sha1", run_sha_1),
 	DEF_COMMAND_PAIR("sha224", run_sha_224),
 	DEF_COMMAND_PAIR("sha256", run_sha_256),
 	DEF_COMMAND_PAIR("sha384", run_sha_384),
