@@ -9,6 +9,7 @@
 #include "ft_ssl_lib.h"
 #include "ft_ssl_hmac.h"
 #include "ft_ssl_pbkdf2.h"
+#include "ft_ssl_des.h"
 #include "option_parser.h"
 
 #define READ_BUFFER_SIZE (128 << 10)
@@ -97,6 +98,9 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
 	DEF_COMMAND_PAIR("base64", run_base64),
+	DEF_COMMAND_PAIR("des", run_des_cbc),
+	DEF_COMMAND_PAIR("des-ecb", run_des_ecb),
+	DEF_COMMAND_PAIR("des-cbc", run_des_cbc),
 	DEF_COMMAND_PAIR("hmac", run_hmac),
 	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2),
 	DEF_COMMAND_PAIR("test", run_test),

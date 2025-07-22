@@ -27,6 +27,33 @@ t_generic_message	new_generic_message(size_t byte_size) {
 	};
 }
 
+t_generic_message	wrap_str_generic_message(char* str) {
+	size_t	byte_size = ft_strlen(str);
+	if (byte_size == 0) {
+		return (t_generic_message){
+			.byte_size = 0,
+			.message = NULL,
+		};
+	}
+	return (t_generic_message){
+		.byte_size = byte_size,
+		.message = str,
+	};
+}
+
+t_generic_message	wrap_mem_generic_message(void* mem, size_t byte_size) {
+	if (byte_size == 0) {
+		return (t_generic_message){
+			.byte_size = 0,
+			.message = NULL,
+		};
+	}
+	return (t_generic_message){
+		.byte_size = byte_size,
+		.message = mem,
+	};
+}
+
 void	copy_generic_message(t_generic_message* dest, const t_generic_message* src) {
 	assert(dest->byte_size >= src->byte_size);
 	ft_memmove(dest->message, src->message, src->byte_size);

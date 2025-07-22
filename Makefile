@@ -49,6 +49,11 @@ FILES	:=	\
 			pbkdf2.c\
 			pbkdf2_preference.c\
 			pbkdf2_hmac_interface.c\
+			des_block_proc.c\
+			des_permutations.c\
+			des_key_scheduler.c\
+			des_modes_of_operation.c\
+			des_preparation.c\
 			generic_message.c\
 			generic_message_io.c\
 			subbyte_manipulation.c\
