@@ -17,6 +17,7 @@
 	}
 
 define_generic_digest(md5)
+define_generic_digest(sha_1)
 define_generic_digest(sha_224)
 define_generic_digest(sha_256)
 define_generic_digest(sha_384)

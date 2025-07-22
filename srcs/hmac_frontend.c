@@ -1,6 +1,7 @@
 #include "ft_ssl.h"
 
 extern t_hmac_hash_interface	g_hi_md5;
+extern t_hmac_hash_interface	g_hi_sha_1;
 extern t_hmac_hash_interface	g_hi_sha_224;
 extern t_hmac_hash_interface	g_hi_sha_256;
 extern t_hmac_hash_interface	g_hi_sha_384;
@@ -15,6 +16,7 @@ extern t_hmac_hash_interface	g_hi_sha_512_256;
 	}
 
 define_hmac_frontend(md5)
+define_hmac_frontend(sha_1)
 define_hmac_frontend(sha_224)
 define_hmac_frontend(sha_256)
 define_hmac_frontend(sha_384)

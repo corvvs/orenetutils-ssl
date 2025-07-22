@@ -2,6 +2,7 @@
 #include "ft_ssl_preference.h"
 
 extern t_hmac_hash_interface	g_hi_md5;
+extern t_hmac_hash_interface	g_hi_sha_1;
 extern t_hmac_hash_interface	g_hi_sha_224;
 extern t_hmac_hash_interface	g_hi_sha_256;
 extern t_hmac_hash_interface	g_hi_sha_384;
@@ -11,6 +12,7 @@ extern t_hmac_hash_interface	g_hi_sha_512_256;
 
 static t_hmac_hash_interface*	select_hi(const char* algo_name) {
 	if (ft_strcmp(algo_name, "md5") == 0) { return &g_hi_md5; }
+	if (ft_strcmp(algo_name, "sha1") == 0) { return &g_hi_sha_1; }
 	if (ft_strcmp(algo_name, "sha224") == 0) { return &g_hi_sha_224; }
 	if (ft_strcmp(algo_name, "sha256") == 0) { return &g_hi_sha_256; }
 	if (ft_strcmp(algo_name, "sha384") == 0) { return &g_hi_sha_384; }

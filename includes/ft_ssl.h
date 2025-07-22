@@ -2,12 +2,14 @@
 #define FT_SSL_H
 
 #include "ft_ssl_md5.h"
+#include "ft_ssl_sha_1.h"
 #include "ft_ssl_sha_2.h"
 #include "utils_endian.h"
 #include "ft_ssl_structure.h"
 #include "ft_ssl_lib.h"
 #include "ft_ssl_hmac.h"
 #include "ft_ssl_pbkdf2.h"
+#include "ft_ssl_des.h"
 #include "option_parser.h"
 
 #define READ_BUFFER_SIZE (128 << 10)
@@ -19,6 +21,9 @@ int run_help(t_master *master, char **argv);
 
 // md5.c
 int run_md5(t_master *master, char **argv);
+
+// sha_1.c
+int run_sha_1(t_master *master, char **argv);
 
 // sha_***.c
 int run_sha_224(t_master *master, char **argv);
@@ -37,6 +42,7 @@ int	run_test(t_master* master, char **argv);
 
 // digest core
 t_md5_digest			md5_hash(const uint8_t *message, uint64_t message_len);
+t_sha_1_digest			sha_1_hash(const uint8_t *message, uint64_t message_len);
 t_sha_224_digest		sha_224_hash(const uint8_t *message, uint64_t message_len);
 t_sha_256_digest		sha_256_hash(const uint8_t *message, uint64_t message_len);
 t_sha_384_digest		sha_384_hash(const uint8_t *message, uint64_t message_len);
@@ -84,6 +90,7 @@ void put_bitstream(int fd, const uint8_t* data, size_t bit_len);
 static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("help", run_help),
 	DEF_COMMAND_PAIR("md5", run_md5),
+	DEF_COMMAND_PAIR("sha1", run_sha_1),
 	DEF_COMMAND_PAIR("sha224", run_sha_224),
 	DEF_COMMAND_PAIR("sha256", run_sha_256),
 	DEF_COMMAND_PAIR("sha384", run_sha_384),
@@ -91,6 +98,9 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
 	DEF_COMMAND_PAIR("base64", run_base64),
+	DEF_COMMAND_PAIR("des", run_des_cbc),
+	DEF_COMMAND_PAIR("des-ecb", run_des_ecb),
+	DEF_COMMAND_PAIR("des-cbc", run_des_cbc),
 	DEF_COMMAND_PAIR("hmac", run_hmac),
 	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2),
 	DEF_COMMAND_PAIR("test", run_test),
@@ -108,6 +118,7 @@ static const t_command_pair g_command_pairs[] = {
 	}
 
 static const t_hash_algorithm	g_hash_md5 = define_hash_algorithm(md5, MD5);
+static const t_hash_algorithm	g_hash_sha_1 = define_hash_algorithm(sha_1, SHA_1);
 static const t_hash_algorithm	g_hash_sha_224 = define_hash_algorithm(sha_224, SHA_224);
 static const t_hash_algorithm	g_hash_sha_256 = define_hash_algorithm(sha_256, SHA_256);
 static const t_hash_algorithm	g_hash_sha_384 = define_hash_algorithm(sha_384, SHA_384);

@@ -22,7 +22,7 @@ static t_generic_message	reshape_key(
 	t_generic_message	truncated_key = new_generic_message(algorithm->block_byte_size);
 	if (algorithm->block_byte_size < key->byte_size) {
 		algorithm->func(&truncated_key, key);
-		DEBUGOUT("truncated key", "");
+		// DEBUGOUT("truncated key", "");
 	} else {
 		copy_generic_message(&truncated_key, key);
 		truncated_key.byte_size = key->byte_size;
@@ -40,7 +40,7 @@ static t_generic_message	reshape_key(
 		);
 		// DEBUGWARN("padding key: %zu -> %zu", truncated_key.byte_size, algorithm->block_byte_size);
 		truncated_key.byte_size = algorithm->block_byte_size;
-		DEBUGOUT("padded key", "");
+		// DEBUGOUT("padded key", "");
 	}
 	// truncated_key は reshape 不要のはず
 	assert(!is_key_reshaping_needed(algorithm, &truncated_key));
@@ -56,16 +56,16 @@ t_generic_message	hmac(
 	const t_generic_message* key,
 	const t_generic_message* text
 ) {
-	DEBUGOUT("hi func: %p", hi->algorithm.func);
-	DEBUGOUT("hi block_byte_size: %zu", hi->algorithm.block_byte_size);
-	DEBUGOUT("hi hash_byte_size: %zu", hi->algorithm.hash_byte_size);
+	// DEBUGOUT("hi func: %p", hi->algorithm.func);
+	// DEBUGOUT("hi block_byte_size: %zu", hi->algorithm.block_byte_size);
+	// DEBUGOUT("hi hash_byte_size: %zu", hi->algorithm.hash_byte_size);
 	if (is_key_reshaping_needed(&hi->algorithm, key)) {
 		// 鍵の reshape
 		t_generic_message	reshaped_key = reshape_key(&hi->algorithm, key);
 		if (is_failed_generic_message(&reshaped_key)) {
 			return reshaped_key;
 		}
-		DEBUGOUT("key reshaped: %zu -> %zu", key->byte_size, reshaped_key.byte_size);
+		// DEBUGOUT("key reshaped: %zu -> %zu", key->byte_size, reshaped_key.byte_size);
 		t_generic_message	result = hmac(hi, &reshaped_key, text);
 		destroy_generic_message(&reshaped_key);
 		return result;

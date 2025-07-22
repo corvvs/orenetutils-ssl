@@ -10,6 +10,10 @@ FILES	:=	\
 			md5_block_padding.c\
 			md5_block_rounds.c\
 			md5_derive_digest.c\
+			sha_1.c\
+			sha_1_block_padding.c\
+			sha_1_block_rounds.c\
+			sha_1_derive_digest.c\
 			sha_224.c\
 			sha_224_block_padding.c\
 			sha_224_block_rounds.c\
@@ -45,6 +49,11 @@ FILES	:=	\
 			pbkdf2.c\
 			pbkdf2_preference.c\
 			pbkdf2_hmac_interface.c\
+			des_block_proc.c\
+			des_permutations.c\
+			des_key_scheduler.c\
+			des_modes_of_operation.c\
+			des_preparation.c\
 			generic_message.c\
 			generic_message_io.c\
 			subbyte_manipulation.c\
@@ -69,9 +78,9 @@ LIBFT_DIR	:=	libft
 CC			:=	gcc
 CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
 CFLAGS		=	$(CCOREFLAGS)\
-				-g -fsanitize=address -fsanitize=undefined\
 				-O2 \
-				-D DEBUG
+				-D DEBUG\
+# 				-g -fsanitize=address -fsanitize=undefined\
 
 RM			:=	rm -rf
 
@@ -105,9 +114,9 @@ fclean:			clean
 .PHONY:	re
 re:				fclean all
 
-.PHONY: test_algos test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
+.PHONY: test_algos test_md5 test_sha_1 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
 
-test_algos: $(NAME) test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
+test_algos: $(NAME) test_md5 test_sha_1 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
 
 test_md5: $(NAME)
 	bash test/md5_simple.sh ""
@@ -118,6 +127,16 @@ test_md5: $(NAME)
 	bash test/md5_simple.sh "hello"
 	bash test/md5_simple.sh "hello!"
 	bash test/md5_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
+
+test_sha_1: $(NAME)
+	bash test/sha_1_simple.sh ""
+	bash test/sha_1_simple.sh "h"
+	bash test/sha_1_simple.sh "he"
+	bash test/sha_1_simple.sh "hel"
+	bash test/sha_1_simple.sh "hell"
+	bash test/sha_1_simple.sh "hello"
+	bash test/sha_1_simple.sh "hello!"
+	bash test/sha_1_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
 
 test_sha_224: $(NAME)
 	bash test/sha_224_simple.sh ""
@@ -192,6 +211,10 @@ test_pdf: $(NAME)
 PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
+
+PHONY: test_pbkdf2
+test_pbkdf2:
+	@ruby test/pbkdf2.rb
 
 .PHONY:	up
 up:

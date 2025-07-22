@@ -62,10 +62,10 @@
 	t_##hash_type##_digest hash_type##_hash(const uint8_t *message, uint64_t message_len) \
 	{                                                                                     \
 		t_##hash_type##_state state = init_state(message, message_len);                   \
-		DEBUGOUT("message_len:        " U64T, state.message_len);                         \
-		DEBUGOUT("message_1bp_len:    " U64T, state.message_1bp_len);                     \
-		DEBUGOUT("message_0bp_len:    " U64T, state.message_0bp_len);                     \
-		DEBUGOUT("padded_message_len: " U64T, state.padded_message_len);                  \
+		/* DEBUGOUT("message_len:        " U64T, state.message_len); */                        \
+		/* DEBUGOUT("message_1bp_len:    " U64T, state.message_1bp_len); */                    \
+		/* DEBUGOUT("message_0bp_len:    " U64T, state.message_0bp_len); */                    \
+		/* DEBUGOUT("padded_message_len: " U64T, state.padded_message_len); */                 \
                                                                                           \
 		while (block_operation(&state))                                                   \
 			;                                                                             \
@@ -78,7 +78,7 @@
 	{                                                                                                                 \
 		const uint64_t bit_from = bit_offset;                                                                         \
 		const uint64_t bit_to = bit_offset + bit_len;                                                                 \
-		DEBUGOUT("bitwise_memset: bit_from: " U64T ", bit_to: " U64T, bit_from, bit_to);                              \
+		/* DEBUGOUT("bitwise_memset: bit_from: " U64T ", bit_to: " U64T, bit_from, bit_to); */                              \
                                                                                                                       \
 		/* 特殊ケース: コピー範囲が最初の１オクテットに収まっている */                     \
 		if (bit_to < OCTET_BIT_SIZE)                                                                                  \
@@ -105,7 +105,7 @@
 		/* バイトコピー */                                                                                      \
 		if (byte_to > byte_from)                                                                                      \
 		{                                                                                                             \
-			DEBUGOUT("memset: [" U64T ", " U64T ")", byte_from, byte_to);                                             \
+			/* DEBUGOUT("memset: [" U64T ", " U64T ")", byte_from, byte_to); */                                             \
 			ft_memset(&mem[byte_from], bit ? 255 : 0, byte_to - byte_from);                                           \
 		}                                                                                                             \
                                                                                                                       \
@@ -151,7 +151,7 @@
 		const uint64_t padding_bit_pos = state->message_len % HASH_TYPE##_WORD_BLOCK_BIT_SIZE;                        \
 		const uint64_t padding_byte_pos = padding_bit_pos / OCTET_BIT_SIZE;                                           \
 		set_bit_at((uint8_t *)state->BLOCK_BUFFER + padding_byte_pos, padding_bit_pos % OCTET_BIT_SIZE, 1);           \
-		DEBUGOUT("ONE PADDING at bit pos: " U64T, padding_bit_pos);                                                   \
+		/* DEBUGOUT("ONE PADDING at bit pos: " U64T, padding_bit_pos); */                                                   \
 	}                                                                                                                 \
 	static bool do_zero_padding_former(const t_##hash_type##_state *state)                                            \
 	{                                                                                                                 \
@@ -175,7 +175,7 @@
 			const uint64_t block_bit_size = HASH_TYPE##_WORD_BLOCK_BIT_SIZE;                                          \
 			const uint64_t set_to = state->message_0bp_len;                                                           \
 			bitwise_memset((uint8_t *)state->BLOCK_BUFFER, 0, set_from % block_bit_size, set_to - set_from);          \
-			DEBUGOUT("ZERO PADDING on bit range: [" U64T ", " U64T ")", set_from, set_to);                            \
+			/* DEBUGOUT("ZERO PADDING on bit range: [" U64T ", " U64T ")", set_from, set_to); */                            \
 		}                                                                                                             \
 		else if (do_zero_padding_latter(state))                                                                       \
 		{                                                                                                             \
@@ -183,7 +183,7 @@
 			const uint64_t block_bit_size = HASH_TYPE##_WORD_BLOCK_BIT_SIZE;                                          \
 			const uint64_t set_to = ((state->message_1bp_len - 1) / block_bit_size + 1) * block_bit_size;             \
 			bitwise_memset((uint8_t *)state->BLOCK_BUFFER, 0, set_from % block_bit_size, set_to - set_from);          \
-			DEBUGOUT("ZERO PADDING on bit range: [" U64T ", " U64T ")", set_from, set_to);                            \
+			/* DEBUGOUT("ZERO PADDING on bit range: [" U64T ", " U64T ")", set_from, set_to); */                            \
 		}                                                                                                             \
 	}                                                                                                                 \
                                                                                                                       \

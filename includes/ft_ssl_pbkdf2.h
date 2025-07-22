@@ -3,7 +3,7 @@
 
 #include "ft_ssl_structure.h"
 
-t_generic_message	pbkdf2(
+t_generic_message	prf_pbkdf2(
 	const t_pbkdf2_prf* prf,
 	const t_generic_message* password,
 	const t_generic_message* salt,

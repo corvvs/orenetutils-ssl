@@ -4,6 +4,7 @@
 #include "ft_ssl_structure.h"
 
 void	generic_digest_md5(t_generic_message* result, const t_generic_message *message);
+void	generic_digest_sha_1(t_generic_message* result, const t_generic_message *text);
 void	generic_digest_sha_224(t_generic_message* result, const t_generic_message *text);
 void	generic_digest_sha_256(t_generic_message* result, const t_generic_message *text);
 void	generic_digest_sha_384(t_generic_message* result, const t_generic_message *text);
@@ -12,6 +13,7 @@ void	generic_digest_sha_512_224(t_generic_message* result, const t_generic_messa
 void	generic_digest_sha_512_256(t_generic_message* result, const t_generic_message *text);
 
 t_generic_message hmac_md5(const t_generic_message *key, const t_generic_message *text);
+t_generic_message hmac_sha_1(const t_generic_message *key, const t_generic_message *text);
 t_generic_message hmac_sha_224(const t_generic_message *key, const t_generic_message *text);
 t_generic_message hmac_sha_256(const t_generic_message *key, const t_generic_message *text);
 t_generic_message hmac_sha_384(const t_generic_message *key, const t_generic_message *text);

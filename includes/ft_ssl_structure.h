@@ -42,17 +42,27 @@ typedef struct s_preference {
 	bool	is_quiet;			// -q option	for hashes
 	bool	is_reverse;			// -r option	for hashes
 	char*	message_argument;	// -s option	for hashes, -S for pbkdf2
+	
+	// generic
+	char*	path_input;			// -i option
+	char*	path_output;		// -o option
+	bool	is_decode;			// -e/-d option
 
-	char*	path_input;			// -i option	for base64
-	char*	path_output;		// -o option	for base64
-	bool	is_decode;			// -e/-d option for base64
-
-	char*	path_key;			// -k for hmac
-	t_hmac_hash_interface*	hi;	// -a for hmac
-	char*	path_salt;			// -s for pbdf2
-	t_pbkdf2_prf*		prf;	// -a for pbkdf2
-	uint32_t	stretch;		// -c for pbkdf2; stretch count
-	uint64_t	dklen;			// -l for pbkdf2; derived key length
+	// for base64
+	// for hmac
+	char*	path_key;			// -k
+	t_hmac_hash_interface*	hi;	// -a
+	// for pbkdf2
+	char*	path_salt;			// -s
+	t_pbkdf2_prf*		prf;	// -a
+	uint32_t	stretch;		// -c; stretch count
+	uint64_t	dklen;			// -l; derived key length
+	// for des
+	bool	is_base64;			// -a option; true の場合, 入出力をbase64でデコード/エンコードする
+	char*	message_key;		// -k option; ブロック鍵; 64ビット in 16進数
+	char*	message_passphrase;	// -p option; パスフレーズ
+	char*	message_salt;		// -s option; KDFのソルト; 64ビット in 16進数
+	char*	message_iv;			// -v option; 初期化ベクトル; 64ビット in 16進数
 }	t_preference;
 
 typedef enum e_command {
@@ -105,8 +115,12 @@ typedef struct s_master_hmac {
 typedef struct s_master_pbkdf2 {
 	t_master		master;
 	t_preference	pref;
-
 }	t_master_pbkdf2;
+
+typedef struct s_master_des {
+	t_master		master;
+	t_preference	pref;
+}	t_master_des;
 
 
 #endif
