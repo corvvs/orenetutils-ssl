@@ -44,19 +44,22 @@ t_generic_message	f(
 		return FAILED_GENERIC_MESSAGE;
 	}
 	ft_bzero(t.message, t.byte_size);
-	for (uint32_t i = 1; i <= c; ++i) {
+	for (uint32_t j = 1; j <= c; ++j) {
 		DEBUGOUT("|u|: \t%zu", u.byte_size);
 		t_generic_message next_u = prf->func(password, &u);
 		if (is_failed_generic_message(&next_u)) {
 			destroy_generic_message(&u);
+			destroy_generic_message(&t);
 			return FAILED_GENERIC_MESSAGE;
 		}
-		yoyo_dprintf(STDOUT_FILENO, "u%u: \t", i); print_generic_message_hex(&next_u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+		yoyo_dprintf(STDOUT_FILENO, "u%u: \t", j); print_generic_message_hex(&next_u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
 		DEBUGOUT("hlen of %s = %zu, |t| = %zu, |next_u| = %zu", prf->name, prf->hlen, t.byte_size, next_u.byte_size);
 		xor_assign_generic_message(&t, &next_u);
+		destroy_generic_message(&u);
 		u = next_u;
 		yoyo_dprintf(STDOUT_FILENO, "t: \t"); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
 	}
+	destroy_generic_message(&u);
 
 	return t;
 }
