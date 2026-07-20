@@ -38,6 +38,9 @@ FILES	:=	\
 			base64_encode.c\
 			base64_decode.c\
 			base64_preference.c\
+			des_core.c\
+			des_ecb.c\
+			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
 			hmac_frontend.c\
@@ -192,6 +195,10 @@ test_pdf: $(NAME)
 PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
+
+.PHONY: test_des_ecb
+test_des_ecb: $(NAME)
+	bash test/des_ecb.sh
 
 .PHONY:	up
 up:

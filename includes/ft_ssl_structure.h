@@ -53,6 +53,8 @@ typedef struct s_preference {
 	t_pbkdf2_prf*		prf;	// -a for pbkdf2
 	uint32_t	stretch;		// -c for pbkdf2; stretch count
 	uint64_t	dklen;			// -l for pbkdf2; derived key length
+
+	char*	hex_key;			// -k for des; key in hex
 }	t_preference;
 
 typedef enum e_command {
@@ -107,6 +109,11 @@ typedef struct s_master_pbkdf2 {
 	t_preference	pref;
 
 }	t_master_pbkdf2;
+
+typedef struct s_master_des {
+	t_master		master;
+	t_preference	pref;
+}	t_master_des;
 
 
 #endif
