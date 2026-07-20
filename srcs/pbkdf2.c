@@ -150,7 +150,7 @@ int	run_pbkdf2(t_master* master, char **argv) {
 		PRINT_ERROR(master, "failed to read salt\n", "");
 		return 1;
 	}
-	DEBUGINFO("salt size: %zu", salt.byte_size);	
+	DEBUGINFO("salt size: %zu", salt.byte_size);
 
 	t_generic_message	password;
 	if (*argv == NULL) {
