@@ -20,6 +20,9 @@ static t_generic_message	reshape_key(
 
 	// 鍵がB(ハッシュのブロック長)より長い場合はハッシュする
 	t_generic_message	truncated_key = new_generic_message(algorithm->block_byte_size);
+	if (is_failed_generic_message(&truncated_key)) {
+		return FAILED_GENERIC_MESSAGE;
+	}
 	if (algorithm->block_byte_size < key->byte_size) {
 		algorithm->func(&truncated_key, key);
 		DEBUGOUT("truncated key", "");
@@ -75,6 +78,9 @@ t_generic_message	hmac(
 	// print_generic_message_hex(key, STDOUT_FILENO);
 
 	t_generic_message	inner = dup_generic_message(key);
+	if (is_failed_generic_message(&inner)) {
+		return FAILED_GENERIC_MESSAGE;
+	}
 	// yoyo_dprintf(STDOUT_FILENO, "inner: \t");
 	// print_generic_message_hex(&inner, STDOUT_FILENO);
 
@@ -84,7 +90,10 @@ t_generic_message	hmac(
 	// print_generic_message_hex(&inner, STDOUT_FILENO);
 
 	// inner = inner + text
-	join_assign_generic_message(&inner, text);
+	if (!join_assign_generic_message(&inner, text)) {
+		destroy_generic_message(&inner);
+		return FAILED_GENERIC_MESSAGE;
+	}
 	// yoyo_dprintf(STDOUT_FILENO, "inner + text: \t");
 	// print_generic_message_hex(&inner, STDOUT_FILENO);
 
@@ -94,6 +103,10 @@ t_generic_message	hmac(
 	// print_generic_message_hex(&inner, STDOUT_FILENO);
 
 	t_generic_message	outer = dup_generic_message(key);
+	if (is_failed_generic_message(&outer)) {
+		destroy_generic_message(&inner);
+		return FAILED_GENERIC_MESSAGE;
+	}
 
 	// outer = key ^ opad
 	xor_assign_generic_message(&outer, &hi->opad);
@@ -101,7 +114,11 @@ t_generic_message	hmac(
 	// print_generic_message_hex(&outer, STDOUT_FILENO);
 
 	// outer = outer + inner
-	join_assign_generic_message(&outer, &inner);
+	if (!join_assign_generic_message(&outer, &inner)) {
+		destroy_generic_message(&inner);
+		destroy_generic_message(&outer);
+		return FAILED_GENERIC_MESSAGE;
+	}
 	// yoyo_dprintf(STDOUT_FILENO, "outer + inner: \t");
 	// print_generic_message_hex(&outer, STDOUT_FILENO);
 
