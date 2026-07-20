@@ -33,6 +33,9 @@ void	copy_generic_message(t_generic_message* dest, const t_generic_message* src)
 }
 
 t_generic_message	dup_generic_message(const t_generic_message* src) {
+	if (src->byte_size == 0) {
+		return (t_generic_message){ .message = NULL, .byte_size = 0 };
+	}
 	void*	duplicated = ft_memdup(src->message, src->byte_size);
 	if (duplicated == NULL) {
 		return FAILED_GENERIC_MESSAGE;
