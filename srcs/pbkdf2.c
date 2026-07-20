@@ -37,7 +37,9 @@ t_generic_message	f(
 	if (is_failed_generic_message(&u)) {
 		return FAILED_GENERIC_MESSAGE;
 	}
-	yoyo_dprintf(STDOUT_FILENO, "u0: \t"); print_generic_message_hex(&u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+#ifdef DEBUG
+	yoyo_dprintf(STDERR_FILENO, "u0: \t"); print_generic_message_hex(&u, STDERR_FILENO); yoyo_dprintf(STDERR_FILENO, "\n");
+#endif
 	t_generic_message t = new_generic_message(prf->hlen);
 	if (is_failed_generic_message(&t)) {
 		destroy_generic_message(&u);
@@ -52,12 +54,16 @@ t_generic_message	f(
 			destroy_generic_message(&t);
 			return FAILED_GENERIC_MESSAGE;
 		}
-		yoyo_dprintf(STDOUT_FILENO, "u%u: \t", j); print_generic_message_hex(&next_u, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+#ifdef DEBUG
+		yoyo_dprintf(STDERR_FILENO, "u%u: \t", j); print_generic_message_hex(&next_u, STDERR_FILENO); yoyo_dprintf(STDERR_FILENO, "\n");
+#endif
 		DEBUGOUT("hlen of %s = %zu, |t| = %zu, |next_u| = %zu", prf->name, prf->hlen, t.byte_size, next_u.byte_size);
 		xor_assign_generic_message(&t, &next_u);
 		destroy_generic_message(&u);
 		u = next_u;
-		yoyo_dprintf(STDOUT_FILENO, "t: \t"); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n"); 
+#ifdef DEBUG
+		yoyo_dprintf(STDERR_FILENO, "t: \t"); print_generic_message_hex(&t, STDERR_FILENO); yoyo_dprintf(STDERR_FILENO, "\n");
+#endif
 	}
 	destroy_generic_message(&u);
 
@@ -99,7 +105,9 @@ t_generic_message	pbkdf2(
 			destroy_generic_message(&dk);
 			return FAILED_GENERIC_MESSAGE;
 		}
-		yoyo_dprintf(STDOUT_FILENO, "t%zu: \t", i); print_generic_message_hex(&t, STDOUT_FILENO); yoyo_dprintf(STDOUT_FILENO, "\n");
+#ifdef DEBUG
+		yoyo_dprintf(STDERR_FILENO, "t%zu: \t", i); print_generic_message_hex(&t, STDERR_FILENO); yoyo_dprintf(STDERR_FILENO, "\n");
+#endif
 		if (!join_assign_generic_message(&dk, &t)) {
 			destroy_generic_message(&t);
 			destroy_generic_message(&dk);
