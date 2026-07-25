@@ -53,6 +53,9 @@ typedef struct s_preference {
 	t_pbkdf2_prf*		prf;	// -a for pbkdf2
 	uint32_t	stretch;		// -c for pbkdf2; stretch count
 	uint64_t	dklen;			// -l for pbkdf2; derived key length
+
+	char*	hex_key;			// -k for des; key in hex
+	bool	is_base64;			// -a for des; encode/decode the message in base64
 }	t_preference;
 
 typedef enum e_command {
@@ -107,6 +110,13 @@ typedef struct s_master_pbkdf2 {
 	t_preference	pref;
 
 }	t_master_pbkdf2;
+
+typedef struct s_master_des {
+	t_master		master;
+	t_preference	pref;
+
+	uint64_t		iv;	// 初期化ベクトル (CBC 等で使う; ECB では 0 のまま)
+}	t_master_des;
 
 
 #endif

@@ -3,6 +3,7 @@
 
 #include "ft_ssl_md5.h"
 #include "ft_ssl_sha_2.h"
+#include "ft_ssl_des.h"
 #include "utils_endian.h"
 #include "ft_ssl_structure.h"
 #include "ft_ssl_lib.h"
@@ -32,6 +33,10 @@ int run_sha_512_256(t_master *master, char **argv);
 int	base64_encode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
 int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd);
 int	run_base64(t_master* master, char **argv);
+
+// des
+int	run_des_ecb(t_master* master, char **argv);
+int	parse_options_des(const t_master* master, char** argv, t_preference* pref_ptr);
 
 int	run_test(t_master* master, char **argv);
 
@@ -91,6 +96,7 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
 	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
 	DEF_COMMAND_PAIR("base64", run_base64),
+	DEF_COMMAND_PAIR("des-ecb", run_des_ecb),
 	DEF_COMMAND_PAIR("hmac", run_hmac),
 	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2),
 	DEF_COMMAND_PAIR("test", run_test),

@@ -38,6 +38,12 @@ FILES	:=	\
 			base64_encode.c\
 			base64_decode.c\
 			base64_preference.c\
+			des_core.c\
+			des_key.c\
+			des_modes.c\
+			des.c\
+			des_ecb.c\
+			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
 			hmac_frontend.c\
