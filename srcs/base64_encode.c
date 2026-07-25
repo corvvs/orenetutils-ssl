@@ -7,7 +7,7 @@ const char *base64_encode_table =
 	"0123456789"
 	"+/";
 
-static void	run_encode(t_base64_encode_state* state) {
+void	run_encode(t_base64_encode_state* state) {
 
 	uint8_t	sextet = 0;
 	const unsigned char*	buffer = state->input_buffer->buffer;
@@ -49,24 +49,32 @@ static void	run_encode(t_base64_encode_state* state) {
 }
 
 #define LINE_LENGTH 76
-static void	write_out_buffer(const t_master_base64* m, t_base64_encode_state* state) {
+
+// エンコード結果を line_length 文字ごとに改行しつつ書き出す.
+// (base64 コマンドは 76, DES の -a は OpenSSL に合わせて 64 を使う)
+bool	base64_write_lines(int out_fd, const t_elastic_buffer* buffer, size_t line_length) {
 	size_t	n = 0;
-	while (n + LINE_LENGTH < state->output_buffer.used) {
-		ssize_t size = write(state->out_fd, state->output_buffer.buffer + n, LINE_LENGTH);
+	while (n + line_length < buffer->used) {
+		ssize_t size = write(out_fd, buffer->buffer + n, line_length);
 		if (size < 0) {
-			PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
-			return;
+			return false;
 		}
-		write(state->out_fd, "\n", 1);
+		write(out_fd, "\n", 1);
 		n += size;
 	}
-	if (state->output_buffer.used > n) {
-		ssize_t size = write(state->out_fd, state->output_buffer.buffer + n, state->output_buffer.used - n);
+	if (buffer->used > n) {
+		ssize_t size = write(out_fd, buffer->buffer + n, buffer->used - n);
 		if (size < 0) {
-			PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
-			return;
+			return false;
 		}
-		write(state->out_fd, "\n", 1);
+		write(out_fd, "\n", 1);
+	}
+	return true;
+}
+
+static void	write_out_buffer(const t_master_base64* m, t_base64_encode_state* state) {
+	if (!base64_write_lines(state->out_fd, &state->output_buffer, LINE_LENGTH)) {
+		PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
 	}
 }
 
