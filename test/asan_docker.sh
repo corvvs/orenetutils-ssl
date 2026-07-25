@@ -9,12 +9,17 @@
 # リポジトリは読み取り専用でマウントし, コンテナ内にコピーしてビルドする.
 # (ホストの objs/ や ft_ssl を Linux バイナリで上書きしないため)
 #
-# 使い方: bash test/asan_docker.sh [テストスクリプト...]
-#         既定では test/des_ecb.sh を実行する.
+# 使い方: bash test/asan_docker.sh ["<コマンド名> [IV]" ...]
+#   bash test/asan_docker.sh                                    # 既定の全モード
+#   bash test/asan_docker.sh "des-cbc 0011223344556677"         # 指定モードのみ
+# 各引数はそのまま test/des_mode.sh の引数になる.
 
 set -u
 IMAGE=ft_ssl_dev
-SCRIPTS=${*:-test/des_ecb.sh}
+
+if [ $# -eq 0 ]; then
+	set -- "des-ecb" "des-cbc 0011223344556677"
+fi
 
 docker build -t "$IMAGE" ./docker || exit 1
 
@@ -36,9 +41,10 @@ docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 	export UBSAN_OPTIONS=print_stacktrace=1:log_path=/build/sanlog
 
 	status=0
-	for script in '"$SCRIPTS"'; do
-		echo "### $script ###"
-		bash "$script" || status=1
+	for spec in "$@"; do
+		echo "### des_mode.sh $spec ###"
+		# $spec は "des-cbc <IV>" のように複数語なので, あえて分割させる
+		bash test/des_mode.sh $spec || status=1
 	done
 
 	echo
@@ -51,4 +57,4 @@ docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 		echo "(なし)"
 	fi
 	exit $status
-'
+' _ "$@"
