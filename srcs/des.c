@@ -183,6 +183,16 @@ int	run_des_generic(t_master* master, char** argv, const t_des_mode* mode) {
 	// など
 	const t_des_roundkeys	roundkeys = des_roundkeys_from_hex(pref->hex_key);
 
+	// 連鎖するモードは初期化ベクトルが要る. OpenSSL も -iv 未指定はエラーにする.
+	// (ECB は -v を受け取っても使わない)
+	if (mode->uses_iv) {
+		if (pref->hex_iv == NULL) {
+			PRINT_ERROR(master, "%s\n", "iv undefined");
+			return 1;
+		}
+		m.iv = des_block_from_hex(pref->hex_iv);
+	}
+
 	t_elastic_buffer	input = {};
 	if (!read_des_input(master, pref, &input)) {
 		return 1;

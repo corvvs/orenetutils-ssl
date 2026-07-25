@@ -55,6 +55,7 @@ typedef struct s_preference {
 	uint64_t	dklen;			// -l for pbkdf2; derived key length
 
 	char*	hex_key;			// -k for des; key in hex
+	char*	hex_iv;				// -v for des; initialization vector in hex
 	bool	is_base64;			// -a for des; encode/decode the message in base64
 }	t_preference;
 

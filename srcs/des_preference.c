@@ -23,6 +23,7 @@ int	parse_options_des(const t_master* master, char** argv, t_preference* pref_pt
 					break;
 				}
 				PARSE_PREFERENCE_WITH_1_ARGUMENT('k', k, hex_key)
+				PARSE_PREFERENCE_WITH_1_ARGUMENT('v', v, hex_iv)
 				PARSE_PREFERENCE_WITH_1_ARGUMENT('i', i, path_input)
 				PARSE_PREFERENCE_WITH_1_ARGUMENT('o', o, path_output)
 				default: {

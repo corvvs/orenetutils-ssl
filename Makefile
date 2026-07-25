@@ -43,6 +43,7 @@ FILES	:=	\
 			des_modes.c\
 			des.c\
 			des_ecb.c\
+			des_cbc.c\
 			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\

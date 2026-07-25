@@ -33,6 +33,7 @@ typedef struct s_des_mode
 }	t_des_mode;
 
 extern const t_des_mode	g_des_mode_ecb;
+extern const t_des_mode	g_des_mode_cbc;
 
 // 64bit 鍵から 16 ラウンド分のラウンド鍵を生成する.
 t_des_roundkeys	des_key_schedule(uint64_t key);
@@ -42,6 +43,8 @@ uint64_t		des_crypt_block(uint64_t block, const t_des_roundkeys* roundkeys, bool
 uint64_t		des_load_block(const uint8_t bytes[DES_BLOCK_BYTE_SIZE]);
 void			des_store_block(uint64_t block, uint8_t bytes[DES_BLOCK_BYTE_SIZE]);
 
+// 16 進文字列を 64bit 値として解釈する (-v の初期化ベクトル用).
+uint64_t		des_block_from_hex(const char* hex);
 // -k で与えられた 16 進文字列を 64bit 鍵として解釈し, ラウンド鍵を生成する.
 t_des_roundkeys	des_roundkeys_from_hex(const char* hex);
 
