@@ -20,9 +20,9 @@ static t_pbkdf2_prf*	select_prf(const char* algo_name) {
 	return NULL;
 }
 
-int	parse_options_pbkdf2(const t_master* master, char** argv, t_preference* pref_ptr) {
+int	parse_options_pbkdf2(const t_master* master, char** argv, t_preference_pbkdf2* pref_ptr) {
 	(void)master;
-	t_preference	pref = {
+	t_preference_pbkdf2	pref = {
 		.stretch = 1,
 		.dklen = 20,
 	};

@@ -1,8 +1,8 @@
 #include "ft_ssl.h"
 #include "ft_ssl_preference.h"
 
-int	parse_options_digest(const t_master* master, char** argv, t_preference* pref_ptr) {
-	t_preference	pref = {};
+int	parse_options_digest(const t_master* master, char** argv, t_preference_digest* pref_ptr) {
+	t_preference_digest	pref = {};
 	int parsed_count = 0;
 	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
 

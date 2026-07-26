@@ -7,7 +7,7 @@
 		t_master_digest m = {                                                       \
 			.master = *master,                                                      \
 		};                                                                          \
-		t_preference *pref = &m.pref;                                               \
+		t_preference_digest *pref = &m.pref;                                               \
 		int parsed_count = parse_options_digest(master, argv, pref);                \
 		if (parsed_count < 0)                                                       \
 		{                                                                           \
@@ -203,7 +203,7 @@
 	}
 
 #define define_print_digest_line(hash_type, hash_prefix)                                                                    \
-	static void print_digest_line(const t_preference *pref, const t_message *message, const t_##hash_type##_digest *digest) \
+	static void print_digest_line(const t_preference_digest *pref, const t_message *message, const t_##hash_type##_digest *digest) \
 	{                                                                                                                       \
 		const bool current_is_stdin = message->is_bytestream && message->file_path == NULL;                                 \
 		if (pref->is_quiet)                                                                                                 \

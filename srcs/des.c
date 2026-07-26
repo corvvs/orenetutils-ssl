@@ -44,7 +44,7 @@ static bool	strip_padding(const uint8_t* buf, size_t len, size_t* out_len) {
 }
 
 // 入力を読み込む (-i があればファイル, なければ標準入力)
-static bool	read_des_input(t_master* master, const t_preference* pref, t_elastic_buffer* input) {
+static bool	read_des_input(t_master* master, const t_preference_des* pref, t_elastic_buffer* input) {
 	if (pref->path_input != NULL) {
 		return create_buffer_path(master, input, pref->path_input);
 	}
@@ -52,7 +52,7 @@ static bool	read_des_input(t_master* master, const t_preference* pref, t_elastic
 }
 
 // 出力先を開く (-o があればファイル, なければ標準出力)
-static int	open_des_output(t_master* master, const t_preference* pref) {
+static int	open_des_output(t_master* master, const t_preference_des* pref) {
 	if (pref->path_output == NULL) {
 		return STDOUT_FILENO;
 	}
@@ -101,7 +101,7 @@ static bool	take_salt_header(t_elastic_buffer* input, uint8_t salt[DES_SALT_BYTE
 //   暗号化: -s があればそれを使い, ヘッダは付けない (OpenSSL 3.x に合わせる).
 //          -s がなければ乱数で作り, ヘッダを前置する.
 static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret* secret) {
-	const t_preference*	pref = &m->pref;
+	const t_preference_des*	pref = &m->pref;
 
 	if (pref->is_decode) {
 		// OpenSSL 1.1.1 が作った暗号文は -S 指定時でもヘッダを持つので,
@@ -139,7 +139,7 @@ static bool	setup_secret(
 	t_elastic_buffer* input,
 	t_des_secret* secret
 ) {
-	const t_preference*	pref = &m->pref;
+	const t_preference_des*	pref = &m->pref;
 	const bool			needs_iv = mode->uses_iv;
 
 	ft_bzero(secret, sizeof(*secret));
@@ -291,7 +291,7 @@ int	run_des_generic(t_master* master, char** argv, const t_des_cipher* cipher, c
 	t_master_des	m = {
 		.master = *master,
 	};
-	t_preference*	pref = &m.pref;
+	t_preference_des*	pref = &m.pref;
 	int parsed_count = parse_options_des(master, argv, pref);
 	if (parsed_count < 0) {
 		return 1;

@@ -36,30 +36,52 @@ typedef struct s_pbkdf2_prf {
 	size_t					hlen;
 }	t_pbkdf2_prf;
 
-// TODO: サブコマンドごとの構造体に分けること
-typedef struct s_preference {
-	bool	is_echo;			// -p option	for hashes
-	bool	is_quiet;			// -q option	for hashes
-	bool	is_reverse;			// -r option	for hashes
-	char*	message_argument;	// -s option	for hashes, -S for pbkdf2
+// [サブコマンドごとのオプション]
+// 同じ綴りのオプションでもサブコマンドによって意味が違う
+// (例: -p は digest ではエコー, des ではパスワード; -s は digest では対象文字列,
+//  pbkdf2 では salt のパス, des では salt の16進表現) ため, 構造体を分けている.
 
-	char*	path_input;			// -i option	for base64
-	char*	path_output;		// -o option	for base64
-	bool	is_decode;			// -e/-d option for base64
+// ハッシュ(`md5` / `sha*`)
+typedef struct s_preference_digest {
+	bool	is_echo;			// -p; 入力をエコーする
+	bool	is_quiet;			// -q
+	bool	is_reverse;			// -r
+	char*	message_argument;	// -s; 対象の文字列
+}	t_preference_digest;
 
-	char*	path_key;			// -k for hmac
-	t_hmac_hash_interface*	hi;	// -a for hmac
-	char*	path_salt;			// -s for pbdf2
-	t_pbkdf2_prf*		prf;	// -a for pbkdf2
-	uint32_t	stretch;		// -c for pbkdf2; stretch count
-	uint64_t	dklen;			// -l for pbkdf2; derived key length
+// `base64`
+typedef struct s_preference_base64 {
+	char*	path_input;			// -i
+	char*	path_output;		// -o
+	bool	is_decode;			// -d / -e
+}	t_preference_base64;
 
-	char*	hex_key;			// -k for des; key in hex
-	char*	hex_iv;				// -v for des; initialization vector in hex
-	char*	hex_salt;			// -s for des; salt in hex
-	char*	password;			// -p for des; password in ASCII
-	bool	is_base64;			// -a for des; encode/decode the message in base64
-}	t_preference;
+// `hmac`
+typedef struct s_preference_hmac {
+	char*					path_key;	// -k; 鍵ファイルのパス
+	t_hmac_hash_interface*	hi;			// -a; ハッシュアルゴリズム
+}	t_preference_hmac;
+
+// `pbkdf2`
+typedef struct s_preference_pbkdf2 {
+	char*			path_salt;			// -s; salt ファイルのパス
+	char*			message_argument;	// -S; salt の文字列
+	t_pbkdf2_prf*	prf;				// -a; 疑似乱数関数
+	uint32_t		stretch;			// -c; ストレッチ回数
+	uint64_t		dklen;				// -l; 導出鍵長
+}	t_preference_pbkdf2;
+
+// `des-*` / `des3-*`
+typedef struct s_preference_des {
+	char*	hex_key;			// -k; 鍵 (16進表現)
+	char*	hex_iv;				// -v; 初期化ベクトル (16進表現)
+	char*	hex_salt;			// -s; salt (16進表現)
+	char*	password;			// -p; パスワード (ASCII)
+	char*	path_input;			// -i
+	char*	path_output;		// -o
+	bool	is_decode;			// -d / -e
+	bool	is_base64;			// -a; 入出力を base64 にする
+}	t_preference_des;
 
 typedef enum e_command {
 	COMMAND_MD5,
@@ -102,29 +124,28 @@ typedef struct s_master {
 }	t_master;
 
 typedef struct s_master_digest {
-	t_master		master;
-	t_preference	pref;
+	t_master			master;
+	t_preference_digest	pref;
 }	t_master_digest;
 
 typedef struct s_master_base64 {
-	t_master		master;
-	t_preference	pref;
+	t_master			master;
+	t_preference_base64	pref;
 }	t_master_base64;
 
 typedef struct s_master_hmac {
-	t_master		master;
-	t_preference	pref;
+	t_master			master;
+	t_preference_hmac	pref;
 }	t_master_hmac;
 
 typedef struct s_master_pbkdf2 {
-	t_master		master;
-	t_preference	pref;
-
+	t_master			master;
+	t_preference_pbkdf2	pref;
 }	t_master_pbkdf2;
 
 typedef struct s_master_des {
-	t_master		master;
-	t_preference	pref;
+	t_master			master;
+	t_preference_des	pref;
 }	t_master_des;
 
 
