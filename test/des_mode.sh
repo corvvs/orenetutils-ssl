@@ -43,6 +43,15 @@ if [ -n "$IV" ]; then
 	OSSL_IV="-iv $IV"
 fi
 
+# パディングするモードかどうかを openssl の実挙動から判定する.
+# (自分の実装から判定すると, 実装が間違っていてもテストが追随してしまう)
+printf 'x' > "$TMP/probe"
+if [ "$(openssl enc -"$OSSL_CMD" -K 133457799bbcdff1 $OSSL_IV $PROV < "$TMP/probe" 2>/dev/null | wc -c)" -eq 1 ]; then
+	PADS=0   # ストリームモード: 暗号文長 = 平文長
+else
+	PADS=1   # ブロックモード
+fi
+
 pass=0
 fail=0
 
@@ -258,15 +267,17 @@ cmp -s "$TMP/len17" "$TMP/pw_a_back" && ok "-a -p enc -> openssl dec" || ng "[-a
 
 echo
 echo "### 8) 異常系 ###"
-# 8 の倍数でない暗号文
-printf 'abc' > "$TMP/errin"
-check_error "decrypt: length not multiple of 8" "bad decrypt: wrong final block length" -d -k $KEY $SSL_IV
-# 空の暗号文
-printf '' > "$TMP/errin"
-check_error "decrypt: empty input" "bad decrypt: wrong final block length" -d -k $KEY $SSL_IV
-# パディングが壊れた暗号文 (ゼロ 16 バイトを別鍵で復号)
-head -c 16 /dev/zero > "$TMP/errin"
-check_error "decrypt: bad padding" "bad decrypt" -d -k 0123456789abcdef $SSL_IV
+if [ "$PADS" -eq 1 ]; then
+	# 8 の倍数でない暗号文
+	printf 'abc' > "$TMP/errin"
+	check_error "decrypt: length not multiple of 8" "bad decrypt: wrong final block length" -d -k $KEY $SSL_IV
+	# 空の暗号文
+	printf '' > "$TMP/errin"
+	check_error "decrypt: empty input" "bad decrypt: wrong final block length" -d -k $KEY $SSL_IV
+	# パディングが壊れた暗号文 (ゼロ 16 バイトを別鍵で復号)
+	head -c 16 /dev/zero > "$TMP/errin"
+	check_error "decrypt: bad padding" "bad decrypt" -d -k 0123456789abcdef $SSL_IV
+fi
 # base64 として不正な入力
 printf 'not*valid*base64!!' > "$TMP/errin"
 check_error "decrypt -a: invalid base64" "bad decrypt" -d -a -k $KEY $SSL_IV
