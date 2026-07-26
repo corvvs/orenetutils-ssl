@@ -49,6 +49,8 @@ FILES	:=	\
 			des3_cbc.c\
 			des_ofb.c\
 			des3_ofb.c\
+			des_cfb.c\
+			des3_cfb.c\
 			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
@@ -205,8 +207,8 @@ PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
 
-.PHONY: test_des test_des_ecb test_des_cbc test_des_ofb test_des3_ecb test_des3_cbc test_des3_ofb
-test_des: test_des_ecb test_des_cbc test_des_ofb test_des3_ecb test_des3_cbc test_des3_ofb
+.PHONY: test_des test_des_ecb test_des_cbc test_des_ofb test_des_cfb test_des3_ecb test_des3_cbc test_des3_ofb test_des3_cfb
+test_des: test_des_ecb test_des_cbc test_des_ofb test_des_cfb test_des3_ecb test_des3_cbc test_des3_ofb test_des3_cfb
 
 test_des_ecb: $(NAME)
 	bash test/des_mode.sh des-ecb des-ecb
@@ -226,6 +228,12 @@ test_des_ofb: $(NAME)
 test_des3_ofb: $(NAME)
 	bash test/des_mode.sh des3-ofb des-ede3-ofb 0011223344556677
 
+test_des_cfb: $(NAME)
+	bash test/des_mode.sh des-cfb des-cfb 0011223344556677
+
+test_des3_cfb: $(NAME)
+	bash test/des_mode.sh des3-cfb des-ede3-cfb 0011223344556677
+
 # macOS で ASAN が動かない環境向け: Linux コンテナ上で
 # Makefile 既定の CFLAGS (ASAN + UBSan) のままテストする
 .PHONY: test_asan_docker
@@ -233,7 +241,8 @@ test_asan_docker:
 	bash test/asan_docker.sh "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677" \
 		"des-ofb des-ofb 0011223344556677" \
 		"des3-ecb des-ede3-ecb" "des3-cbc des-ede3-cbc 0011223344556677" \
-		"des3-ofb des-ede3-ofb 0011223344556677"
+		"des-cfb des-cfb 0011223344556677" \
+		"des3-ofb des-ede3-ofb 0011223344556677" "des3-cfb des-ede3-cfb 0011223344556677"
 
 .PHONY:	up
 up:

@@ -70,3 +70,28 @@ const t_des_mode	g_des_mode_ofb = {
 	.uses_iv = true,
 	.uses_padding = false,
 };
+
+// [CFB]
+// 直前の暗号文ブロックを暗号化して鍵ストリームを作り, データと XOR する (C_0 = IV).
+// OFB と同じく, 復号でも暗号化方向の変換しか使わない.
+// 連鎖値は CBC と同じく暗号文なので, 暗号化では出力を, 復号では入力を次に渡す.
+static uint64_t	cfb_encrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
+	const uint64_t	encrypted = block ^ ctx->cipher->crypt(*chain, ctx->keys, false);
+	*chain = encrypted;
+	return encrypted;
+}
+
+static uint64_t	cfb_decrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
+	const uint64_t	decrypted = block ^ ctx->cipher->crypt(*chain, ctx->keys, false);
+	// 入力ブロック(暗号文)がそのまま次の連鎖値になる
+	*chain = block;
+	return decrypted;
+}
+
+const t_des_mode	g_des_mode_cfb = {
+	.name = "cfb",
+	.encrypt = cfb_encrypt,
+	.decrypt = cfb_decrypt,
+	.uses_iv = true,
+	.uses_padding = false,
+};
