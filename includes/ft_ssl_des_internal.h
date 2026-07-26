@@ -68,6 +68,7 @@ extern const t_des_mode	g_des_mode_ecb;
 extern const t_des_mode	g_des_mode_cbc;
 extern const t_des_mode	g_des_mode_ofb;
 extern const t_des_mode	g_des_mode_cfb;
+extern const t_des_mode	g_des_mode_ctr;
 
 // 実際に暗号化・復号に使う鍵材料.
 // -k / -v による直接指定と, パスワードからの導出のどちらでもここに集約される.

@@ -51,6 +51,8 @@ FILES	:=	\
 			des3_ofb.c\
 			des_cfb.c\
 			des3_cfb.c\
+			des_ctr.c\
+			des3_ctr.c\
 			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\

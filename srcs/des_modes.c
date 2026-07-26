@@ -95,3 +95,23 @@ const t_des_mode	g_des_mode_cfb = {
 	.uses_iv = true,
 	.uses_padding = false,
 };
+
+// [CTR]
+// カウンタブロックを暗号化して鍵ストリームを作り, データと XOR する.
+//   C_i = P_i ^ E(counter + i)   (counter の初期値は IV)
+// 鍵ストリームがデータに依存しない点は OFB と同じで, 暗号化と復号は同じ処理になる.
+// OFB との違いは, 次の鍵ストリームを「前の鍵ストリームの暗号化」ではなく
+// 「カウンタを進めて暗号化」で作ること.
+static uint64_t	ctr_crypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
+	const uint64_t	keystream = ctx->cipher->crypt(*chain, ctx->keys, false);
+	*chain += 1; // 規格としては正でありさえすればいいが, 互換性/相互運用性を考えると +1 するしかない
+	return block ^ keystream;
+}
+
+const t_des_mode	g_des_mode_ctr = {
+	.name = "ctr",
+	.encrypt = ctr_crypt,
+	.decrypt = ctr_crypt,
+	.uses_iv = true,
+	.uses_padding = false,
+};
