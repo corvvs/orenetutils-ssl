@@ -87,25 +87,28 @@ void put_bitstream(int fd, const uint8_t* data, size_t bit_len);
 
 #define PRINT_ERROR(master, format, ...) yoyo_dprintf(STDERR_FILENO, "%s: %s: " format, (master)->program_name, (master)->command_name, __VA_ARGS__)
 
+// 並び順がそのままコマンド一覧の表示順になる (分類ごとにまとめて表示される)
 static const t_command_pair g_command_pairs[] = {
-	DEF_COMMAND_PAIR("help", run_help),
-	DEF_COMMAND_PAIR("md5", run_md5),
-	DEF_COMMAND_PAIR("sha224", run_sha_224),
-	DEF_COMMAND_PAIR("sha256", run_sha_256),
-	DEF_COMMAND_PAIR("sha384", run_sha_384),
-	DEF_COMMAND_PAIR("sha512", run_sha_512),
-	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224),
-	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256),
-	DEF_COMMAND_PAIR("base64", run_base64),
-	// OpenSSL に倣い des は des-cbc のエイリアス
-	DEF_COMMAND_PAIR("des", run_des_cbc),
-	DEF_COMMAND_PAIR("des-ecb", run_des_ecb),
-	DEF_COMMAND_PAIR("des-cbc", run_des_cbc),
-	DEF_COMMAND_PAIR("hmac", run_hmac),
-	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2),
-	DEF_COMMAND_PAIR("test", run_test),
+	DEF_COMMAND_PAIR("help", run_help, COMMAND_CATEGORY_STANDARD),
+	DEF_COMMAND_PAIR("hmac", run_hmac, COMMAND_CATEGORY_STANDARD),
+	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2, COMMAND_CATEGORY_STANDARD),
+	DEF_COMMAND_PAIR("test", run_test, COMMAND_CATEGORY_STANDARD),
 
-	DEF_COMMAND_PAIR(NULL, NULL),
+	DEF_COMMAND_PAIR("md5", run_md5, COMMAND_CATEGORY_DIGEST),
+	DEF_COMMAND_PAIR("sha224", run_sha_224, COMMAND_CATEGORY_DIGEST),
+	DEF_COMMAND_PAIR("sha256", run_sha_256, COMMAND_CATEGORY_DIGEST),
+	DEF_COMMAND_PAIR("sha384", run_sha_384, COMMAND_CATEGORY_DIGEST),
+	DEF_COMMAND_PAIR("sha512", run_sha_512, COMMAND_CATEGORY_DIGEST),
+	DEF_COMMAND_PAIR("sha512-224", run_sha_512_224, COMMAND_CATEGORY_DIGEST),
+	DEF_COMMAND_PAIR("sha512-256", run_sha_512_256, COMMAND_CATEGORY_DIGEST),
+
+	DEF_COMMAND_PAIR("base64", run_base64, COMMAND_CATEGORY_CIPHER),
+	// OpenSSL に倣い des は des-cbc のエイリアス
+	DEF_COMMAND_PAIR("des", run_des_cbc, COMMAND_CATEGORY_CIPHER),
+	DEF_COMMAND_PAIR("des-ecb", run_des_ecb, COMMAND_CATEGORY_CIPHER),
+	DEF_COMMAND_PAIR("des-cbc", run_des_cbc, COMMAND_CATEGORY_CIPHER),
+
+	DEF_COMMAND_PAIR(NULL, NULL, COMMAND_CATEGORY_STANDARD),
 };
 
 #define define_hash_algorithm(hash_type, HASH_TYPE)                          \

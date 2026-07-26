@@ -1,20 +1,31 @@
 #include "ft_ssl.h"
 
-static void	show_help(void) {
-	yoyo_dprintf(STDERR_FILENO,
-		"Commands:\n"
-	);
-	for (unsigned int i = 0; i < sizeof(g_command_pairs) / sizeof(g_command_pairs[0]); ++i) {
-		if (g_command_pairs[i].name == NULL) {
-			break;
+static const struct s_command_category_title {
+	t_command_category	category;
+	const char*			title;
+}	g_command_category_titles[] = {
+	{ COMMAND_CATEGORY_STANDARD, "Standard commands" },
+	{ COMMAND_CATEGORY_DIGEST,   "Message Digest commands" },
+	{ COMMAND_CATEGORY_CIPHER,   "Cipher commands" },
+};
+
+static void	show_commands_in_category(t_command_category category) {
+	for (unsigned int i = 0; g_command_pairs[i].name != NULL; ++i) {
+		if (g_command_pairs[i].category == category) {
+			yoyo_dprintf(STDERR_FILENO, "%s\n", g_command_pairs[i].name);
 		}
-		yoyo_dprintf(STDERR_FILENO, "%s\n", g_command_pairs[i].name);
 	}
-	yoyo_dprintf(STDERR_FILENO, "\n");
-	yoyo_dprintf(STDERR_FILENO,
-		"Flags:\n"
-		"-p -q -r -s\n"
-	);
+}
+
+static void	show_help(void) {
+	const unsigned int	n = sizeof(g_command_category_titles) / sizeof(g_command_category_titles[0]);
+	for (unsigned int i = 0; i < n; ++i) {
+		if (i > 0) {
+			yoyo_dprintf(STDERR_FILENO, "\n");
+		}
+		yoyo_dprintf(STDERR_FILENO, "%s:\n", g_command_category_titles[i].title);
+		show_commands_in_category(g_command_category_titles[i].category);
+	}
 }
 
 int run_help(t_master *master, char **arguments) {
