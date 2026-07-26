@@ -29,21 +29,35 @@
 #define TX_RST "\e[0m"
 #endif
 
+// デバッグ出力を実行時に抑制するためのフラグ (main.c で定義・初期化).
+// 環境変数 FT_SSL_DEBUG=0 を与えると出力しなくなる.
+// PBKDF2 のように同じ処理を数万回繰り返す場面では出力自体が支配的なコストに
+// なるため, ビルドし直さずに黙らせられるようにしている.
+extern int	g_debug_enabled;
+
 #define YOYO_DPRINTF(...)                    \
 	{                                        \
 		yoyo_dprintf(STDERR_FILENO, __VA_ARGS__); \
 	}
 
+// デバッグ用の出力. 実行時フラグが立っているときだけ出す.
+#define YOYO_DEBUG_DPRINTF(...)                       \
+	{                                                 \
+		if (g_debug_enabled) {                        \
+			yoyo_dprintf(STDERR_FILENO, __VA_ARGS__); \
+		}                                             \
+	}
+
 #ifdef DEBUG
 // vargs がないとコンパイルが通らない。
 // vargs がいらない時は適当に空文字列なり入れるとよい。
-#define DEBUGSTRN(format) YOYO_DPRINTF("%s[%s:%d %s] " format "%s", TX_GRY, __FILE__, __LINE__, __func__, TX_RST)
-#define DEBUGSTR(format) YOYO_DPRINTF("%s[%s:%d %s] " format "%s\n", TX_GRY, __FILE__, __LINE__, __func__, TX_RST)
-#define DEBUGOUT(format, ...) YOYO_DPRINTF("%s[D] [%s:%d %s] " format "%s\n", TX_GRY, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)
-#define DEBUGINFO(format, ...) YOYO_DPRINTF("[I] [%s:%d %s] " format "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
-#define DEBUGWARN(format, ...) YOYO_DPRINTF("%s[W] [%s:%d %s] " format "%s\n", TX_YLW, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)
-#define DEBUGERR(format, ...) YOYO_DPRINTF("%s[E] [%s:%d %s] " format "%s\n", TX_RED, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)
-#define DEBUGSAY(format, ...) YOYO_DPRINTF("[s] [%s:%d %s] " format "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define DEBUGSTRN(format) YOYO_DEBUG_DPRINTF("%s[%s:%d %s] " format "%s", TX_GRY, __FILE__, __LINE__, __func__, TX_RST)
+#define DEBUGSTR(format) YOYO_DEBUG_DPRINTF("%s[%s:%d %s] " format "%s\n", TX_GRY, __FILE__, __LINE__, __func__, TX_RST)
+#define DEBUGOUT(format, ...) YOYO_DEBUG_DPRINTF("%s[D] [%s:%d %s] " format "%s\n", TX_GRY, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)
+#define DEBUGINFO(format, ...) YOYO_DEBUG_DPRINTF("[I] [%s:%d %s] " format "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
+#define DEBUGWARN(format, ...) YOYO_DEBUG_DPRINTF("%s[W] [%s:%d %s] " format "%s\n", TX_YLW, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)
+#define DEBUGERR(format, ...) YOYO_DEBUG_DPRINTF("%s[E] [%s:%d %s] " format "%s\n", TX_RED, __FILE__, __LINE__, __func__, __VA_ARGS__, TX_RST)
+#define DEBUGSAY(format, ...) YOYO_DEBUG_DPRINTF("[s] [%s:%d %s] " format "\n", __FILE__, __LINE__, __func__, __VA_ARGS__)
 #else
 #define DEBUGSTRN(format) ((void)0)
 #define DEBUGSTR(format) ((void)0)

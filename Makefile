@@ -38,6 +38,13 @@ FILES	:=	\
 			base64_encode.c\
 			base64_decode.c\
 			base64_preference.c\
+			des_core.c\
+			des_key.c\
+			des_modes.c\
+			des.c\
+			des_ecb.c\
+			des_cbc.c\
+			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
 			hmac_frontend.c\
@@ -192,6 +199,21 @@ test_pdf: $(NAME)
 PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
+
+.PHONY: test_des test_des_ecb test_des_cbc
+test_des: test_des_ecb test_des_cbc
+
+test_des_ecb: $(NAME)
+	bash test/des_mode.sh des-ecb
+
+test_des_cbc: $(NAME)
+	bash test/des_mode.sh des-cbc 0011223344556677
+
+# macOS で ASAN が動かない環境向け: Linux コンテナ上で
+# Makefile 既定の CFLAGS (ASAN + UBSan) のままテストする
+.PHONY: test_asan_docker
+test_asan_docker:
+	bash test/asan_docker.sh "des-ecb" "des-cbc 0011223344556677"
 
 .PHONY:	up
 up:

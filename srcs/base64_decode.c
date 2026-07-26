@@ -40,7 +40,7 @@ static bool	is_base64_char(unsigned char c) {
 	return (c < 128 && base64_decode_table[(int)c] >= 0);
 }
 
-void	chomp_buffer(t_elastic_buffer* buffer) {
+void	base64_chomp_newline(t_elastic_buffer* buffer) {
 	if (buffer->used == 0) {
 		return;
 	}
@@ -112,7 +112,7 @@ bool	is_decodable_as_base64(const t_master_base64* m, const t_base64_decode_stat
 // - デコード後のバイト数           D = P / 8 = (B + 7) / 8 = (6S + 7) / 8
 
 // base64エンコードされたデータをデコードする
-bool	run_decode(const t_master_base64* m, t_base64_decode_state* state) {
+bool	base64_decode_buffer(const t_master_base64* m, t_base64_decode_state* state) {
 	// 2-pass で実装する.
 	// 1-pass でもいけるが extend 回数が増える.
 	// メモリアロケーションの方がコストが重そう, という判断.
@@ -180,7 +180,7 @@ bool	run_decode(const t_master_base64* m, t_base64_decode_state* state) {
 }
 
 int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
-	chomp_buffer(input);
+	base64_chomp_newline(input);
 	t_base64_decode_state	state = {
 		.input_buffer = input,
 		.out_fd = out_fd,
@@ -189,7 +189,7 @@ int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
 	if (!is_decodable_as_base64(m, &state)) {
 		return 1;
 	}
-	if (!run_decode(m, &state)) {
+	if (!base64_decode_buffer(m, &state)) {
 		return 1;
 	}
 
