@@ -39,11 +39,14 @@ FILES	:=	\
 			base64_decode.c\
 			base64_preference.c\
 			des_core.c\
+			des_ciphers.c\
 			des_key.c\
 			des_modes.c\
 			des.c\
 			des_ecb.c\
 			des_cbc.c\
+			des3_ecb.c\
+			des3_cbc.c\
 			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
