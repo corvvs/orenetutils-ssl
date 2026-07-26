@@ -48,10 +48,7 @@ void	base64_encode_buffer(t_base64_encode_state* state) {
 	}
 }
 
-#define LINE_LENGTH 76
-
 // エンコード結果を line_length 文字ごとに改行しつつ書き出す.
-// (base64 コマンドは 76, DES の -a は OpenSSL に合わせて 64 を使う)
 bool	base64_write_lines(int out_fd, const t_elastic_buffer* buffer, size_t line_length) {
 	size_t	n = 0;
 	while (n + line_length < buffer->used) {
@@ -73,7 +70,7 @@ bool	base64_write_lines(int out_fd, const t_elastic_buffer* buffer, size_t line_
 }
 
 static void	write_out_buffer(const t_master_base64* m, t_base64_encode_state* state) {
-	if (!base64_write_lines(state->out_fd, &state->output_buffer, LINE_LENGTH)) {
+	if (!base64_write_lines(state->out_fd, &state->output_buffer, BASE64_LINE_LENGTH)) {
 		PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
 	}
 }
