@@ -175,7 +175,7 @@ static bool	write_base64_output(t_master_des* m, const uint8_t* data, size_t len
 	t_base64_encode_state	state = { .input_buffer = &source, .out_fd = out_fd };
 
 	base64_encode_buffer(&state);
-	const bool	result = base64_write_lines(out_fd, &state.output_buffer, DES_BASE64_LINE_LENGTH);
+	const bool	result = base64_write_lines(out_fd, &state.output_buffer, BASE64_LINE_LENGTH);
 	if (!result) {
 		PRINT_ERROR(&m->master, "%s\n", strerror(errno));
 	}

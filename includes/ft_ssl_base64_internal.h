@@ -26,6 +26,10 @@ typedef struct s_base64_decode_state
 	t_elastic_buffer	output_buffer;
 } t_base64_decode_state;
 
+// base64 出力の改行幅.
+// openssl base64 も openssl enc -a も 64 文字ごとに改行するので, それに合わせる.
+#define BASE64_LINE_LENGTH 64
+
 // [base64 変換コア]
 // base64 コマンドと DES の -a オプションで共用する.
 

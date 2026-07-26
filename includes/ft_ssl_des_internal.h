@@ -8,9 +8,6 @@
 // DES のラウンド数
 #define DES_ROUNDS 16
 
-// -a で出力する base64 の改行幅 (OpenSSL の enc -a に合わせる)
-#define DES_BASE64_LINE_LENGTH 64
-
 // 1つの DES ブロック暗号に使う 16 ラウンド分の鍵(ラウンド鍵).
 // 各ラウンド鍵は 48bit で, uint64_t の下位 48bit を使う.
 typedef struct s_des_roundkeys
