@@ -246,8 +246,18 @@ test_des_pcbc: $(NAME)
 	bash test/des_pcbc.sh
 
 # macOS で ASAN が動かない環境向け: Linux コンテナ上で
-# Makefile 既定の CFLAGS (ASAN + UBSan) のままテストする
-.PHONY: test_asan_docker
+# Makefile 既定の CFLAGS (ASAN + UBSan) のままテストする.
+# ft_ssl は OpenSSL 1.1.1 の挙動に合わせているため, バイト一致の検証は
+# test_docker_111 (1.1.1) で行う. test_asan_docker は 3.x との相互運用確認.
+.PHONY: test_asan_docker test_docker_111
+test_docker_111:
+	FT_SSL_IMAGE=ft_ssl_dev_111 FT_SSL_DOCKERFILE=docker/Dockerfile.openssl111 \
+		bash test/asan_docker.sh --ctr --pcbc "des-ecb des-ecb" \
+		"des-cbc des-cbc 0011223344556677" "des-ofb des-ofb 0011223344556677" \
+		"des-cfb des-cfb 0011223344556677" "des3-ecb des-ede3" \
+		"des3-cbc des-ede3-cbc 0011223344556677" \
+		"des3-ofb des-ede3-ofb 0011223344556677" "des3-cfb des-ede3-cfb 0011223344556677"
+
 test_asan_docker:
 	bash test/asan_docker.sh --ctr --pcbc "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677" \
 		"des-ofb des-ofb 0011223344556677" \

@@ -26,12 +26,21 @@ OSSL_CMD=${2:?usage: des_mode.sh <ft_ssl-command> <openssl-command> [iv-hex]}
 IV=${3:-}
 
 SSL=./ft_ssl
-PROV="-provider legacy -provider default"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
 # デバッグ出力抑制フラグ
 export FT_SSL_DEBUG=0
+
+# OpenSSL 3.x では des-* が legacy provider にあるため provider を明示しないと使えない.
+# 一方 1.1.1 には -provider 自体が無く, 付けるとエラーになる.
+# どちらの環境でも動くように, 実際に試して決める.
+if openssl enc -des-ecb -K 0011223344556677 -provider legacy -provider default \
+		-in /dev/null >/dev/null 2>&1; then
+	PROV="-provider legacy -provider default"
+else
+	PROV=""
+fi
 
 # ft_ssl 側と openssl 側で IV オプションの綴りが違う.
 # bash 3.2 では set -u 下の空配列展開が落ちるので, 配列ではなく文字列で持ち
@@ -223,22 +232,51 @@ echo "### 7) パスワードからの鍵導出 (-p / -s) ###"
 PW="MySuperSecurePassword"
 SALT=0011223344556677
 
-# -s があれば salt が固定なので, 暗号文が openssl とバイト一致するはず.
-# (OpenSSL 3.x は -S 指定時に Salted__ ヘッダを付けない)
+# -S 指定時に "Salted__" ヘッダを付けるかは OpenSSL のバージョンで違う
+# (1.1.1 は付け, 3.x は付けない). ft_ssl は 1.1.1 に合わせているので,
+# 参照側がどちらなのかを実挙動から判定して期待値を変える.
+printf 'x' > "$TMP/probe"
+openssl enc -"$OSSL_CMD" -pass pass:pw -S $SALT -pbkdf2 $OSSL_IV $PROV < "$TMP/probe" 2>/dev/null > "$TMP/probe.out"
+if [ "$(head -c 8 "$TMP/probe.out")" = "Salted__" ]; then
+	REF_SALTS_HEADER=1   # 1.1.1 系: バイト一致を期待できる
+	echo "  (参照 openssl は -S 指定時にヘッダを付ける = 1.1.1 系)"
+else
+	REF_SALTS_HEADER=0   # 3.x 系: バイト一致しないので復号可否で検証する
+	echo "  (参照 openssl は -S 指定時にヘッダを付けない = 3.x 系)"
+fi
+
 for f in len0 len8 len17 bin256; do
 	$SSL "$CMD" -p "$PW" -s $SALT $SSL_IV < "$TMP/$f" 2>/dev/null > "$TMP/pw_mine"
 	openssl enc -"$OSSL_CMD" -pass pass:"$PW" -S $SALT -pbkdf2 $OSSL_IV $PROV < "$TMP/$f" 2>/dev/null > "$TMP/pw_ref"
-	if cmp -s "$TMP/pw_mine" "$TMP/pw_ref"; then
-		ok "-p -s enc input=$f"
+
+	if [ "$REF_SALTS_HEADER" -eq 1 ]; then
+		# 同じ形式なので暗号文がバイト一致するはず
+		if cmp -s "$TMP/pw_mine" "$TMP/pw_ref"; then
+			ok "-p -s enc input=$f (byte-exact)"
+		else
+			ng "[-p -s enc] input=$f"
+			echo "    mine: $(xxd -p "$TMP/pw_mine" | tr -d '\n')"
+			echo "    ref : $(xxd -p "$TMP/pw_ref"  | tr -d '\n')"
+		fi
 	else
-		ng "[-p -s enc] input=$f"
-		echo "    mine: $(xxd -p "$TMP/pw_mine" | tr -d '\n')"
-		echo "    ref : $(xxd -p "$TMP/pw_ref"  | tr -d '\n')"
+		# 形式が違うのでバイト比較はできない.
+		# ft_ssl の出力はヘッダを持つので, 参照側は -S を省けば復号できるはず.
+		openssl enc -d -"$OSSL_CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_mine" 2>/dev/null > "$TMP/pw_o_dec"
+		cmp -s "$TMP/$f" "$TMP/pw_o_dec" \
+			&& ok "-p -s enc input=$f (3.x が -S 省略で復号できる)" \
+			|| ng "[-p -s enc] input=$f (3.x が復号できない)"
 	fi
-	# openssl の暗号文を ft_ssl で復号
+
+	# openssl の暗号文を ft_ssl で復号 (ヘッダ有無どちらも受理できること)
 	$SSL "$CMD" -d -p "$PW" -s $SALT $SSL_IV < "$TMP/pw_ref" 2>/dev/null > "$TMP/pw_back"
 	cmp -s "$TMP/$f" "$TMP/pw_back" && ok "-p -s dec input=$f" || ng "[-p -s dec] input=$f"
 done
+
+# -s 指定時にも ft_ssl は必ずヘッダを付ける (1.1.1 準拠)
+$SSL "$CMD" -p "$PW" -s $SALT $SSL_IV < "$TMP/len17" 2>/dev/null > "$TMP/pw_s_hdr"
+[ "$(head -c 8 "$TMP/pw_s_hdr")" = "Salted__" ] \
+	&& ok "-p -s: Salted__ ヘッダを付ける (1.1.1 準拠)" \
+	|| ng "[-p -s] Salted__ ヘッダがない"
 
 # -s なしでは salt が毎回変わるので, 暗号文の一致ではなく往復で確認する.
 # 先頭には "Salted__" + salt が付く.
