@@ -18,7 +18,7 @@ set -u
 IMAGE=ft_ssl_dev
 
 if [ $# -eq 0 ]; then
-	set -- "des-ecb" "des-cbc 0011223344556677"
+	set -- "--ctr" "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677"
 fi
 
 docker build -t "$IMAGE" ./docker || exit 1
@@ -42,6 +42,12 @@ docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 
 	status=0
 	for spec in "$@"; do
+		if [ "$spec" = "--ctr" ]; then
+			# CTR は OpenSSL に対応コマンドがなく専用スクリプトで検証する
+			echo "### des_ctr.sh ###"
+			bash test/des_ctr.sh || status=1
+			continue
+		fi
 		echo "### des_mode.sh $spec ###"
 		# $spec は "des-cbc <IV>" のように複数語なので, あえて分割させる
 		bash test/des_mode.sh $spec || status=1
