@@ -26,6 +26,7 @@ const t_des_mode	g_des_mode_ecb = {
 	.encrypt = ecb_encrypt,
 	.decrypt = ecb_decrypt,
 	.uses_iv = false,
+	.uses_padding = true,
 };
 
 // [CBC]
@@ -50,4 +51,22 @@ const t_des_mode	g_des_mode_cbc = {
 	.encrypt = cbc_encrypt,
 	.decrypt = cbc_decrypt,
 	.uses_iv = true,
+	.uses_padding = true,
+};
+
+// [OFB]
+// 鍵ストリーム O_i = E(O_{i-1}) を作り, データと XOR するだけ (O_0 = IV).
+// 連鎖値は暗号文ではなく鍵ストリームそのもので, データには依存しない.
+// そのため暗号化と復号がまったく同じ処理になり, 復号でも暗号化方向の変換を使う.
+static uint64_t	ofb_crypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
+	*chain = ctx->cipher->crypt(*chain, ctx->keys, false);
+	return block ^ *chain;
+}
+
+const t_des_mode	g_des_mode_ofb = {
+	.name = "ofb",
+	.encrypt = ofb_crypt,
+	.decrypt = ofb_crypt,
+	.uses_iv = true,
+	.uses_padding = false,
 };

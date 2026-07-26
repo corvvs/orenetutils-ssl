@@ -15,8 +15,16 @@ static void	des_crypt_blocks(
 	uint64_t chain
 ) {
 	for (size_t i = 0; i < len; i += DES_BLOCK_BYTE_SIZE) {
-		const uint64_t	block = des_load_block(buf + i);
-		des_store_block(crypt(block, ctx, &chain), buf + i);
+		const size_t	rest = len - i;
+		if (rest >= DES_BLOCK_BYTE_SIZE) {
+			const uint64_t	block = des_load_block(buf + i);
+			des_store_block(crypt(block, ctx, &chain), buf + i);
+			continue;
+		}
+		uint8_t	tail[DES_BLOCK_BYTE_SIZE] = {}; // ゼロ埋め; ストリームモード用
+		ft_memcpy(tail, buf + i, rest);
+		des_store_block(crypt(des_load_block(tail), ctx, &chain), tail);
+		ft_memcpy(buf + i, tail, rest);
 	}
 }
 
@@ -198,14 +206,21 @@ static int	des_encrypt(
 	const t_des_mode* mode,
 	int out_fd
 ) {
-	// パディングは常に 1 .. DES_BLOCK_BYTE_SIZE バイト付く
+	// ブロックモードのパディングは常に 1 .. DES_BLOCK_BYTE_SIZE バイト付く.
+	// ストリームモードは付けない (暗号文長 = 平文長).
 	const size_t	len = input->used;
-	const uint8_t	pad = DES_BLOCK_BYTE_SIZE - (len % DES_BLOCK_BYTE_SIZE);
+	const uint8_t	pad = mode->uses_padding
+		? DES_BLOCK_BYTE_SIZE - (len % DES_BLOCK_BYTE_SIZE)
+		: 0;
 	const size_t	body_len = len + pad;
 	// salt をランダム生成した場合は "Salted__" + salt を暗号文の前に置く.
 	// (-a 指定時はこれも含めて base64 にする)
 	const size_t	header_len = secret->emit_salt_header ? DES_SALT_HEADER_BYTE_SIZE : 0;
 
+	if (header_len + body_len == 0) {
+		// ストリームモードで入力も salt ヘッダもない -> 出力すべきものがない
+		return 0;
+	}
 	uint8_t*	buf = malloc(header_len + body_len);
 	if (buf == NULL) {
 		PRINT_ERROR(&m->master, "%s\n", strerror(errno));
@@ -242,9 +257,13 @@ static int	des_decrypt(
 	int out_fd
 ) {
 	const size_t	len = input->used;
-	if (len == 0 || len % DES_BLOCK_BYTE_SIZE != 0) {
+	if (mode->uses_padding && (len == 0 || len % DES_BLOCK_BYTE_SIZE != 0)) {
 		PRINT_ERROR(&m->master, "%s\n", "bad decrypt: wrong final block length");
 		return 1;
+	}
+	if (len == 0) {
+		// ストリームモードの空入力 -> 出力も空
+		return 0;
 	}
 
 	uint8_t*	buf = malloc(len);
@@ -256,8 +275,8 @@ static int	des_decrypt(
 
 	des_crypt_blocks(buf, len, ctx, mode->decrypt, secret->iv);
 
-	size_t	out_len;
-	if (!strip_padding(buf, len, &out_len)) {
+	size_t	out_len = len;
+	if (mode->uses_padding && !strip_padding(buf, len, &out_len)) {
 		PRINT_ERROR(&m->master, "%s\n", "bad decrypt");
 		free(buf);
 		return 1;

@@ -57,11 +57,16 @@ typedef struct s_des_mode
 	const char*			name;
 	des_block_function*	encrypt;
 	des_block_function*	decrypt;
-	bool				uses_iv;	// 初期化ベクトル (-v) を使うか
+	bool				uses_iv; // 初期化ベクトル (-v) を使うか
+	// ブロックを埋めてから処理するか.
+	// ECB/CBC 等のブロックモードは true. OFB 等のストリームモードは false で,
+	// 暗号文長が平文長と等しくなり, 末尾が 8 オクテット未満になりうる.
+	bool				uses_padding;
 }	t_des_mode;
 
 extern const t_des_mode	g_des_mode_ecb;
 extern const t_des_mode	g_des_mode_cbc;
+extern const t_des_mode	g_des_mode_ofb;
 
 // 実際に暗号化・復号に使う鍵材料.
 // -k / -v による直接指定と, パスワードからの導出のどちらでもここに集約される.

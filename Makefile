@@ -47,6 +47,8 @@ FILES	:=	\
 			des_cbc.c\
 			des3_ecb.c\
 			des3_cbc.c\
+			des_ofb.c\
+			des3_ofb.c\
 			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
