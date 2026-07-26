@@ -98,8 +98,13 @@ static bool	take_salt_header(t_elastic_buffer* input, uint8_t salt[DES_SALT_BYTE
 
 // パスワードから鍵を導出するのに使う salt を決める.
 //   復号: 入力にヘッダがあればそこから読む. なければ -s を使う.
-//   暗号化: -s があればそれを使い, ヘッダは付けない (OpenSSL 3.x に合わせる).
-//          -s がなければ乱数で作り, ヘッダを前置する.
+//   暗号化: -s があればそれを使い, なければ乱数で作る.
+//           いずれの場合も "Salted__" + salt を前置する (OpenSSL 1.1.1 に合わせる).
+//
+// NOTE: -s 指定時にヘッダを付けるかは OpenSSL のバージョンで挙動が違う.
+//       1.1.1 は付け, 3.x は付けない. ここでは 1.1.1 に合わせている.
+//       ヘッダを付けた暗号文は salt を自分で持つため, 3.x でも -S を省けば復号できる.
+//       (逆にヘッダ無しの暗号文は 1.1.1 では復号できない) 復元性が広い方を採る.
 static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret* secret) {
 	const t_preference_des*	pref = &m->pref;
 
@@ -117,6 +122,7 @@ static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret*
 		return false;
 	}
 
+	secret->emit_salt_header = true;
 	if (pref->hex_salt != NULL) {
 		des_bytes_from_hex(pref->hex_salt, secret->salt, DES_SALT_BYTE_SIZE);
 		return true;
@@ -126,7 +132,6 @@ static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret*
 		PRINT_ERROR(&m->master, "%s\n", "unable to generate salt");
 		return false;
 	}
-	secret->emit_salt_header = true;
 	return true;
 }
 
