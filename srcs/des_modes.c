@@ -115,3 +115,32 @@ const t_des_mode	g_des_mode_ctr = {
 	.uses_iv = true,
 	.uses_padding = false,
 };
+
+// [PCBC]
+// CBC の連鎖値を「直前の暗号文」から「直前の平文と暗号文の XOR」に変えたもの.
+//   C_i = E(P_i ^ P_{i-1} ^ C_{i-1})   /   P_i = D(C_i) ^ P_{i-1} ^ C_{i-1}
+//   (P_0 ^ C_0 = IV)
+// CBC と違い誤りが後続ブロックすべてに伝播する (Propagating CBC).
+// 連鎖値に平文と暗号文の両方が要るが, どちらも 1 ブロック分の処理の中で
+// 手に入る (入力と出力) ので, 追加の状態は要らない.
+static uint64_t	pcbc_encrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
+	const uint64_t	encrypted = ctx->cipher->crypt(block ^ *chain, ctx->keys, false);
+	// 平文 ^ 暗号文 が次の連鎖値になる
+	*chain = block ^ encrypted;
+	return encrypted;
+}
+
+static uint64_t	pcbc_decrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
+	const uint64_t	decrypted = ctx->cipher->crypt(block, ctx->keys, true) ^ *chain;
+	// 復号側でも同じく 平文 ^ 暗号文 (ここでは 出力 ^ 入力)
+	*chain = decrypted ^ block;
+	return decrypted;
+}
+
+const t_des_mode	g_des_mode_pcbc = {
+	.name = "pcbc",
+	.encrypt = pcbc_encrypt,
+	.decrypt = pcbc_decrypt,
+	.uses_iv = true,
+	.uses_padding = true,
+};
