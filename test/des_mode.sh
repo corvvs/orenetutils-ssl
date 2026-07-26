@@ -11,15 +11,19 @@
 # 前提: プロジェクトルートで ./ft_ssl をビルド済みであること.
 #       OpenSSL 3.x では des-* が legacy provider にあるため provider を明示する.
 #
-# 使い方: bash test/des_mode.sh <コマンド名> [IV(hex)]
-#   bash test/des_mode.sh des-ecb
-#   bash test/des_mode.sh des-cbc 0011223344556677
+# 使い方: bash test/des_mode.sh <ft_sslのコマンド名> <opensslのコマンド名> [IV(hex)]
+#   bash test/des_mode.sh des-ecb  des-ecb
+#   bash test/des_mode.sh des-cbc  des-cbc      0011223344556677
+#   bash test/des_mode.sh des3-ecb des-ede3-ecb
+#   bash test/des_mode.sh des3-cbc des-ede3-cbc 0011223344556677
 #
+# 3DES は ft_ssl と openssl でコマンド名が違う (des3-cbc / des-ede3-cbc) ため別々に渡す.
 # IV を渡すと ft_ssl には -v, openssl には -iv として与える.
 
 set -u
-CMD=${1:?usage: des_mode.sh <command> [iv-hex]}
-IV=${2:-}
+CMD=${1:?usage: des_mode.sh <ft_ssl-command> <openssl-command> [iv-hex]}
+OSSL_CMD=${2:?usage: des_mode.sh <ft_ssl-command> <openssl-command> [iv-hex]}
+IV=${3:-}
 
 SSL=./ft_ssl
 PROV="-provider legacy -provider default"
@@ -52,7 +56,7 @@ check_raw() {
 	local tag="$name (key='$key')"
 
 	$SSL "$CMD" -k "$key" $SSL_IV < "$infile" 2>/dev/null > "$TMP/mine"
-	openssl enc -"$CMD" -K "$key" $OSSL_IV $PROV < "$infile" 2>/dev/null > "$TMP/ref"
+	openssl enc -"$OSSL_CMD" -K "$key" $OSSL_IV $PROV < "$infile" 2>/dev/null > "$TMP/ref"
 	if ! cmp -s "$TMP/mine" "$TMP/ref"; then
 		ng "[enc] $tag"
 		echo "    mine: $(xxd -p "$TMP/mine" | tr -d '\n')"
@@ -61,7 +65,7 @@ check_raw() {
 	fi
 
 	# ft_ssl の暗号文を openssl で復号
-	openssl enc -d -"$CMD" -K "$key" $OSSL_IV $PROV < "$TMP/mine" 2>/dev/null > "$TMP/back"
+	openssl enc -d -"$OSSL_CMD" -K "$key" $OSSL_IV $PROV < "$TMP/mine" 2>/dev/null > "$TMP/back"
 	if ! cmp -s "$infile" "$TMP/back"; then
 		ng "[enc->ossl dec] $tag"
 		return
@@ -84,7 +88,7 @@ check_base64() {
 	local tag="$name (key='$key')"
 
 	$SSL "$CMD" -a -k "$key" $SSL_IV < "$infile" 2>/dev/null > "$TMP/mine64"
-	openssl enc -"$CMD" -K "$key" $OSSL_IV -a $PROV < "$infile" 2>/dev/null > "$TMP/ref64"
+	openssl enc -"$OSSL_CMD" -K "$key" $OSSL_IV -a $PROV < "$infile" 2>/dev/null > "$TMP/ref64"
 	if ! cmp -s "$TMP/mine64" "$TMP/ref64"; then
 		ng "[enc -a] $tag"
 		echo "    mine: $(cat "$TMP/mine64")"
@@ -159,6 +163,7 @@ keys=(
 	ff12cd                  # 短い -> ゼロ埋め
 	ff1                     # 奇数桁 -> ff10000000000000
 	133457799bbcdff10011    # 長い -> 先頭8バイトに切り詰め
+	0123456789abcdef23456789abcdef01456789abcdef0123    # 24バイト (3DES 用; DES では先頭8バイト)
 )
 
 inputs="len0 len1 len7 len8 len9 len15 len16 len17 len100 len200 bin256 nuls newlines special"
@@ -189,7 +194,7 @@ echo
 echo "### 5) -i / -o によるファイル入出力 ###"
 KEY=133457799bbcdff1
 $SSL "$CMD" -k $KEY $SSL_IV -i "$TMP/bin256" -o "$TMP/io_enc" 2>/dev/null
-openssl enc -"$CMD" -K $KEY $OSSL_IV $PROV -in "$TMP/bin256" -out "$TMP/io_ref" 2>/dev/null
+openssl enc -"$OSSL_CMD" -K $KEY $OSSL_IV $PROV -in "$TMP/bin256" -out "$TMP/io_ref" 2>/dev/null
 cmp -s "$TMP/io_enc" "$TMP/io_ref" && ok "-i/-o enc" || ng "-i/-o enc"
 $SSL "$CMD" -d -k $KEY $SSL_IV -i "$TMP/io_enc" -o "$TMP/io_back" 2>/dev/null
 cmp -s "$TMP/bin256" "$TMP/io_back" && ok "-i/-o dec" || ng "-i/-o dec"
@@ -197,7 +202,7 @@ cmp -s "$TMP/bin256" "$TMP/io_back" && ok "-i/-o dec" || ng "-i/-o dec"
 echo
 echo "### 6) base64 入力の空白・改行の許容 ###"
 # openssl の -a 出力は 64 文字ごとに改行される. さらに空白を挿入しても復号できること.
-openssl enc -"$CMD" -K $KEY $OSSL_IV -a $PROV < "$TMP/len200" 2>/dev/null > "$TMP/ws64"
+openssl enc -"$OSSL_CMD" -K $KEY $OSSL_IV -a $PROV < "$TMP/len200" 2>/dev/null > "$TMP/ws64"
 $SSL "$CMD" -d -a -k $KEY $SSL_IV < "$TMP/ws64" 2>/dev/null > "$TMP/ws_back"
 cmp -s "$TMP/len200" "$TMP/ws_back" && ok "multi-line base64" || ng "multi-line base64"
 tr -d '\n' < "$TMP/ws64" > "$TMP/ws_flat"
@@ -213,7 +218,7 @@ SALT=0011223344556677
 # (OpenSSL 3.x は -S 指定時に Salted__ ヘッダを付けない)
 for f in len0 len8 len17 bin256; do
 	$SSL "$CMD" -p "$PW" -s $SALT $SSL_IV < "$TMP/$f" 2>/dev/null > "$TMP/pw_mine"
-	openssl enc -"$CMD" -pass pass:"$PW" -S $SALT -pbkdf2 $OSSL_IV $PROV < "$TMP/$f" 2>/dev/null > "$TMP/pw_ref"
+	openssl enc -"$OSSL_CMD" -pass pass:"$PW" -S $SALT -pbkdf2 $OSSL_IV $PROV < "$TMP/$f" 2>/dev/null > "$TMP/pw_ref"
 	if cmp -s "$TMP/pw_mine" "$TMP/pw_ref"; then
 		ok "-p -s enc input=$f"
 	else
@@ -239,16 +244,16 @@ $SSL "$CMD" -p "$PW" $SSL_IV < "$TMP/len17" 2>/dev/null > "$TMP/pw_salted2"
 cmp -s "$TMP/pw_salted" "$TMP/pw_salted2" && ng "[-p (no -s)] salt が毎回同じ" || ok "-p (no -s): salt が毎回変わる"
 
 # ft_ssl -> openssl
-openssl enc -d -"$CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_salted" 2>/dev/null > "$TMP/pw_o_back"
+openssl enc -d -"$OSSL_CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_salted" 2>/dev/null > "$TMP/pw_o_back"
 cmp -s "$TMP/len17" "$TMP/pw_o_back" && ok "-p enc -> openssl dec" || ng "[-p enc -> openssl dec]"
 # openssl -> ft_ssl
-openssl enc -"$CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/len17" 2>/dev/null > "$TMP/pw_o_enc"
+openssl enc -"$OSSL_CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/len17" 2>/dev/null > "$TMP/pw_o_enc"
 $SSL "$CMD" -d -p "$PW" $SSL_IV < "$TMP/pw_o_enc" 2>/dev/null > "$TMP/pw_m_back"
 cmp -s "$TMP/len17" "$TMP/pw_m_back" && ok "openssl enc -> -p dec" || ng "[openssl enc -> -p dec]"
 
 # -a と併用 (Salted__ ヘッダは base64 の内側)
 $SSL "$CMD" -a -p "$PW" $SSL_IV < "$TMP/len17" 2>/dev/null > "$TMP/pw_a"
-openssl enc -d -"$CMD" -a -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_a" 2>/dev/null > "$TMP/pw_a_back"
+openssl enc -d -"$OSSL_CMD" -a -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_a" 2>/dev/null > "$TMP/pw_a_back"
 cmp -s "$TMP/len17" "$TMP/pw_a_back" && ok "-a -p enc -> openssl dec" || ng "[-a -p enc -> openssl dec]"
 
 echo
