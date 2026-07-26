@@ -76,12 +76,20 @@ struct s_master;
 
 typedef int (t_runner_func)(struct s_master *master, char **);
 
+// コマンド一覧を表示するときの分類.
+typedef enum e_command_category {
+	COMMAND_CATEGORY_STANDARD,
+	COMMAND_CATEGORY_DIGEST,
+	COMMAND_CATEGORY_CIPHER,
+}	t_command_category;
+
 typedef struct e_command_pair {
-	const char* 	name;
-	t_runner_func*	func;
+	const char* 		name;
+	t_runner_func*		func;
+	t_command_category	category;
 }	t_command_pair;
 
-#define DEF_COMMAND_PAIR(n, f) (t_command_pair){ .name = n, .func = f }
+#define DEF_COMMAND_PAIR(n, f, c) (t_command_pair){ .name = n, .func = f, .category = c }
 
 typedef struct s_master {
 	const char*		program_name;
