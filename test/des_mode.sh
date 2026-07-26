@@ -264,7 +264,7 @@ head -c 16 /dev/zero > "$TMP/errin"
 check_error "decrypt: bad padding" "bad decrypt" -d -k 0123456789abcdef $SSL_IV
 # base64 として不正な入力
 printf 'not*valid*base64!!' > "$TMP/errin"
-check_error "decrypt -a: invalid base64" "error reading input file" -d -a -k $KEY $SSL_IV
+check_error "decrypt -a: invalid base64" "bad decrypt" -d -a -k $KEY $SSL_IV
 # 未知のオプション
 printf 'x' > "$TMP/errin"
 check_error "unknown option" "illegal option -- Z" -Z -k $KEY $SSL_IV

@@ -59,7 +59,7 @@ static int	open_des_output(t_master* master, const t_preference* pref) {
 static bool	decode_base64_input(t_master_des* m, t_elastic_buffer* input) {
 	base64_chomp_newline(input);
 	if (!is_decodable_as_base64(input->buffer, input->used)) {
-		PRINT_ERROR(&m->master, "%s\n", "error reading input file");
+		PRINT_ERROR(&m->master, "%s\n", "bad decrypt");
 		return false;
 	}
 
