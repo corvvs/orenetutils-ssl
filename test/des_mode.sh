@@ -26,6 +26,9 @@ PROV="-provider legacy -provider default"
 TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 
+# デバッグ出力抑制フラグ
+export FT_SSL_DEBUG=0
+
 # ft_ssl 側と openssl 側で IV オプションの綴りが違う.
 # bash 3.2 では set -u 下の空配列展開が落ちるので, 配列ではなく文字列で持ち
 # 非クォートで展開する (IV は 16 進文字列なので単語分割の心配はない).
@@ -202,7 +205,54 @@ $SSL "$CMD" -d -a -k $KEY $SSL_IV < "$TMP/ws_flat" 2>/dev/null > "$TMP/ws_back2"
 cmp -s "$TMP/len200" "$TMP/ws_back2" && ok "single-line base64" || ng "single-line base64"
 
 echo
-echo "### 7) 異常系 ###"
+echo "### 7) パスワードからの鍵導出 (-p / -s) ###"
+PW="MySuperSecurePassword"
+SALT=0011223344556677
+
+# -s があれば salt が固定なので, 暗号文が openssl とバイト一致するはず.
+# (OpenSSL 3.x は -S 指定時に Salted__ ヘッダを付けない)
+for f in len0 len8 len17 bin256; do
+	$SSL "$CMD" -p "$PW" -s $SALT $SSL_IV < "$TMP/$f" 2>/dev/null > "$TMP/pw_mine"
+	openssl enc -"$CMD" -pass pass:"$PW" -S $SALT -pbkdf2 $OSSL_IV $PROV < "$TMP/$f" 2>/dev/null > "$TMP/pw_ref"
+	if cmp -s "$TMP/pw_mine" "$TMP/pw_ref"; then
+		ok "-p -s enc input=$f"
+	else
+		ng "[-p -s enc] input=$f"
+		echo "    mine: $(xxd -p "$TMP/pw_mine" | tr -d '\n')"
+		echo "    ref : $(xxd -p "$TMP/pw_ref"  | tr -d '\n')"
+	fi
+	# openssl の暗号文を ft_ssl で復号
+	$SSL "$CMD" -d -p "$PW" -s $SALT $SSL_IV < "$TMP/pw_ref" 2>/dev/null > "$TMP/pw_back"
+	cmp -s "$TMP/$f" "$TMP/pw_back" && ok "-p -s dec input=$f" || ng "[-p -s dec] input=$f"
+done
+
+# -s なしでは salt が毎回変わるので, 暗号文の一致ではなく往復で確認する.
+# 先頭には "Salted__" + salt が付く.
+$SSL "$CMD" -p "$PW" $SSL_IV < "$TMP/len17" 2>/dev/null > "$TMP/pw_salted"
+if [ "$(head -c 8 "$TMP/pw_salted")" = "Salted__" ]; then
+	ok "-p (no -s): Salted__ ヘッダが付く"
+else
+	ng "[-p (no -s)] Salted__ ヘッダがない"
+fi
+# 2 回暗号化すると salt が変わるので結果も変わる
+$SSL "$CMD" -p "$PW" $SSL_IV < "$TMP/len17" 2>/dev/null > "$TMP/pw_salted2"
+cmp -s "$TMP/pw_salted" "$TMP/pw_salted2" && ng "[-p (no -s)] salt が毎回同じ" || ok "-p (no -s): salt が毎回変わる"
+
+# ft_ssl -> openssl
+openssl enc -d -"$CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_salted" 2>/dev/null > "$TMP/pw_o_back"
+cmp -s "$TMP/len17" "$TMP/pw_o_back" && ok "-p enc -> openssl dec" || ng "[-p enc -> openssl dec]"
+# openssl -> ft_ssl
+openssl enc -"$CMD" -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/len17" 2>/dev/null > "$TMP/pw_o_enc"
+$SSL "$CMD" -d -p "$PW" $SSL_IV < "$TMP/pw_o_enc" 2>/dev/null > "$TMP/pw_m_back"
+cmp -s "$TMP/len17" "$TMP/pw_m_back" && ok "openssl enc -> -p dec" || ng "[openssl enc -> -p dec]"
+
+# -a と併用 (Salted__ ヘッダは base64 の内側)
+$SSL "$CMD" -a -p "$PW" $SSL_IV < "$TMP/len17" 2>/dev/null > "$TMP/pw_a"
+openssl enc -d -"$CMD" -a -pass pass:"$PW" -pbkdf2 $OSSL_IV $PROV < "$TMP/pw_a" 2>/dev/null > "$TMP/pw_a_back"
+cmp -s "$TMP/len17" "$TMP/pw_a_back" && ok "-a -p enc -> openssl dec" || ng "[-a -p enc -> openssl dec]"
+
+echo
+echo "### 8) 異常系 ###"
 # 8 の倍数でない暗号文
 printf 'abc' > "$TMP/errin"
 check_error "decrypt: length not multiple of 8" "bad decrypt: wrong final block length" -d -k $KEY $SSL_IV
@@ -215,11 +265,16 @@ check_error "decrypt: bad padding" "bad decrypt" -d -k 0123456789abcdef $SSL_IV
 # base64 として不正な入力
 printf 'not*valid*base64!!' > "$TMP/errin"
 check_error "decrypt -a: invalid base64" "error reading input file" -d -a -k $KEY $SSL_IV
-# 鍵未指定
-printf 'x' > "$TMP/errin"
-check_error "no key" "key is required (-k)" -e $SSL_IV
 # 未知のオプション
+printf 'x' > "$TMP/errin"
 check_error "unknown option" "illegal option -- Z" -Z -k $KEY $SSL_IV
+# 鍵を直接もらっているのに IV だけ足りない (パスワードもない)
+if [ -n "$IV" ]; then
+	check_error "key without iv" "iv undefined" -e -k $KEY
+fi
+# パスワード復号で salt が得られない (ヘッダなし・-s なし)
+head -c 16 /dev/zero > "$TMP/errin"
+check_error "decrypt: no salt" "bad magic number" -d -p pw $SSL_IV
 # IV を使うモードで -v 未指定 (OpenSSL の "iv undefined" 相当)
 if [ -n "$IV" ]; then
 	check_error "no iv" "iv undefined" -e -k $KEY
