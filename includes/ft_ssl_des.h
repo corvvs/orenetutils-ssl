@@ -7,6 +7,10 @@
 #define DES_BLOCK_BYTE_SIZE 8
 #define DES_KEY_BYTE_SIZE 8
 
+// Triple DES は 8 オクテットの鍵を 3 本使う
+#define DES_KEYS_MAX 3
+#define DES3_KEY_BYTE_SIZE (DES_KEY_BYTE_SIZE * 3)
+
 // パスワードからの鍵導出に使う PBKDF2 の反復回数; OpenSSL 3系と合わせる
 #define DES_PBKDF2_ITERATIONS 10000
 #define DES_SALT_BYTE_SIZE 8

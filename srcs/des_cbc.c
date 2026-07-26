@@ -2,4 +2,4 @@
 #include "ft_ssl_des_internal.h"
 #include "ft_ssl_des_common.h"
 
-define_des_runner(cbc)
+define_des_runner(des_cbc, des, cbc)

@@ -18,14 +18,14 @@ static int	des_hex_value(char c) {
 	return -1;
 }
 
-// 16 進文字列を 64bit のオクテット列へ変換する.
+// 16 進文字列を size オクテットへ変換する.
 // 短ければ右側をゼロ埋め, 長ければ切り詰める (OpenSSL の挙動に合わせる).
 // 奇数桁の末尾は上位ニブルとして扱う (例: "FF1" -> FF 10 00 ..).
-static void	des_hex_to_block(const char* hex, uint8_t block[DES_BLOCK_BYTE_SIZE]) {
-	ft_bzero(block, DES_BLOCK_BYTE_SIZE);
+static void	des_hex_to_bytes(const char* hex, uint8_t* block, size_t size) {
+	ft_bzero(block, size);
 	size_t	bi = 0;
 	size_t	i = 0;
-	while (hex[i] && bi < DES_BLOCK_BYTE_SIZE) {
+	while (hex[i] && bi < size) {
 		const int	hi = des_hex_value(hex[i]);
 		if (hi < 0) {
 			break;
@@ -43,18 +43,22 @@ static void	des_hex_to_block(const char* hex, uint8_t block[DES_BLOCK_BYTE_SIZE]
 	}
 }
 
-void	des_bytes_from_hex(const char* hex, uint8_t out[DES_BLOCK_BYTE_SIZE]) {
-	des_hex_to_block(hex, out);
+void	des_bytes_from_hex(const char* hex, uint8_t* out, size_t size) {
+	des_hex_to_bytes(hex, out, size);
 }
 
 uint64_t	des_block_from_hex(const char* hex) {
 	uint8_t	block[DES_BLOCK_BYTE_SIZE];
-	des_hex_to_block(hex, block);
+	des_hex_to_bytes(hex, block, sizeof(block));
 	return des_load_block(block);
 }
 
-t_des_roundkeys	des_roundkeys_from_hex(const char* hex) {
-	return des_key_schedule(des_block_from_hex(hex));
+t_des_keys	des_keys_from_bytes(const uint8_t* material, size_t count) {
+	t_des_keys	keys = { .count = count };
+	for (size_t i = 0; i < count; ++i) {
+		keys.roundkeys[i] = des_key_schedule(des_load_block(material + i * DES_KEY_BYTE_SIZE));
+	}
+	return keys;
 }
 
 bool	des_random_salt(uint8_t salt[DES_SALT_BYTE_SIZE]) {
@@ -79,12 +83,13 @@ bool	des_random_salt(uint8_t salt[DES_SALT_BYTE_SIZE]) {
 bool	des_derive_key_iv(
 	const char* password,
 	const uint8_t salt[DES_SALT_BYTE_SIZE],
+	size_t key_byte_size,
 	bool needs_iv,
-	uint64_t* key,
+	uint8_t* key_material,
 	uint64_t* iv
 ) {
-	// 鍵材料は 鍵 || IV の順に並ぶ. IV を使わないモードでは鍵の分だけ導出する.
-	const size_t	dklen = DES_KEY_BYTE_SIZE + (needs_iv ? DES_BLOCK_BYTE_SIZE : 0);
+	// 導出結果は 鍵 || IV の順に並ぶ. IV を使わないモードでは鍵の分だけ導出する.
+	const size_t	dklen = key_byte_size + (needs_iv ? DES_BLOCK_BYTE_SIZE : 0);
 	const t_generic_message	pw = {
 		.message = (void*)password,
 		.byte_size = ft_strlen(password),
@@ -99,9 +104,9 @@ bool	des_derive_key_iv(
 		return false;
 	}
 	const uint8_t*	material = dk.message;
-	*key = des_load_block(material);
+	ft_memcpy(key_material, material, key_byte_size);
 	if (needs_iv) {
-		*iv = des_load_block(material + DES_KEY_BYTE_SIZE);
+		*iv = des_load_block(material + key_byte_size);
 	}
 	destroy_generic_message(&dk);
 	return true;

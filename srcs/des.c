@@ -10,13 +10,13 @@
 static void	des_crypt_blocks(
 	uint8_t* buf,
 	size_t len,
-	const t_des_roundkeys* roundkeys,
+	const t_des_block_context* ctx,
 	des_block_function* crypt, // crypt が何を行うかはモードおよび暗号化/復号化の指定に依存する
 	uint64_t chain
 ) {
 	for (size_t i = 0; i < len; i += DES_BLOCK_BYTE_SIZE) {
 		const uint64_t	block = des_load_block(buf + i);
-		des_store_block(crypt(block, roundkeys, &chain), buf + i);
+		des_store_block(crypt(block, ctx, &chain), buf + i);
 	}
 }
 
@@ -102,7 +102,7 @@ static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret*
 			return true;
 		}
 		if (pref->hex_salt != NULL) {
-			des_bytes_from_hex(pref->hex_salt, secret->salt);
+			des_bytes_from_hex(pref->hex_salt, secret->salt, DES_SALT_BYTE_SIZE);
 			return true;
 		}
 		PRINT_ERROR(&m->master, "%s\n", "bad magic number");
@@ -110,7 +110,7 @@ static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret*
 	}
 
 	if (pref->hex_salt != NULL) {
-		des_bytes_from_hex(pref->hex_salt, secret->salt);
+		des_bytes_from_hex(pref->hex_salt, secret->salt, DES_SALT_BYTE_SIZE);
 		return true;
 	}
 	// ユーザー入力から salt を得られなかったので, 乱数から生成
@@ -124,7 +124,13 @@ static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret*
 
 // 鍵と IV を決める.
 // -k / -v による直接指定を優先し, 足りない分をパスワードから導出する.
-static bool	setup_secret(t_master_des* m, const t_des_mode* mode, t_elastic_buffer* input, t_des_secret* secret) {
+static bool	setup_secret(
+	t_master_des* m,
+	const t_des_cipher* cipher,
+	const t_des_mode* mode,
+	t_elastic_buffer* input,
+	t_des_secret* secret
+) {
 	const t_preference*	pref = &m->pref;
 	const bool			needs_iv = mode->uses_iv;
 
@@ -139,7 +145,8 @@ static bool	setup_secret(t_master_des* m, const t_des_mode* mode, t_elastic_buff
 		return false;
 	}
 
-	uint64_t	derived_key = 0;
+	// 鍵材料は 3DES なら 24 オクテット. 使わない分は触らない.
+	uint8_t		key_material[DES3_KEY_BYTE_SIZE] = {};
 	uint64_t	derived_iv = 0;
 	if (use_password) {
 		if (!resolve_salt(m, input, secret)) {
@@ -151,15 +158,17 @@ static bool	setup_secret(t_master_des* m, const t_des_mode* mode, t_elastic_buff
 		if (password == NULL) {
 			return false;
 		}
-		if (!des_derive_key_iv(password, secret->salt, needs_iv, &derived_key, &derived_iv)) {
+		if (!des_derive_key_iv(password, secret->salt, cipher->key_byte_size, needs_iv, key_material, &derived_iv)) {
 			PRINT_ERROR(&m->master, "%s\n", "unable to derive key from password");
 			return false;
 		}
 	}
 
-	secret->roundkeys = (pref->hex_key != NULL)
-		? des_roundkeys_from_hex(pref->hex_key)
-		: des_key_schedule(derived_key);
+	if (pref->hex_key != NULL) {
+		// -k 指定があれば導出結果より優先する
+		des_bytes_from_hex(pref->hex_key, key_material, cipher->key_byte_size);
+	}
+	secret->keys = des_keys_from_bytes(key_material, cipher->key_count);
 	if (needs_iv) {
 		secret->iv = (pref->hex_iv != NULL)
 			? des_block_from_hex(pref->hex_iv)
@@ -184,6 +193,7 @@ static bool	write_base64_output(t_master_des* m, const uint8_t* data, size_t len
 static int	des_encrypt(
 	t_master_des* m,
 	const t_elastic_buffer* input,
+	const t_des_block_context* ctx,
 	const t_des_secret* secret,
 	const t_des_mode* mode,
 	int out_fd
@@ -211,7 +221,7 @@ static int	des_encrypt(
 	}
 	ft_memset(body + len, pad, pad);
 
-	des_crypt_blocks(body, body_len, &secret->roundkeys, mode->encrypt, secret->iv);
+	des_crypt_blocks(body, body_len, ctx, mode->encrypt, secret->iv);
 
 	int	result = 0;
 	if (m->pref.is_base64) {
@@ -226,6 +236,7 @@ static int	des_encrypt(
 static int	des_decrypt(
 	t_master_des* m,
 	const t_elastic_buffer* input,
+	const t_des_block_context* ctx,
 	const t_des_secret* secret,
 	const t_des_mode* mode,
 	int out_fd
@@ -243,7 +254,7 @@ static int	des_decrypt(
 	}
 	ft_memcpy(buf, input->buffer, len);
 
-	des_crypt_blocks(buf, len, &secret->roundkeys, mode->decrypt, secret->iv);
+	des_crypt_blocks(buf, len, ctx, mode->decrypt, secret->iv);
 
 	size_t	out_len;
 	if (!strip_padding(buf, len, &out_len)) {
@@ -257,7 +268,7 @@ static int	des_decrypt(
 }
 
 // DES 全モード共通のフロントエンド関数
-int	run_des_generic(t_master* master, char** argv, const t_des_mode* mode) {
+int	run_des_generic(t_master* master, char** argv, const t_des_cipher* cipher, const t_des_mode* mode) {
 	t_master_des	m = {
 		.master = *master,
 	};
@@ -289,16 +300,17 @@ int	run_des_generic(t_master* master, char** argv, const t_des_mode* mode) {
 
 	t_des_secret	secret;
 	if (ready) {
-		ready = setup_secret(&m, mode, &input, &secret);
+		ready = setup_secret(&m, cipher, mode, &input, &secret);
 	}
 
 	int	result = 1;
 	if (ready) {
 		const int	out_fd = open_des_output(master, pref);
 		if (out_fd >= 0) {
+			const t_des_block_context	ctx = { .cipher = cipher, .keys = &secret.keys };
 			result = pref->is_decode
-				? des_decrypt(&m, &input, &secret, mode, out_fd)
-				: des_encrypt(&m, &input, &secret, mode, out_fd);
+				? des_decrypt(&m, &input, &ctx, &secret, mode, out_fd)
+				: des_encrypt(&m, &input, &ctx, &secret, mode, out_fd);
 			if (pref->path_output != NULL) {
 				close(out_fd);
 			}
