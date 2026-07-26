@@ -51,20 +51,20 @@ void	base64_chomp_newline(t_elastic_buffer* buffer) {
 	buffer->used -= 1;
 }
 
-void	write_buffer(t_base64_decode_state* state) {
+static void	write_decoded(int out_fd, const t_elastic_buffer* decoded) {
 	size_t	n = 0;
-	while (n + 1024 < state->output_buffer.used) {
-		ssize_t size = write(state->out_fd, state->output_buffer.buffer + n, 1024);
+	while (n + 1024 < decoded->used) {
+		ssize_t size = write(out_fd, decoded->buffer + n, 1024);
 		if (size < 0) {
 			return;
 		}
 		n += size;
 	}
-	write(state->out_fd, state->output_buffer.buffer + n, state->output_buffer.used - n);
+	write(out_fd, decoded->buffer + n, decoded->used - n);
 }
 
 // 与えられたデータがbase64デコード可能な文字列かどうかを判定する
-bool	is_decodable_as_base64(const t_master_base64* m, const t_base64_decode_state* state) {
+bool	is_decodable_as_base64(const void* src, size_t len) {
 	// [判定処理]
 	// - (空白文字は無視して判定する)
 	// - 末尾に2個以下の`=`があること
@@ -73,9 +73,8 @@ bool	is_decodable_as_base64(const t_master_base64* m, const t_base64_decode_stat
 	// - 末尾までの文字がすべて使用可能文字であること
 	// - 全体の長さが4の倍数であること
 
-	(void)m;
-	const char* 	buffer = state->input_buffer->buffer;
-	const size_t	buffer_len = state->input_buffer->used;
+	const char* 	buffer = src;
+	const size_t	buffer_len = len;
 	size_t			data_len = 0;
 	size_t			equals = 0;
 	bool			has_encountered_equal = false;
@@ -112,16 +111,15 @@ bool	is_decodable_as_base64(const t_master_base64* m, const t_base64_decode_stat
 // - デコード後のバイト数           D = P / 8 = (B + 7) / 8 = (6S + 7) / 8
 
 // base64エンコードされたデータをデコードする
-bool	base64_decode_buffer(const t_master_base64* m, t_base64_decode_state* state) {
+bool	base64_decode_buffer(const void* src, size_t len, t_elastic_buffer* out) {
 	// 2-pass で実装する.
 	// 1-pass でもいけるが extend 回数が増える.
 	// メモリアロケーションの方がコストが重そう, という判断.
 	// (測れや...)
 
-	const char* 	source = state->input_buffer->buffer;
-	const size_t	source_len = state->input_buffer->used;
+	const char* 	source = src;
+	const size_t	source_len = len;
 
-	(void)m;
 	// もう1度長さを測る
 	size_t		data_len = 0;
 	for (size_t i = 0; i < source_len; ++i) {
@@ -137,11 +135,11 @@ bool	base64_decode_buffer(const t_master_base64* m, t_base64_decode_state* state
 	// デコード後バイト数
 	const size_t	decoded_len = (data_len * 6 + 7) / 8;
 	// デコードバッファを必要分確保する
-	if (!eb_reserve(&state->output_buffer, decoded_len)) {
+	if (!eb_reserve(out, decoded_len)) {
 		return false;
 	}
 	// デコード実施
-	unsigned char*	dest = state->output_buffer.buffer;
+	unsigned char*	dest = out->buffer;
 	unsigned char	decoded_bit = 0;
 	size_t	di = 0;
 	for (size_t i = 0; i < source_len; ++i) {
@@ -159,17 +157,17 @@ bool	base64_decode_buffer(const t_master_base64* m, t_base64_decode_state* state
 				break;
 			case 1:
 				decoded_bit |= sextet >> 4;
-				dest[state->output_buffer.used++] = decoded_bit;
+				dest[out->used++] = decoded_bit;
 				decoded_bit = sextet << 4;
 				break;
 			case 2:
 				decoded_bit |= sextet >> 2;
-				dest[state->output_buffer.used++] = decoded_bit;
+				dest[out->used++] = decoded_bit;
 				decoded_bit = sextet << 6;
 				break;
 			case 3:
 				decoded_bit |= sextet;
-				dest[state->output_buffer.used++] = decoded_bit;
+				dest[out->used++] = decoded_bit;
 				decoded_bit = 0;
 				break;
 		}
@@ -181,19 +179,18 @@ bool	base64_decode_buffer(const t_master_base64* m, t_base64_decode_state* state
 
 int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
 	base64_chomp_newline(input);
-	t_base64_decode_state	state = {
-		.input_buffer = input,
-		.out_fd = out_fd,
-	};
 
-	if (!is_decodable_as_base64(m, &state)) {
+	if (!is_decodable_as_base64(input->buffer, input->used)) {
+		PRINT_ERROR(&(m->master), "%s\n", "invalid base64 input");
 		return 1;
 	}
-	if (!base64_decode_buffer(m, &state)) {
+	t_elastic_buffer	decoded = {};
+	if (!base64_decode_buffer(input->buffer, input->used, &decoded)) {
+		PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
 		return 1;
 	}
 
-	write_buffer(&state);
-	destroy_buffer(&state.output_buffer);
+	write_decoded(out_fd, &decoded);
+	destroy_buffer(&decoded);
 	return 0;
 }

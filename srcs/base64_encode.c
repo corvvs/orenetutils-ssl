@@ -7,44 +7,43 @@ const char *base64_encode_table =
 	"0123456789"
 	"+/";
 
-void	base64_encode_buffer(t_base64_encode_state* state) {
+void	base64_encode_buffer(const void* src, size_t len, t_elastic_buffer* out) {
 
 	uint8_t	sextet = 0;
-	const unsigned char*	buffer = state->input_buffer->buffer;
-	const size_t			input_used = state->input_buffer->used;
-	for (size_t i = 0; i < input_used; ++i) {
+	const unsigned char*	buffer = src;
+	for (size_t i = 0; i < len; ++i) {
 		unsigned char encoding_byte = buffer[i];
 		switch (i % 3) {
 			case 0:
 				// msb6, lsb2
 				sextet |= (encoding_byte & 0b11111100) >> 2;
-				eb_push(&state->output_buffer, &base64_encode_table[sextet], 1, 1);
+				eb_push(out, &base64_encode_table[sextet], 1, 1);
 				sextet = 0;
 				sextet |= (encoding_byte & 0b00000011) << 4;
 				break;
 			case 1:
 				// msb4, lsb4
 				sextet |= (encoding_byte & 0b11110000) >> 4;
-				eb_push(&state->output_buffer, &base64_encode_table[sextet], 1, 1);
+				eb_push(out, &base64_encode_table[sextet], 1, 1);
 				sextet = 0;
 				sextet |= (encoding_byte & 0b00001111) << 2;
 				break;
 			case 2:
 				// msb2, lsb6
 				sextet |= (encoding_byte & 0b11000000) >> 6;
-				eb_push(&state->output_buffer, &base64_encode_table[sextet], 1, 1);
+				eb_push(out, &base64_encode_table[sextet], 1, 1);
 				sextet = 0;
 				sextet |= (encoding_byte & 0b00111111);
-				eb_push(&state->output_buffer, &base64_encode_table[sextet], 1, 1);
+				eb_push(out, &base64_encode_table[sextet], 1, 1);
 				sextet = 0;
 				break;
 		}
 	}
-	if (input_used % 3 > 0) {
-		eb_push(&state->output_buffer, &base64_encode_table[sextet], 1, 1);
+	if (len % 3 > 0) {
+		eb_push(out, &base64_encode_table[sextet], 1, 1);
 	}
-	while (state->output_buffer.used % 4 > 0) {
-		eb_push(&state->output_buffer, "=", 1, 1);
+	while (out->used % 4 > 0) {
+		eb_push(out, "=", 1, 1);
 	}
 }
 
@@ -69,20 +68,14 @@ bool	base64_write_lines(int out_fd, const t_elastic_buffer* buffer, size_t line_
 	return true;
 }
 
-static void	write_out_buffer(const t_master_base64* m, t_base64_encode_state* state) {
-	if (!base64_write_lines(state->out_fd, &state->output_buffer, BASE64_LINE_LENGTH)) {
-		PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
-	}
-}
-
 // **オンラインで** base64エンコードを行う
 int	base64_encode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
-	t_base64_encode_state	state = {
-		.input_buffer = input,
-		.out_fd = out_fd,
-	};
-	base64_encode_buffer(&state);
-	write_out_buffer(m, &state);
-	destroy_buffer(&state.output_buffer);
+	t_elastic_buffer	encoded = {};
+
+	base64_encode_buffer(input->buffer, input->used, &encoded);
+	if (!base64_write_lines(out_fd, &encoded, BASE64_LINE_LENGTH)) {
+		PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
+	}
+	destroy_buffer(&encoded);
 	return 0;
 }

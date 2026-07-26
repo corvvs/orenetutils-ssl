@@ -57,21 +57,20 @@ static int	open_des_output(t_master* master, const t_preference* pref) {
 
 // -a 指定の復号: 入力は base64 テキストなので, デコードして input を置き換える
 static bool	decode_base64_input(t_master_des* m, t_elastic_buffer* input) {
-	const t_master_base64	mb = { .master = m->master };
-	t_base64_decode_state	state = { .input_buffer = input };
-
 	base64_chomp_newline(input);
-	if (!is_decodable_as_base64(&mb, &state)) {
-		PRINT_ERROR(&m->master, "%s\n", "error reading input file");
+	if (!is_decodable_as_base64(input->buffer, input->used)) {
+		PRINT_ERROR(&m->master, "%s\n", "bad decrypt");
 		return false;
 	}
-	if (!base64_decode_buffer(&mb, &state)) {
+
+	t_elastic_buffer	decoded = {};
+	if (!base64_decode_buffer(input->buffer, input->used, &decoded)) {
 		PRINT_ERROR(&m->master, "%s\n", strerror(errno));
-		destroy_buffer(&state.output_buffer);
+		destroy_buffer(&decoded);
 		return false;
 	}
 	destroy_buffer(input);
-	*input = state.output_buffer;
+	*input = decoded;
 	return true;
 }
 
@@ -171,15 +170,14 @@ static bool	setup_secret(t_master_des* m, const t_des_mode* mode, t_elastic_buff
 
 // -a 指定の暗号化: 暗号文を base64 にして書き出す
 static bool	write_base64_output(t_master_des* m, const uint8_t* data, size_t len, int out_fd) {
-	t_elastic_buffer		source = { .buffer = (void*)data, .capacity = len, .used = len };
-	t_base64_encode_state	state = { .input_buffer = &source, .out_fd = out_fd };
+	t_elastic_buffer	encoded = {};
 
-	base64_encode_buffer(&state);
-	const bool	result = base64_write_lines(out_fd, &state.output_buffer, BASE64_LINE_LENGTH);
+	base64_encode_buffer(data, len, &encoded);
+	const bool	result = base64_write_lines(out_fd, &encoded, BASE64_LINE_LENGTH);
 	if (!result) {
 		PRINT_ERROR(&m->master, "%s\n", strerror(errno));
 	}
-	destroy_buffer(&state.output_buffer);
+	destroy_buffer(&encoded);
 	return result;
 }
 
