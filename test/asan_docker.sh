@@ -15,13 +15,17 @@
 # 各引数はそのまま test/des_mode.sh の引数になる.
 
 set -u
-IMAGE=ft_ssl_dev
+# 検証に使うイメージ. 既定は docker/Dockerfile (OpenSSL 3.x).
+# OpenSSL 1.1.1 を参照実装にする場合は環境変数で差し替える:
+#   FT_SSL_IMAGE=ft_ssl_dev_111 FT_SSL_DOCKERFILE=docker/Dockerfile.openssl111
+IMAGE=${FT_SSL_IMAGE:-ft_ssl_dev}
+DOCKERFILE=${FT_SSL_DOCKERFILE:-docker/Dockerfile}
 
 if [ $# -eq 0 ]; then
 	set -- "--ctr" "--pcbc" "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677"
 fi
 
-docker build -t "$IMAGE" ./docker || exit 1
+docker build -t "$IMAGE" -f "$DOCKERFILE" docker || exit 1
 
 docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 	set -u
@@ -59,6 +63,10 @@ docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 		# $spec は "des-cbc <IV>" のように複数語なので, あえて分割させる
 		bash test/des_mode.sh $spec || status=1
 	done
+
+	echo
+	echo "=== openssl version ==="
+	openssl version
 
 	echo
 	echo "=== sanitizer reports ==="

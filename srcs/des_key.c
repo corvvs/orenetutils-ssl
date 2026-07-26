@@ -113,14 +113,10 @@ bool	des_derive_key_iv(
 }
 
 // OpenSSL に倣い "enter <コマンド名> encryption password:" の形にする.
-// コマンド名は大文字にする (OpenSSL 3.x の表記; 1.1.1 は小文字だった).
+// コマンド名はそのまま (小文字) 使う: 1.1.1 の表記に合わせている (3.x は大文字).
 static void	build_password_prompt(const t_master_des* m, char* buffer, size_t size) {
 	ft_strlcpy(buffer, "enter ", size);
-	const size_t	name_from = ft_strlen(buffer);
 	ft_strlcat(buffer, m->master.command_name, size);
-	for (size_t i = name_from; buffer[i]; ++i) {
-		buffer[i] = ft_toupper(buffer[i]);
-	}
 	ft_strlcat(buffer, m->pref.is_decode ? " decryption password:" : " encryption password:", size);
 }
 

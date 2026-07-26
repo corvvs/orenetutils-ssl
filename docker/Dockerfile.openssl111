@@ -1,0 +1,13 @@
+# OpenSSL 1.1.1 を参照実装にするための環境.
+#
+# ft_ssl は OpenSSL 1.1.1 の挙動に合わせている (des の -S 指定時に
+# "Salted__" ヘッダを付ける, パスワードプロンプトが小文字, など).
+# 3.x では挙動が違うため, バイト一致の検証は 1.1.1 に対して行う.
+# debian:11 (bullseye) が 1.1.1 系を積んでいる最後の Debian 安定版.
+FROM debian:11
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    openssl \
+    xxd \
+    ruby \
+    && rm -rf /var/lib/apt/lists/*
