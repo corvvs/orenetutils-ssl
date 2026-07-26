@@ -39,6 +39,8 @@ int	run_des_ecb(t_master* master, char **argv);
 int	run_des_cbc(t_master* master, char **argv);
 int	run_des3_ecb(t_master* master, char **argv);
 int	run_des3_cbc(t_master* master, char **argv);
+int	run_des_ofb(t_master* master, char **argv);
+int	run_des3_ofb(t_master* master, char **argv);
 int	parse_options_des(const t_master* master, char** argv, t_preference* pref_ptr);
 
 int	run_test(t_master* master, char **argv);
@@ -109,10 +111,12 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("des", run_des_cbc, COMMAND_CATEGORY_CIPHER),
 	DEF_COMMAND_PAIR("des-ecb", run_des_ecb, COMMAND_CATEGORY_CIPHER),
 	DEF_COMMAND_PAIR("des-cbc", run_des_cbc, COMMAND_CATEGORY_CIPHER),
+	DEF_COMMAND_PAIR("des-ofb", run_des_ofb, COMMAND_CATEGORY_CIPHER),
 	// des3 も OpenSSL に倣い des3-cbc のエイリアス
 	DEF_COMMAND_PAIR("des3", run_des3_cbc, COMMAND_CATEGORY_CIPHER),
 	DEF_COMMAND_PAIR("des3-ecb", run_des3_ecb, COMMAND_CATEGORY_CIPHER),
 	DEF_COMMAND_PAIR("des3-cbc", run_des3_cbc, COMMAND_CATEGORY_CIPHER),
+	DEF_COMMAND_PAIR("des3-ofb", run_des3_ofb, COMMAND_CATEGORY_CIPHER),
 
 	DEF_COMMAND_PAIR(NULL, NULL, COMMAND_CATEGORY_STANDARD),
 };
