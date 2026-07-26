@@ -7,4 +7,18 @@
 #define DES_BLOCK_BYTE_SIZE 8
 #define DES_KEY_BYTE_SIZE 8
 
+// パスワードからの鍵導出に使う PBKDF2 の反復回数; OpenSSL 3系と合わせる
+#define DES_PBKDF2_ITERATIONS 10000
+#define DES_SALT_BYTE_SIZE 8
+
+// 端末から読むパスワードの最大長
+// OpenSSL も同じ長さまでを受け付ける(それより長い入力はサイレントに切り詰める)
+#define DES_PASSWORD_MAX_LEN 1023
+
+// salt をランダム生成した場合, 暗号文の先頭に"Salted__" + salt(8オクテット) を置く
+// OpenSSL 3系と合わせる
+#define DES_SALT_MAGIC "Salted__"
+#define DES_SALT_MAGIC_BYTE_SIZE 8
+#define DES_SALT_HEADER_BYTE_SIZE (DES_SALT_MAGIC_BYTE_SIZE + DES_SALT_BYTE_SIZE)
+
 #endif

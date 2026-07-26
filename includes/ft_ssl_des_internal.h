@@ -35,6 +35,18 @@ typedef struct s_des_mode
 extern const t_des_mode	g_des_mode_ecb;
 extern const t_des_mode	g_des_mode_cbc;
 
+// 実際に暗号化・復号に使う鍵材料.
+// -k / -v による直接指定と, パスワードからの導出のどちらでもここに集約される.
+typedef struct s_des_secret
+{
+	t_des_roundkeys	roundkeys;
+	uint64_t		iv;
+	uint8_t			salt[DES_SALT_BYTE_SIZE];
+	// 暗号文の先頭に "Salted__" + salt を置くか
+	// salt をランダム生成したとき, つまり -s も -k もない暗号化のとき true になる
+	bool			emit_salt_header;
+}	t_des_secret;
+
 // 64bit 鍵から 16 ラウンド分のラウンド鍵を生成する.
 t_des_roundkeys	des_key_schedule(uint64_t key);
 // 64bit ブロック 1 つを暗号化 (decrypt=false) または復号 (decrypt=true) する.
@@ -45,8 +57,24 @@ void			des_store_block(uint64_t block, uint8_t bytes[DES_BLOCK_BYTE_SIZE]);
 
 // 16 進文字列を 64bit 値として解釈する (-v の初期化ベクトル用).
 uint64_t		des_block_from_hex(const char* hex);
+// 16 進文字列を 8 オクテットへ変換する (-s の salt 用; 鍵・IV と同じ詰め方).
+void			des_bytes_from_hex(const char* hex, uint8_t out[DES_BLOCK_BYTE_SIZE]);
 // -k で与えられた 16 進文字列を 64bit 鍵として解釈し, ラウンド鍵を生成する.
 t_des_roundkeys	des_roundkeys_from_hex(const char* hex);
+
+// salt をランダムに生成する.
+bool			des_random_salt(uint8_t salt[DES_SALT_BYTE_SIZE]);
+// パスワードと salt から鍵と IV を導出する (PBKDF2-HMAC-SHA256).
+// 導出した鍵材料の先頭 8 オクテットが鍵, 続く 8 オクテットが IV になる.
+bool			des_derive_key_iv(
+					const char* password,
+					const uint8_t salt[DES_SALT_BYTE_SIZE],
+					bool needs_iv,
+					uint64_t* key,
+					uint64_t* iv);
+// パスワードを得る. -p があればそれを, なければ端末 (なければ標準入力) から読む.
+// 端末から読む場合は buffer に格納して返す. 失敗時は NULL (エラーは内部で報告済み).
+const char*		des_acquire_password(const t_master_des* m, char* buffer, size_t size);
 
 // モードを差し替えるだけで各 des-* コマンドを実現する共通フロントエンド.
 int	run_des_generic(t_master* master, char** argv, const t_des_mode* mode);

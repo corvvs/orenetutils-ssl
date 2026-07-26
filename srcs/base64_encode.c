@@ -7,7 +7,7 @@ const char *base64_encode_table =
 	"0123456789"
 	"+/";
 
-void	run_encode(t_base64_encode_state* state) {
+void	base64_encode_buffer(t_base64_encode_state* state) {
 
 	uint8_t	sextet = 0;
 	const unsigned char*	buffer = state->input_buffer->buffer;
@@ -84,7 +84,7 @@ int	base64_encode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
 		.input_buffer = input,
 		.out_fd = out_fd,
 	};
-	run_encode(&state);
+	base64_encode_buffer(&state);
 	write_out_buffer(m, &state);
 	destroy_buffer(&state.output_buffer);
 	return 0;

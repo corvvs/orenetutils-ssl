@@ -56,6 +56,8 @@ typedef struct s_preference {
 
 	char*	hex_key;			// -k for des; key in hex
 	char*	hex_iv;				// -v for des; initialization vector in hex
+	char*	hex_salt;			// -s for des; salt in hex
+	char*	password;			// -p for des; password in ASCII
 	bool	is_base64;			// -a for des; encode/decode the message in base64
 }	t_preference;
 
@@ -115,8 +117,6 @@ typedef struct s_master_pbkdf2 {
 typedef struct s_master_des {
 	t_master		master;
 	t_preference	pref;
-
-	uint64_t		iv;	// 初期化ベクトル (CBC 等で使う; ECB では 0 のまま)
 }	t_master_des;
 
 
