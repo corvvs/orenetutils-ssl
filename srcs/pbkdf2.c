@@ -136,11 +136,11 @@ t_generic_message	pbkdf2(
 int	run_pbkdf2(t_master* master, char **argv) {
 	// usage:
 	// ./ft_ssl pbkdf2 [-a algorithm_name] [-s salt_path] [-S salt_str] [password_path]
-	t_master_hmac	m = {
+	t_master_pbkdf2	m = {
 		.master = *master,
 	};
 
-	t_preference*	pref = &m.pref;
+	t_preference_pbkdf2*	pref = &m.pref;
 	int parsed_count = parse_options_pbkdf2(master, argv, pref);
 	if (parsed_count < 0) {
 		return 1;

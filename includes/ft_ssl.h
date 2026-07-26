@@ -47,7 +47,7 @@ int	run_des_ctr(t_master* master, char **argv);
 int	run_des3_ctr(t_master* master, char **argv);
 int	run_des_pcbc(t_master* master, char **argv);
 int	run_des3_pcbc(t_master* master, char **argv);
-int	parse_options_des(const t_master* master, char** argv, t_preference* pref_ptr);
+int	parse_options_des(const t_master* master, char** argv, t_preference_des* pref_ptr);
 
 int	run_test(t_master* master, char **argv);
 
@@ -64,10 +64,10 @@ t_sha_512_256_digest	sha_512_256_hash(const uint8_t *message, uint64_t message_l
 int run_in_repl(t_master* master);
 
 // preference.c
-int	parse_options_digest(const t_master* master, char** argv, t_preference* pref_ptr);
+int	parse_options_digest(const t_master* master, char** argv, t_preference_digest* pref_ptr);
 
 // base64_preference.c
-int	parse_options_base64(const t_master* master, char** argv, t_preference* pref_ptr);
+int	parse_options_base64(const t_master* master, char** argv, t_preference_base64* pref_ptr);
 
 // read_file.c
 bool	read_file(t_master* master, int ifd, t_elastic_buffer* joined);

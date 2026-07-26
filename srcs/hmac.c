@@ -144,7 +144,7 @@ int	run_hmac(t_master* master, char **argv) {
 	t_master_hmac	m = {
 		.master = *master,
 	};
-	t_preference*	pref = &m.pref;
+	t_preference_hmac*	pref = &m.pref;
 	int parsed_count = parse_options_hmac(master, argv, pref);
 	if (parsed_count < 0) {
 		return 1;

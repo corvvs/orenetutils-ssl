@@ -1,9 +1,9 @@
 #include "ft_ssl.h"
 #include "ft_ssl_preference.h"
 
-int	parse_options_base64(const t_master* master, char** argv, t_preference* pref_ptr) {
+int	parse_options_base64(const t_master* master, char** argv, t_preference_base64* pref_ptr) {
 	(void)master;
-	t_preference	pref = {};
+	t_preference_base64	pref = {};
 	int parsed_count = 0;
 	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
 

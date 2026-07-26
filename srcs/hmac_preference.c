@@ -20,9 +20,9 @@ static t_hmac_hash_interface*	select_hi(const char* algo_name) {
 	return NULL;
 }
 
-int	parse_options_hmac(const t_master* master, char** argv, t_preference* pref_ptr) {
+int	parse_options_hmac(const t_master* master, char** argv, t_preference_hmac* pref_ptr) {
 	(void)master;
-	t_preference	pref = {};
+	t_preference_hmac	pref = {};
 	int parsed_count = 0;
 	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
 
