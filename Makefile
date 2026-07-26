@@ -53,6 +53,8 @@ FILES	:=	\
 			des3_cfb.c\
 			des_ctr.c\
 			des3_ctr.c\
+			des_pcbc.c\
+			des3_pcbc.c\
 			des_preference.c\
 			hmac.c\
 			hmac_digest_interface.c\
@@ -209,8 +211,8 @@ PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
 
-.PHONY: test_des test_des_ecb test_des_cbc test_des_ofb test_des_cfb test_des_ctr test_des3_ecb test_des3_cbc test_des3_ofb test_des3_cfb
-test_des: test_des_ecb test_des_cbc test_des_ofb test_des_cfb test_des3_ecb test_des3_cbc test_des3_ofb test_des3_cfb test_des_ctr
+.PHONY: test_des test_des_ecb test_des_cbc test_des_ofb test_des_cfb test_des_ctr test_des_pcbc test_des3_ecb test_des3_cbc test_des3_ofb test_des3_cfb
+test_des: test_des_ecb test_des_cbc test_des_ofb test_des_cfb test_des3_ecb test_des3_cbc test_des3_ofb test_des3_cfb test_des_ctr test_des_pcbc
 
 test_des_ecb: $(NAME)
 	bash test/des_mode.sh des-ecb des-ecb
@@ -236,15 +238,18 @@ test_des_cfb: $(NAME)
 test_des3_cfb: $(NAME)
 	bash test/des_mode.sh des3-cfb des-ede3-cfb 0011223344556677
 
-# CTR は OpenSSL に対応コマンドがないため, 専用の検証を行う
+# CTR / PCBC は OpenSSL に対応コマンドがないため, 専用の検証を行う
 test_des_ctr: $(NAME)
 	bash test/des_ctr.sh
+
+test_des_pcbc: $(NAME)
+	bash test/des_pcbc.sh
 
 # macOS で ASAN が動かない環境向け: Linux コンテナ上で
 # Makefile 既定の CFLAGS (ASAN + UBSan) のままテストする
 .PHONY: test_asan_docker
 test_asan_docker:
-	bash test/asan_docker.sh --ctr "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677" \
+	bash test/asan_docker.sh --ctr --pcbc "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677" \
 		"des-ofb des-ofb 0011223344556677" \
 		"des3-ecb des-ede3-ecb" "des3-cbc des-ede3-cbc 0011223344556677" \
 		"des-cfb des-cfb 0011223344556677" \
