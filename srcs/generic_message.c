@@ -1,5 +1,6 @@
 #include "generic_message.h"
 #include "libft.h"
+#include "printf.h"
 #include <assert.h>
 
 bool	is_failed_generic_message(const t_generic_message* message) {
@@ -83,17 +84,14 @@ void	destroy_generic_message(t_generic_message* message) {
 }
 
 void	print_generic_message_hex(const t_generic_message* message, int fd) {
-	// dprintf(fd, "byte_size: %zu, \t", message->byte_size);
-	// dprintf(fd, "data: ");
 	for (size_t i = 0; i < message->byte_size; ++i) {
-		dprintf(fd, "%02x", ((uint8_t*)message->message)[i]);
+		// yoyo_dprintf は幅指定を持たないので, 上位・下位ニブルに分けて出す
+		const uint8_t	byte = ((uint8_t*)message->message)[i];
+		yoyo_dprintf(fd, "%x", byte / 16);
+		yoyo_dprintf(fd, "%x", byte % 16);
 	}
-	// write(fd, "\n", 1);
 }
 
 void	print_generic_message_ascii(const t_generic_message* message, int fd) {
-	// dprintf(fd, "byte_size: %zu, \t", message->byte_size);
-	// dprintf(fd, "data: \"");
 	write(fd, message->message, message->byte_size);
-	// write(fd, "\"\n", 2);
 }
