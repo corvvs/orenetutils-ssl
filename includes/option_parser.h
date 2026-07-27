@@ -33,11 +33,4 @@ int parse_number(
 	unsigned long max
 );
 
-int	parse_pattern(
-	const t_master* m,
-	const char* str,
-	char* buffer,
-	size_t max_len
-);
-
 #endif
