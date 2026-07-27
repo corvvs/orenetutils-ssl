@@ -80,12 +80,17 @@ FILES	:=	\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
+# コンパイル時にコンパイラへ書かせるヘッダ依存関係
+DEPS	:=	$(OBJS:%.o=%.d)
 NAME	:=	ft_ssl
 
 LIBFT		:=	libft.a
 LIBFT_DIR	:=	libft
 CC			:=	gcc
 CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
+# -MMD -MP: ヘッダ依存を .d ファイルに出力させる.
+# これがないとヘッダだけ変更したときに再コンパイルされず, 古いオブジェクトが残る.
+DEPFLAGS	=	-MMD -MP
 # 通常ビルド
 CFLAGS		=	$(CCOREFLAGS) -O2
 # 開発用: デバッグ出力 (-D DEBUG) を有効にする.
@@ -99,11 +104,13 @@ all:			$(NAME)
 
 $(OBJDIR)/%.o:	$(SRCDIR)/%.c
 	@mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o:	%.c
 	@mkdir -p $(OBJDIR)
-	$(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(DEPFLAGS) -c $< -o $@
+
+-include $(DEPS)
 
 $(NAME):	$(OBJS) $(LIBFT)
 	$(CC) $(CFLAGS) -o $(NAME) $(OBJS) $(LIBFT)
