@@ -119,14 +119,77 @@ static uint64_t	permute(uint64_t src, const uint8_t* table, size_t out_bits, siz
 }
 
 // これは使わない
-#define PERMUTE(src, table, in_bits) permute((src), (table), sizeof(table) / sizeof((table)[0]), (in_bits))
-// ここから下を使う
-#define PERMUTE_IP(src)   PERMUTE((src), DES_IP,  64)
-#define PERMUTE_FP(src)   PERMUTE((src), DES_FP,  64)
-#define PERMUTE_E(src)    PERMUTE((src), DES_E,   32)
-#define PERMUTE_P(src)    PERMUTE((src), DES_P,   32)
-#define PERMUTE_PC1(src)  PERMUTE((src), DES_PC1, 64)
-#define PERMUTE_PC2(src)  PERMUTE((src), DES_PC2, 56)
+// [置換の高速化]
+// 置換は「出力の各ビットが入力のどれか1ビットだけを見る」写像なので,
+// 入力をバイトに分けて, 各バイトの寄与を OR で合成できる.
+// その寄与表は起動時に上の permute() 自身から作る.
+// つまり FIPS の表と permute() が唯一の正であることは変わらない.
+typedef struct s_permutation
+{
+	uint64_t	contrib[8][256];
+}	t_permutation;
+
+static t_permutation	g_perm_ip;
+static t_permutation	g_perm_fp;
+static t_permutation	g_perm_e;
+static t_permutation	g_perm_pc1;
+static t_permutation	g_perm_pc2;
+
+// [S-box と P 転置の統合]
+// f 関数は 6bit を S-box で 4bit にし, 8 個つないで P で転置する.
+// P は出力ビットの入れ替えでしかないので, 「S-box の結果を P で転置済みの 32bit 値」
+// を持っておけば転置そのものが消える. これも DES_S と DES_P から作る.
+static uint32_t			g_sbox_p[8][64];
+
+static void	build_permutation(t_permutation* perm, const uint8_t* table, size_t out_bits, size_t in_bits) {
+	// 64bit を 8bit ずつに区切ってキャッシュを作る
+	const size_t	in_bytes = in_bits / OCTET_BIT_SIZE;
+	for (size_t b = 0; b < in_bytes; ++b) {
+		for (size_t v = 0; v < 256; ++v) {
+			const uint64_t	src = (uint64_t)v << (OCTET_BIT_SIZE * (in_bytes - 1 - b));
+			perm->contrib[b][v] = permute(src, table, out_bits, in_bits);
+		}
+	}
+}
+
+static void	build_sbox_p(void) {
+	// 32bit を 4bit ずつに区切ってキャッシュを作る
+	for (size_t j = 0; j < 8; ++j) {
+		for (size_t six = 0; six < 64; ++six) {
+			const uint8_t	row = (((six >> 5) & 1) << 1) | (six & 1); // MSB-LSB
+			const uint8_t	col = (six >> 1) & 0x0F; // 中間の 4bit
+			// j 番目の S-box の出力は 32bit のうち上から 4*j ビット目に入る
+			const uint32_t	placed = (uint32_t)DES_S[j][row][col] << (28 - 4 * j);
+			g_sbox_p[j][six] = permute(placed, DES_P, 32, 32);
+		}
+	}
+}
+
+// 最初に DES を使うときに一度だけ表を用意する.
+void	des_prepare_tables(void) {
+	build_permutation(&g_perm_ip,  DES_IP,  64, 64);
+	build_permutation(&g_perm_fp,  DES_FP,  64, 64);
+	build_permutation(&g_perm_e,   DES_E,   48, 32);
+	build_permutation(&g_perm_pc1, DES_PC1, 56, 64);
+	build_permutation(&g_perm_pc2, DES_PC2, 48, 56);
+	build_sbox_p();
+}
+
+// in_bytes は呼び出し側から定数で渡す (コンパイラに展開させるため)
+static inline uint64_t	permute_by(const t_permutation* perm, uint64_t src, size_t in_bytes) {
+	uint64_t	dst = 0;
+	for (size_t b = 0; b < in_bytes; ++b) {
+		dst |= perm->contrib[b][(src >> (OCTET_BIT_SIZE * (in_bytes - 1 - b))) & 0xFF];
+	}
+	return dst;
+}
+
+// P は g_sbox_p に畳み込まれたので, ここには現れない
+#define PERMUTE_IP(src)   permute_by(&g_perm_ip,  (src), 8)
+#define PERMUTE_FP(src)   permute_by(&g_perm_fp,  (src), 8)
+#define PERMUTE_E(src)    permute_by(&g_perm_e,   (src), 4)
+#define PERMUTE_PC1(src)  permute_by(&g_perm_pc1, (src), 8)
+#define PERMUTE_PC2(src)  permute_by(&g_perm_pc2, (src), 7)
 
 // 28bit 値の左巡回シフト
 static uint32_t	rotl28(uint32_t v, uint8_t n) {
@@ -138,16 +201,13 @@ static uint32_t	rotl28(uint32_t v, uint8_t n) {
 static uint32_t	feistel(uint32_t r, uint64_t roundkey) {
 	// 入力(32bitを E(Expansion; 拡大置換)に入れて, その結果をラウンド鍵と XOR する(-> 48bit)
 	const uint64_t	expanded = PERMUTE_E(r) ^ roundkey;
-	// 48bit を 6bit ごとに S BOX に入れる(6bit -> 4bit)
+	// 48bit を 6bit ごとに, S-box と P を畳んだ表に通して XOR で合成する
 	uint32_t		out = 0;
+	// MEMO: このループはコンパイラが展開し, 二分木上の XOR に再編する
 	for (size_t j = 0; j < 8; ++j) {
-		const uint8_t	six = (expanded >> (6*(7 - j)) ) & 0x3F;
-		const uint8_t	row = (((six >> 5) & 1) << 1) | (six & 1);
-		const uint8_t	col = (six >> 1) & 0x0F;
-		out = (out << 4) | DES_S[j][row][col];
+		out ^= g_sbox_p[j][(expanded >> (6 * (7 - j))) & 0x3F];
 	}
-	// 結果(4bit * 8 = 32bit)を結合し, P(Permutation; 転置)に入れる(-> 32bit)
-	return PERMUTE_P(out);
+	return out;
 }
 
 // ラウンド鍵生成

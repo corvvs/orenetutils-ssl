@@ -16,7 +16,10 @@ t_pbkdf2_prf			g_prf_hmac_sha_512;
 t_pbkdf2_prf			g_prf_hmac_sha_512_224;
 t_pbkdf2_prf			g_prf_hmac_sha_512_256;
 
+void	des_prepare_tables(void);
+
 bool	on_startup(void) {
+	des_prepare_tables();
 	// HMAC - Hash インターフェースの作成
 	g_hi_md5         = (t_hmac_hash_interface)x_make_hmac_interface(&g_hash_md5);
 	g_hi_sha_224     = (t_hmac_hash_interface)x_make_hmac_interface(&g_hash_sha_224);
