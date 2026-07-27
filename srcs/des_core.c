@@ -171,7 +171,7 @@ t_des_roundkeys	des_key_schedule(uint64_t key) {
 }
 
 // https://ja.wikipedia.org/wiki/Data_Encryption_Standard#%E5%85%A8%E4%BD%93%E6%A7%8B%E9%80%A0
-uint64_t	des_crypt_block(uint64_t block, const t_des_roundkeys* roundkeys, bool decrypt) {
+uint64_t	des_crypt_block(uint64_t block, const t_des_roundkeys* roundkeys, t_des_direction direction) {
 	// IP を実施
 	const uint64_t	permuted = PERMUTE_IP(block);
 	// IP で得られた64ビットを左右32ビット(l, rs)に分割
@@ -180,7 +180,7 @@ uint64_t	des_crypt_block(uint64_t block, const t_des_roundkeys* roundkeys, bool 
 	// 16 ラウンドの Feistel 構造を実施
 	for (size_t i = 0; i < DES_ROUNDS; ++i) {
 		// 復号時はラウンド鍵を逆順に適用する
-		const size_t	rk_i = decrypt ? (DES_ROUNDS - 1 - i) : i;
+		const size_t	rk_i = (direction == DES_DECRYPT) ? (DES_ROUNDS - 1 - i) : i;
 		// r だけに F(Feistel)関数を適用し, l と XOR して次のラウンドの r を得る
 		const uint32_t	next = l ^ feistel(r, roundkeys->k[rk_i]);
 		// 次のラウンドの l は r そのもの
