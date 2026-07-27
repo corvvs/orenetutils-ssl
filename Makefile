@@ -86,10 +86,11 @@ LIBFT		:=	libft.a
 LIBFT_DIR	:=	libft
 CC			:=	gcc
 CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
-CFLAGS		=	$(CCOREFLAGS)\
-				-O2 \
-				-D DEBUG \
-				-g -fsanitize=address -fsanitize=undefined\
+# 通常ビルド
+CFLAGS		=	$(CCOREFLAGS) -O2
+# 開発用: デバッグ出力 (-D DEBUG) を有効にする.
+DEBUGFLAGS	=	$(CCOREFLAGS) -O2 -g -D DEBUG -fsanitize=undefined
+ASANFLAGS	=	$(DEBUGFLAGS) -fsanitize=address
 
 RM			:=	rm -rf
 
@@ -122,6 +123,14 @@ fclean:			clean
 
 .PHONY:	re
 re:				fclean all
+
+.PHONY:	debug
+debug:
+	$(MAKE) re CFLAGS="$(DEBUGFLAGS)"
+
+.PHONY:	debug_asan
+debug_asan:
+	$(MAKE) re CFLAGS="$(ASANFLAGS)"
 
 .PHONY: test_algos test_md5 test_sha_224 test_sha_256 test_sha_384 test_sha_512 test_sha_512_224 test_sha_512_256
 

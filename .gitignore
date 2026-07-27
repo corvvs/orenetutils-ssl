@@ -1,4 +1,12 @@
-*.o
-*.a
-*.out
+# ビルド成果物
+objs/
 ft_ssl
+libft.a
+
+*.pdf
+
+mine
+ref
+data
+key
+file

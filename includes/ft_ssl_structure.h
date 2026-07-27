@@ -83,17 +83,6 @@ typedef struct s_preference_des {
 	bool	is_base64;			// -a; 入出力を base64 にする
 }	t_preference_des;
 
-typedef enum e_command {
-	COMMAND_MD5,
-	COMMAND_SHA224,
-	COMMAND_SHA256,
-	COMMAND_SHA384,
-	COMMAND_SHA512,
-	COMMAND_SHA512_224,
-	COMMAND_SHA512_256,
-	COMMAND_UNKNOWN
-}	t_command;
-
 struct s_master;
 
 typedef int (t_runner_func)(struct s_master *master, char **);

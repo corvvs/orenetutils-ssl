@@ -32,9 +32,10 @@ docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 	cp -r /src /build && cd /build
 	# ホストで作られた macOS のオブジェクトが混ざらないよう作り直す
 	make fclean >/dev/null 2>&1
-	if ! make >/dev/null 2>&1; then
+	# サニタイザを効かせるため開発用ビルドを使う
+	if ! make debug_asan >/dev/null 2>&1; then
 		echo "build failed"
-		make
+		make debug_asan
 		exit 1
 	fi
 
