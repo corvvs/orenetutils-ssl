@@ -191,12 +191,12 @@ int	parse_pattern(
 	size_t i = 0, j = 0;
 	for (; str[i];) {
 		if (max_len <= j) {
-			dprintf(STDERR_FILENO, "%s: pattern too long: %s\n", m->program_name, str);
+			yoyo_dprintf(STDERR_FILENO, "%s: pattern too long: %s\n", m->program_name, str);
 			return -1;
 		}
 		int	x = chtox(str[i]);
 		if (x < 0) {
-			dprintf(STDERR_FILENO, "%s: error in pattern near %c\n", m->program_name, str[i]);
+			yoyo_dprintf(STDERR_FILENO, "%s: error in pattern near %c\n", m->program_name, str[i]);
 			return -1;
 		}
 		i += 1;
@@ -204,7 +204,7 @@ int	parse_pattern(
 		if (str[i]) {
 			x = chtox(str[i]);
 			if (x < 0) {
-				dprintf(STDERR_FILENO, "%s: error in pattern near %c\n", m->program_name, str[i]);
+				yoyo_dprintf(STDERR_FILENO, "%s: error in pattern near %c\n", m->program_name, str[i]);
 				return -1;
 			}
 			i += 1;
