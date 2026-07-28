@@ -27,6 +27,14 @@ t_generic_message	hmac(
 	const t_generic_message* text
 );
 
+// 鍵をブロック長に整形したものを返す (要 destroy).
+// 同じ鍵で hmac() を繰り返し呼ぶ場合, これを先に一度だけ通しておけば
+// hmac() 内部の整形が省ける.
+t_generic_message	hmac_reshaped_key(
+	const t_hmac_hash_interface* hi,
+	const t_generic_message* key
+);
+
 int	parse_options_hmac(const t_master* master, char** argv, t_preference_hmac* pref_ptr);
 t_generic_message	new_generic_message_path(t_master* master, const char* path);
 t_generic_message	new_generic_message_stdin(t_master* master);

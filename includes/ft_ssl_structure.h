@@ -31,9 +31,11 @@ typedef struct s_hmac_hash_interface {
 }	t_hmac_hash_interface;
 
 typedef struct s_pbkdf2_prf {
-	const char*				name;
-	pseudo_random_function*	func;
-	size_t					hlen;
+	const char*						name;
+	pseudo_random_function*			func;
+	size_t							hlen;
+	// func が使うハッシュ. 鍵の整形を反復の外で一度だけ行うために要る.
+	const t_hmac_hash_interface*	hi;
 }	t_pbkdf2_prf;
 
 // [サブコマンドごとのオプション]

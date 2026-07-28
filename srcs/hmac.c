@@ -54,6 +54,16 @@ static t_generic_message	reshape_key(
 	return truncated_key;
 }
 
+t_generic_message	hmac_reshaped_key(
+	const t_hmac_hash_interface* hi,
+	const t_generic_message* key
+) {
+	if (!is_key_reshaping_needed(&hi->algorithm, key)) {
+		return dup_generic_message(key);
+	}
+	return reshape_key(&hi->algorithm, key);
+}
+
 t_generic_message	hmac(
 	const t_hmac_hash_interface* hi,
 	const t_generic_message* key,
