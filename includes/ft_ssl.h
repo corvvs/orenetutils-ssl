@@ -17,6 +17,7 @@
 bool	on_startup(void);
 
 int run_help(t_master *master, char **argv);
+void	show_usage(const t_master* master);
 
 // md5.c
 int run_md5(t_master *master, char **argv);

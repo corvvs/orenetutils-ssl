@@ -10,6 +10,7 @@
 #   a) どんな入力でも有限時間で終了する
 #   b) シグナルで死なない
 #   c) 正常な入力では従来どおりの結果が出る
+#   d) 引数なし起動では usage 行を出してから REPL に入る (RSA PDF p.7)
 #
 # 前提: プロジェクトルートで ./ft_ssl をビルド済みであること.
 # 使い方: bash test/repl.sh
@@ -110,6 +111,24 @@ check_output "未知のコマンドは報告される" 'nosuchcommand
 '    'invalid command'
 # 末尾に改行が無くても, その行のコマンドは実行されなければならない
 check_output "末尾に改行が無くても実行される" 'md5 -s abc' '900150983cd24fb0d6963f7d28e17f72'
+
+echo "--- 引数なし起動時の usage 行 (RSA PDF p.7) ---"
+# 引数を1つも与えられなかったときだけ使い方を示し, そのまま REPL に入る.
+# (PDF の例では引数なしの場合だけプロンプトに戻っていない = プロセスが続いている)
+check_output "usage 行が出る"          ""             'usage: '
+check_output "usage の後も REPL が動く" 'md5 -s abc
+'    '900150983cd24fb0d6963f7d28e17f72'
+# 陰性対照: コマンドを与えたとき (ARGV mode) は usage を出さない.
+# PDF の 'ft_ssl foobar' の例にも usage は無く, コマンド一覧だけが出る.
+# これが落ちるなら, 上の検査は「常に出る何か」を見ているだけかもしれない.
+: > "$TMP/in"
+limited_run "$TMP/in" "$TMP/out" "$TMP/err" "$SSL" foobar
+if grep -q -- 'usage: ' "$TMP/out" "$TMP/err" 2>/dev/null; then
+	fail=$((fail + 1))
+	echo "  FAIL [陰性対照: ARGV mode で usage が出ている]"
+else
+	pass=$((pass + 1))
+fi
 
 echo
 echo "=== repl: pass=$pass fail=$fail ==="

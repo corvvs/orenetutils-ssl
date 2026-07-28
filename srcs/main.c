@@ -35,6 +35,7 @@ int main(int argc, char **argv) {
 	const char*	command_name = *argv;
 	if (command_name == NULL) {
 		// REPL mode
+		show_usage(&master);
 		return run_in_repl(&master);
 	} else {
 		// ARGV mode
