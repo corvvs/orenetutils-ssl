@@ -1,5 +1,4 @@
 #include "ft_ssl.h"
-#include "ft_ssl_preference.h"
 
 extern t_hmac_hash_interface	g_hi_md5;
 extern t_hmac_hash_interface	g_hi_sha_224;
@@ -20,48 +19,29 @@ static t_hmac_hash_interface*	select_hi(const char* algo_name) {
 	return NULL;
 }
 
+// -a は名前からハッシュの実体を引くので, 表に書ける代入では済まない
+static bool	set_hmac_algorithm(const t_master* master, void* pref, const char* value) {
+	t_hmac_hash_interface*	hi = select_hi(value);
+	if (hi == NULL) {
+		print_error_by_message(master, "unexpected hash algorithm name");
+		return false;
+	}
+	((t_preference_hmac*)pref)->hi = hi;
+	return true;
+}
+
+// `hmac` のオプション
+static const t_option_spec	g_options_hmac[] = {
+	{ .name = "a", .kind = OPTION_CUSTOM, .handle = set_hmac_algorithm },
+	{ .name = "k", .kind = OPTION_STRING, .field_offset = offsetof(t_preference_hmac, path_key) },
+	{ .name = NULL },
+};
+
 int	parse_options_hmac(const t_master* master, char** argv, t_preference_hmac* pref_ptr) {
-	(void)master;
 	t_preference_hmac	pref = {};
-	int parsed_count = 0;
-	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
-
-		const char*	option = *argv;
-		++option;
-		while (*option) {
-			switch (*option) {
-				case 'a': {
-					/* option に後続がある場合はアウト */
-					if (option[1]) {
-						print_error_by_message(master, "illegal option -- a\n");
-						return -1;
-					}
-					/* argv に後続がない場合はアウト */
-					argv += 1;
-					if (*argv == NULL) {
-						print_error_by_message(master, "option requires an argument -- a\n");
-						return -1;
-					}
-
-					t_hmac_hash_interface*	hi = select_hi(*argv);
-					if (hi == NULL) {
-						print_error_by_message(master, "unexpected hash algorithm name\n");
-						return -1;
-					}
-					pref.hi = hi;
-					parsed_count += 1;
-					break;
-				}
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('k', k, path_key)
-				default: {
-					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
-					return -1;
-				}
-			}
-			option += 1;
-		}
-		argv += 1;
-		parsed_count += 1;
+	const int	parsed_count = parse_options(master, argv, &pref, g_options_hmac);
+	if (parsed_count < 0) {
+		return -1;
 	}
 	if (pref.hi == NULL) {
 		// set default
@@ -70,4 +50,3 @@ int	parse_options_hmac(const t_master* master, char** argv, t_preference_hmac* p
 	*pref_ptr = pref;
 	return parsed_count;
 }
-

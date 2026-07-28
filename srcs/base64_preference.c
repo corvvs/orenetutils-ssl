@@ -1,37 +1,21 @@
 #include "ft_ssl.h"
-#include "ft_ssl_preference.h"
+
+// `base64` のオプション.
+// -d と -e は同じフィールドを逆向きに設定するので, 後に書いた方が勝つ.
+static const t_option_spec	g_options_base64[] = {
+	{ .name = "d", .kind = OPTION_SET_TRUE,  .field_offset = offsetof(t_preference_base64, is_decode) },
+	{ .name = "e", .kind = OPTION_SET_FALSE, .field_offset = offsetof(t_preference_base64, is_decode) },
+	{ .name = "i", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_base64, path_input) },
+	{ .name = "o", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_base64, path_output) },
+	{ .name = NULL },
+};
 
 int	parse_options_base64(const t_master* master, char** argv, t_preference_base64* pref_ptr) {
-	(void)master;
 	t_preference_base64	pref = {};
-	int parsed_count = 0;
-	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
-
-		const char*	option = *argv;
-		++option;
-		while (*option) {
-			switch (*option) {
-				case 'd': {
-					pref.is_decode = true;
-					break;
-				}
-				case 'e': {
-					pref.is_decode = false;
-					break;
-				}
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('i', i, path_input)
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('o', o, path_output)
-				default: {
-					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
-					return -1;
-				}
-			}
-			option += 1;
-		}
-		argv += 1;
-		parsed_count += 1;
+	const int	parsed_count = parse_options(master, argv, &pref, g_options_base64);
+	if (parsed_count < 0) {
+		return -1;
 	}
 	*pref_ptr = pref;
 	return parsed_count;
 }
-

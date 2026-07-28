@@ -77,6 +77,7 @@ FILES	:=	\
 			utils_random.c\
 			printf.c\
 			option_parser.c\
+			option_spec.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
@@ -266,7 +267,12 @@ test_des_pcbc: $(NAME)
 # test_pdf は課題の例を流して目視するためのもの (合否判定が無く, 作業ディレクトリに
 # ファイルを作る) なので入れていない. Docker が要るものも別扱い.
 .PHONY: test
-test: test_algos test_hmac test_des test_robustness
+test: test_algos test_hmac test_des test_options test_robustness
+
+# オプション解析の規則 (名前照合 / 連結 / "--name" / エラー文言) の確認.
+.PHONY: test_options
+test_options: $(NAME)
+	bash test/options.sh
 
 # 頑健性のテスト.
 # 上のテスト群が「正しい入力に正しい答えを返すか」を見るのに対し, こちらは
