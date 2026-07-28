@@ -11,7 +11,6 @@ static ssize_t	memlen_until_nl(unsigned char* buffer, size_t len) {
 }
 
 static ssize_t	read_command_line(t_master* master) {
-	size_t	command_candidate_len = 0;
 	t_elastic_buffer*	repl_buffer = &master->repl;
 	// すでにバッファ内にnlがないかどうか見る
 	if (repl_buffer->used > 0) {
@@ -20,6 +19,10 @@ static ssize_t	read_command_line(t_master* master) {
 			return nl_len;
 		}
 	}
+	// 改行がないので, 今バッファにある分はまるごと命令候補.
+	// EOF 到達済みだと下の while に入らないため, ここで数えておかないと 0 のままになり,
+	// 呼び出し側が 1 バイトしか切り詰められず無限ループになる.
+	size_t	command_candidate_len = repl_buffer->used;
 
 	unsigned char	read_buffer[READ_SIZE];
 	while (!repl_buffer->eof_reached) {
