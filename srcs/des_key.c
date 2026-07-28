@@ -128,9 +128,9 @@ typedef enum e_password_read
 	PASSWORD_READ_FAILED,
 }	t_password_read;
 
-// 端末ならエコーを止める
+// 端末ならエコーを止める.
 static bool	mute_tty_echo(int fd, struct termios* saved) {
-	if (!isatty(fd) || tcgetattr(fd, saved) != 0) {
+	if (tcgetattr(fd, saved) != 0) {
 		return false;
 	}
 	struct termios	muted = *saved;
