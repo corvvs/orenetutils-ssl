@@ -8,6 +8,13 @@
 
 // https://www.nic.ad.jp/ja/tech/ipa/RFC2202JA.html
 
+// 各ケースは HMAC の計算経路を通すだけで結果は検証していないが,
+// 返り値は確保済みのメモリなので解放しないとリークする.
+static void	run_case_hmac_md5(const t_generic_message* key, const t_generic_message* data) {
+	t_generic_message	mac = hmac_md5(key, data);
+	destroy_generic_message(&mac);
+}
+
 // test_case =     1
 // key =           0x0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b0b
 // key_len =       16
@@ -19,7 +26,7 @@ void	md5_1(void) {
 	ft_memset(kb, 0x0b, sizeof(kb) - 1);
 	const t_generic_message key = define_generic_message_literal(kb);
 	const t_generic_message data = define_generic_message_literal("Hi There");
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 // test_case =     2
@@ -31,7 +38,7 @@ void	md5_1(void) {
 void	md5_2(void) {
 	const t_generic_message key = define_generic_message_literal("Jefe");
 	const t_generic_message data = define_generic_message_literal("what do ya want for nothing?");
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 // test_case =     3
@@ -47,7 +54,7 @@ void	md5_3(void) {
 	ft_memset(db, 0xdd, sizeof(db) - 1);
 	const t_generic_message key = define_generic_message_literal(kb);
 	const t_generic_message data = define_generic_message_literal(db);
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 // test_case =     4
@@ -65,7 +72,7 @@ void	md5_4(void) {
 	ft_memset(db, 0xcd, sizeof(db) - 1);
 	const t_generic_message key = define_generic_message_literal(kb);
 	const t_generic_message data = define_generic_message_literal(db);
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 // test_case =     5
@@ -80,7 +87,7 @@ void	md5_5(void) {
 	ft_memset(kb, 0x0c, sizeof(kb) - 1);
 	const t_generic_message key = define_generic_message_literal(kb);
 	const t_generic_message data = define_generic_message_literal("Test With Truncation");
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 // test_case =     6
@@ -94,7 +101,7 @@ void	md5_6(void) {
 	ft_memset(kb, 0xaa, sizeof(kb) - 1);
 	const t_generic_message key = define_generic_message_literal(kb);
 	const t_generic_message data = define_generic_message_literal("Test Using Larger Than Block-Size Key - Hash Key First");
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 // test_case =     7
@@ -108,7 +115,7 @@ void	md5_7(void) {
 	ft_memset(kb, 0xaa, sizeof(kb) - 1);
 	const t_generic_message key = define_generic_message_literal(kb);
 	const t_generic_message data = define_generic_message_literal("Test Using Larger Than Block-Size Key and Larger Than One Block-Size Data");
-	hmac_md5(&key, &data);
+	run_case_hmac_md5(&key, &data);
 }
 
 void	run_cases_md5(void) {
