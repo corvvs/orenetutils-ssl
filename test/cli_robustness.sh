@@ -28,6 +28,22 @@ LIMITED_SEC=20
 KEY=0011223344556677
 KEY3=00112233445566778899aabbccddeeff0011223344556677
 
+# ft_ssl はパスワードを /dev/tty から直接読む (標準入力がメッセージ本体で
+# 埋まっていることがあるため). そのため標準入力を /dev/null にしても,
+# 端末付きで走らせると鍵もパスワードも無い呼び出しは入力待ちで止まってしまう.
+# 鍵の有無が主題でない検査には, これを付けて入力待ちを避ける.
+PW="-p testpassword"
+
+# 鍵もパスワードも与えないこと自体が主題の検査は, 端末があると入力待ちになる.
+# (プログラムの動作は正しい. 端末から読むのが仕様なので, テストの側が避ける)
+# 端末が無いときだけ行い, 飛ばした件数は最後に必ず報告する.
+if : < /dev/tty 2>/dev/null; then
+	has_tty=1
+else
+	has_tty=0
+fi
+skipped=0
+
 # ft_ssl を制限時間つきで走らせ, 落ちていないことを確かめる.
 # 標準入力は /dev/null に固定する (パスワード等を待って止まらないようにするため).
 check() { # check <名前> <ft_ssl に渡す引数...>
@@ -48,6 +64,15 @@ check() { # check <名前> <ft_ssl に渡す引数...>
 	pass=$((pass + 1))
 }
 
+# 端末があるとパスワード入力待ちになる検査を, 端末が無いときだけ行う
+check_without_tty() { # check_without_tty <名前> <ft_ssl に渡す引数...>
+	if [ "$has_tty" -eq 1 ]; then
+		skipped=$((skipped + 1))
+		return
+	fi
+	check "$@"
+}
+
 DIGESTS="md5 sha224 sha256 sha384 sha512 sha512-224 sha512-256"
 DES_MODES="des des-ecb des-cbc des-ofb des-cfb des-ctr des-pcbc"
 DES3_MODES="des3 des3-ecb des3-cbc des3-ofb des3-cfb des3-ctr des3-pcbc"
@@ -65,8 +90,12 @@ make_random() { # make_random <バイト数> <出力先>
 }
 
 echo "--- コマンド名とオプション ---"
-for c in $ALL; do
+for c in help test hmac pbkdf2 base64 $DIGESTS; do
 	check "引数なし: $c" "$c"
+done
+# des-* は鍵もパスワードも無いので, 端末があるとパスワード入力に進む
+for c in $DES_MODES $DES3_MODES; do
+	check_without_tty "引数なし: $c" "$c"
 done
 check "未知のコマンド"      nosuchcommand
 check "空のコマンド名"      ""
@@ -76,10 +105,13 @@ check "とても長い名前"      "$LONG"
 check "パス風のコマンド名"  ../../etc/passwd
 check "非 ASCII のコマンド名" 日本語
 for c in md5 base64 des-ecb hmac pbkdf2; do
-	check "未知のオプション: $c"      "$c" -Z
-	check "ハイフンのみ: $c"          "$c" -
-	check "ハイフンが5つ: $c"         "$c" -----
-	check "とても長いオプション: $c"  "$c" "-$LONG"
+	# des-* は鍵を渡しておかないとパスワード入力に進んでしまう
+	extra=""
+	[ "$c" = "des-ecb" ] && extra="-k $KEY"
+	check "未知のオプション: $c"      "$c" $extra -Z
+	check "ハイフンのみ: $c"          "$c" $extra -
+	check "ハイフンが5つ: $c"         "$c" $extra -----
+	check "とても長いオプション: $c"  "$c" $extra "-$LONG"
 done
 # 値を要求するオプションが引数列の末尾にある
 for o in k v s p i o; do
@@ -92,15 +124,16 @@ check "-d と -e の併用"              des-ecb -d -e -k "$KEY"
 echo "--- 16進の解釈 (-k / -v / -s) ---"
 head -c 8 /dev/urandom > "$TMP/in8"
 for o in k v s; do
-	check "空文字: -$o"        des-cbc "-$o" ""             -i "$TMP/in8"
-	check "奇数桁: -$o"        des-cbc "-$o" abc            -i "$TMP/in8"
-	check "非16進: -$o"        des-cbc "-$o" zzzzzzzz       -i "$TMP/in8"
-	check "途中から非16進: -$o" des-cbc "-$o" 00zz11        -i "$TMP/in8"
-	check "0x 前置: -$o"       des-cbc "-$o" 0x00112233     -i "$TMP/in8"
-	check "負号: -$o"          des-cbc "-$o" -1             -i "$TMP/in8"
-	check "空白入り: -$o"      des-cbc "-$o" "00 11 22"     -i "$TMP/in8"
-	check "非 ASCII: -$o"      des-cbc "-$o" あいう          -i "$TMP/in8"
-	check "とても長い: -$o"    des-cbc "-$o" "$LONG"        -i "$TMP/in8"
+	# -v / -s だけでは鍵が決まらないので, パスワードも渡して入力待ちを避ける
+	check "空文字: -$o"        des-cbc $PW "-$o" ""             -i "$TMP/in8"
+	check "奇数桁: -$o"        des-cbc $PW "-$o" abc            -i "$TMP/in8"
+	check "非16進: -$o"        des-cbc $PW "-$o" zzzzzzzz       -i "$TMP/in8"
+	check "途中から非16進: -$o" des-cbc $PW "-$o" 00zz11        -i "$TMP/in8"
+	check "0x 前置: -$o"       des-cbc $PW "-$o" 0x00112233     -i "$TMP/in8"
+	check "負号: -$o"          des-cbc $PW "-$o" -1             -i "$TMP/in8"
+	check "空白入り: -$o"      des-cbc $PW "-$o" "00 11 22"     -i "$TMP/in8"
+	check "非 ASCII: -$o"      des-cbc $PW "-$o" あいう          -i "$TMP/in8"
+	check "とても長い: -$o"    des-cbc $PW "-$o" "$LONG"        -i "$TMP/in8"
 done
 check "3DES に短すぎる鍵" des3-cbc -k 00 -i "$TMP/in8"
 
@@ -110,12 +143,14 @@ printf 'x' > "$TMP/noread"; chmod 000 "$TMP/noread"
 ln -s "$TMP/loop" "$TMP/loop" 2>/dev/null
 : > "$TMP/empty"
 for c in md5 base64 des-ecb; do
-	check "存在しない入力: $c"         "$c" -i "$TMP/nonexistent"
-	check "入力がディレクトリ: $c"     "$c" -i "$TMP/adir"
-	check "読めない入力: $c"           "$c" -i "$TMP/noread"
-	check "シンボリックリンクの輪: $c" "$c" -i "$TMP/loop"
-	check "/dev/null: $c"              "$c" -i /dev/null
-	check "空ファイル: $c"             "$c" -i "$TMP/empty"
+	extra=""
+	[ "$c" = "des-ecb" ] && extra="-k $KEY"
+	check "存在しない入力: $c"         "$c" $extra -i "$TMP/nonexistent"
+	check "入力がディレクトリ: $c"     "$c" $extra -i "$TMP/adir"
+	check "読めない入力: $c"           "$c" $extra -i "$TMP/noread"
+	check "シンボリックリンクの輪: $c" "$c" $extra -i "$TMP/loop"
+	check "/dev/null: $c"              "$c" $extra -i /dev/null
+	check "空ファイル: $c"             "$c" $extra -i "$TMP/empty"
 done
 check "出力先がディレクトリ"   md5 -i "$TMP/in8" -o "$TMP/adir"
 check "出力先の親が無い"       md5 -i "$TMP/in8" -o "$TMP/nodir/x"
@@ -196,8 +231,8 @@ for n in 1 1023 1024 5000; do
 	check "パスワード $n 文字" des-cbc -p "$pw" -i "$TMP/in8"
 done
 check "非 ASCII のパスワード" des-cbc -p "パスワード" -i "$TMP/in8"
-# 標準入力からのパスワード読み取り (check は標準入力を /dev/null にするので即 EOF)
-check "パスワード入力が即 EOF" des-cbc -i "$TMP/in8"
+# 端末が無いときはパスワードを標準入力から読む. check は /dev/null を渡すので即 EOF.
+check_without_tty "パスワード入力が即 EOF" des-cbc -i "$TMP/in8"
 
 # PBKDF2 は同じ鍵で PRF を1万回まわす. 鍵の整形を反復の内側でやっていると
 # 所要時間がパスワード長に比例してしまう (30万文字で約7秒かかっていた).
@@ -209,5 +244,9 @@ check "30万文字のパスワードが ${LIMITED_SEC}秒以内に終わる" des
 LIMITED_SEC=$saved_limit
 
 echo
+if [ "$skipped" -gt 0 ]; then
+	echo "  端末があるため, 鍵もパスワードも与えない検査 $skipped 件は飛ばした"
+	echo "  (これらを含めて確認するには, 端末を持たない状態で走らせること: make test_asan_docker など)"
+fi
 echo "=== cli_robustness: pass=$pass fail=$fail ==="
 [ "$fail" -eq 0 ]
