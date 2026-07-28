@@ -9,7 +9,11 @@ int	g_debug_enabled = 1;
 // NOTE: DEBUG* マクロが参照する
 
 int main(int argc, char **argv) {
-	(void)argc;
+	// argv が空の場合 (execve に空の配列を渡された場合) はプログラム名すら無い.
+	// このまま進むと ++argv が argv の終端を越えて環境変数を読んでしまう.
+	if (argc < 1) {
+		return 1;
+	}
 	// デバッグ出力の有無を最初に決める (以降の DEBUG* 出力が従う)
 	const char*	debug_env = getenv("FT_SSL_DEBUG");
 	g_debug_enabled = (debug_env == NULL || ft_strcmp(debug_env, "0") != 0);
