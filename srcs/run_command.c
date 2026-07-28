@@ -28,6 +28,10 @@ static void	show_help(void) {
 	}
 }
 
+void	show_usage(const t_master* master) {
+	yoyo_dprintf(STDERR_FILENO, "usage: %s command [command opts] [command args]\n", master->program_name);
+}
+
 int run_help(t_master *master, char **arguments) {
 	(void)arguments;
 	if (!master->in_repl) {
