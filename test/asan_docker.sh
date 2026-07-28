@@ -22,7 +22,8 @@ IMAGE=${FT_SSL_IMAGE:-ft_ssl_dev}
 DOCKERFILE=${FT_SSL_DOCKERFILE:-docker/Dockerfile}
 
 if [ $# -eq 0 ]; then
-	set -- "--ctr" "--pcbc" "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677"
+	set -- "--repl" "--robustness" "--properties" \
+		"--ctr" "--pcbc" "des-ecb des-ecb" "des-cbc des-cbc 0011223344556677"
 fi
 
 docker build -t "$IMAGE" -f "$DOCKERFILE" docker || exit 1
@@ -57,6 +58,22 @@ docker run --rm -v "$PWD":/src:ro "$IMAGE" bash -c '
 			--pcbc)
 				echo "### des_pcbc.sh ###"
 				bash test/des_pcbc.sh || status=1
+				continue
+				;;
+			# 頑健性のテスト. サニタイザ下で回すとリークや未定義動作も一緒に拾える.
+			--repl)
+				echo "### repl.sh ###"
+				bash test/repl.sh || status=1
+				continue
+				;;
+			--robustness)
+				echo "### cli_robustness.sh ###"
+				bash test/cli_robustness.sh || status=1
+				continue
+				;;
+			--properties)
+				echo "### des_properties.sh ###"
+				bash test/des_properties.sh || status=1
 				continue
 				;;
 		esac

@@ -213,7 +213,7 @@ test_sha_512_256: $(NAME)
 	bash test/sha_512_256_simple.sh "hello!"
 	bash test/sha_512_256_simple.sh "974906r9065098t6089569067062078y78yf97t80o7t0o10to8hrr7hgf0o78t872t587f2578fy8gor875boxd9ygn3d098ygbg8on63hcrbuchnyrouifxr7bgoy78b897b8oao78yb789y789bo29n578yo5y89o"
 
-PHONY: test_pdf
+.PHONY: test_pdf
 test_pdf: $(NAME)
 	@bash test/pdf_test.sh md5
 	@bash test/pdf_test.sh sha224
@@ -223,7 +223,7 @@ test_pdf: $(NAME)
 	@bash test/pdf_test.sh sha512-224
 	@bash test/pdf_test.sh sha512-256
 
-PHONY: test_hmac
+.PHONY: test_hmac
 test_hmac:
 	@ruby test/hmac.rb
 
@@ -260,6 +260,27 @@ test_des_ctr: $(NAME)
 
 test_des_pcbc: $(NAME)
 	bash test/des_pcbc.sh
+
+# 合否が自動で判定できるテストを一通り走らせる.
+# test_pdf は課題の例を流して目視するためのもの (合否判定が無く, 作業ディレクトリに
+# ファイルを作る) なので入れていない. Docker が要るものも別扱い.
+.PHONY: test
+test: test_algos test_hmac test_des test_robustness
+
+# 頑健性のテスト.
+# 上のテスト群が「正しい入力に正しい答えを返すか」を見るのに対し, こちらは
+# 「壊れた入力で落ちたり固まったりしないか」「規格上の性質を満たすか」を見る.
+.PHONY: test_robustness test_repl test_cli_robustness test_des_properties
+test_robustness: test_repl test_cli_robustness test_des_properties
+
+test_repl: $(NAME)
+	bash test/repl.sh
+
+test_cli_robustness: $(NAME)
+	bash test/cli_robustness.sh
+
+test_des_properties: $(NAME)
+	bash test/des_properties.sh
 
 # macOS で ASAN が動かない環境向け: Linux コンテナ上で
 # Makefile 既定の CFLAGS (ASAN + UBSan) のままテストする.
