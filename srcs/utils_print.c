@@ -1,5 +1,20 @@
 #include "ft_ssl.h"
 
+// fd に len オクテットを書き切る.
+bool	write_all(int fd, const void* data, size_t len) {
+	const uint8_t*	head = data;
+	while (len > 0) {
+		const ssize_t	written = write(fd, head, len);
+		// 0 が返ることは通常ないが, 進まないまま回り続けないよう失敗として扱う
+		if (written <= 0) {
+			return false;
+		}
+		head += written;
+		len -= (size_t)written;
+	}
+	return true;
+}
+
 static bool	is_binary_char(int ch) {
 	return !(ft_isprint(ch) || ch == '\n' || ch == '\t');
 }
@@ -23,9 +38,13 @@ void put_bitstream(int fd, const uint8_t* data, size_t bit_len) {
 
 	if (len == 0) { return; }
 
+	// 書けなくなったら諦める.
+	// 呼び出し側は表示用のマクロで, 失敗を伝える経路が無い.
 	const size_t	batch_size = 1024;
 	while (len >= batch_size + 1) {
-		write(fd, data, batch_size);
+		if (!write_all(fd, data, batch_size)) {
+			return;
+		}
 		data += batch_size;
 		len -= batch_size;
 	}
@@ -34,5 +53,5 @@ void put_bitstream(int fd, const uint8_t* data, size_t bit_len) {
 	if (data_is_test_like && (char)data[len - 1] == '\n') {
 		len -= 1;
 	}
-	write(fd, data, len);
+	write_all(fd, data, len);
 }

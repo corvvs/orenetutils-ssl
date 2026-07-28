@@ -51,19 +51,21 @@ void	base64_encode_buffer(const void* src, size_t len, t_elastic_buffer* out) {
 bool	base64_write_lines(int out_fd, const t_elastic_buffer* buffer, size_t line_length) {
 	size_t	n = 0;
 	while (n + line_length < buffer->used) {
-		ssize_t size = write(out_fd, buffer->buffer + n, line_length);
-		if (size < 0) {
+		if (!write_all(out_fd, buffer->buffer + n, line_length)) {
 			return false;
 		}
-		write(out_fd, "\n", 1);
-		n += size;
+		if (!write_all(out_fd, "\n", 1)) {
+			return false;
+		}
+		n += line_length;
 	}
 	if (buffer->used > n) {
-		ssize_t size = write(out_fd, buffer->buffer + n, buffer->used - n);
-		if (size < 0) {
+		if (!write_all(out_fd, buffer->buffer + n, buffer->used - n)) {
 			return false;
 		}
-		write(out_fd, "\n", 1);
+		if (!write_all(out_fd, "\n", 1)) {
+			return false;
+		}
 	}
 	return true;
 }

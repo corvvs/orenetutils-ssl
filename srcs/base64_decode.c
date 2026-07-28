@@ -51,18 +51,6 @@ void	base64_chomp_newline(t_elastic_buffer* buffer) {
 	buffer->used -= 1;
 }
 
-static void	write_decoded(int out_fd, const t_elastic_buffer* decoded) {
-	size_t	n = 0;
-	while (n + 1024 < decoded->used) {
-		ssize_t size = write(out_fd, decoded->buffer + n, 1024);
-		if (size < 0) {
-			return;
-		}
-		n += size;
-	}
-	write(out_fd, decoded->buffer + n, decoded->used - n);
-}
-
 // 与えられたデータがbase64デコード可能な文字列かどうかを判定する
 bool	is_decodable_as_base64(const void* src, size_t len) {
 	// [判定処理]
@@ -190,7 +178,11 @@ int	base64_decode(t_master_base64* m, t_elastic_buffer* input, int out_fd) {
 		return 1;
 	}
 
-	write_decoded(out_fd, &decoded);
+	if (!write_all(out_fd, decoded.buffer, decoded.used)) {
+		PRINT_ERROR(&(m->master), "%s\n", strerror(errno));
+		destroy_buffer(&decoded);
+		return 1;
+	}
 	destroy_buffer(&decoded);
 	return 0;
 }
