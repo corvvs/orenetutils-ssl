@@ -24,9 +24,10 @@ t_generic_message	salt_i(
 	return si;
 }
 
+// prf_key は整形済みの鍵 (pbkdf2() が反復の外で一度だけ用意する).
 t_generic_message	f(
 	const t_pbkdf2_prf* prf,
-	const t_generic_message* password,
+	const t_generic_message* prf_key,
 	const t_generic_message* salt,
 	size_t c,
 	size_t i
@@ -50,7 +51,7 @@ t_generic_message	f(
 	ft_bzero(t.message, t.byte_size);
 	for (uint32_t j = 1; j <= c; ++j) {
 		DEBUGOUT("|u|: \t%zu", u.byte_size);
-		t_generic_message next_u = prf->func(password, &u);
+		t_generic_message next_u = prf->func(prf_key, &u);
 		if (is_failed_generic_message(&next_u)) {
 			destroy_generic_message(&u);
 			destroy_generic_message(&t);
@@ -100,15 +101,26 @@ t_generic_message	pbkdf2(
 	const size_t	w = (dklen - 1) / prf->hlen + 1;
 	assert(w <= ((1ull << 32) - 1));
 
+	// 鍵(パスワード)は全反復を通して同じなので, ブロック長への整形はここで一度だけ行う.
+	// 生のパスワードを毎回 prf に渡すと, 反復ごとにパスワード全体をハッシュすることになり,
+	// 所要時間がパスワード長に比例してしまう.
+	t_generic_message	prf_key = hmac_reshaped_key(prf->hi, password);
+	if (is_failed_generic_message(&prf_key)) {
+		DEBUGERR("failed to reshape password: %zu", password->byte_size);
+		return FAILED_GENERIC_MESSAGE;
+	}
+
 	t_generic_message	dk = new_generic_message(0);
 	if (is_failed_generic_message(&dk)) {
 		DEBUGERR("failed to allocate memory for dk: dklen: %zu", dklen);
+		destroy_generic_message(&prf_key);
 		return FAILED_GENERIC_MESSAGE;
 	}
 	for (size_t i = 1; i <= w; ++i) {
-		t_generic_message	t = f(prf, password, salt, c, i);
+		t_generic_message	t = f(prf, &prf_key, salt, c, i);
 		if (is_failed_generic_message(&t)) {
 			destroy_generic_message(&dk);
+			destroy_generic_message(&prf_key);
 			return FAILED_GENERIC_MESSAGE;
 		}
 #ifdef DEBUG
@@ -119,10 +131,12 @@ t_generic_message	pbkdf2(
 		if (!join_assign_generic_message(&dk, &t)) {
 			destroy_generic_message(&t);
 			destroy_generic_message(&dk);
+			destroy_generic_message(&prf_key);
 			return FAILED_GENERIC_MESSAGE;
 		}
 		destroy_generic_message(&t);
 	}
+	destroy_generic_message(&prf_key);
 	assert(dk.byte_size >= dklen);
 	if (dk.byte_size > dklen) {
 		DEBUGOUT("dk truncation: %zu -> %zu", dk.byte_size, dklen);

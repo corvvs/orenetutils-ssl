@@ -8,5 +8,6 @@ t_pbkdf2_prf	make_prf(hmac_function* hmac, const t_hmac_hash_interface* hi) {
 		.name = hi->algorithm.name,
 		.func = hmac,
 		.hlen = hi->algorithm.hash_byte_size,
+		.hi = hi,
 	};
 }
