@@ -16,6 +16,9 @@
 #include <assert.h>
 
 
+// utils_print.c
+bool	write_all(int fd, const void* data, size_t len);
+
 // subbyte_manipulation.c
 void	set_bit_at(uint8_t* mem, uint64_t bit_pos, uint8_t bit);
 void	subbyte_memcpy(uint8_t* dst, const uint8_t* src, uint8_t bit_from, uint8_t bit_to);

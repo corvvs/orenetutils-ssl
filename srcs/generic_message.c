@@ -1,4 +1,5 @@
 #include "generic_message.h"
+#include "ft_ssl_lib.h"
 #include "libft.h"
 #include "printf.h"
 #include <assert.h>
@@ -93,5 +94,5 @@ void	print_generic_message_hex(const t_generic_message* message, int fd) {
 }
 
 void	print_generic_message_ascii(const t_generic_message* message, int fd) {
-	write(fd, message->message, message->byte_size);
+	write_all(fd, message->message, message->byte_size);
 }

@@ -246,8 +246,9 @@ static int	des_encrypt(
 	int	result = 0;
 	if (m->pref.is_base64) {
 		result = write_base64_output(m, buf, header_len + body_len, out_fd) ? 0 : 1;
-	} else {
-		write(out_fd, buf, header_len + body_len);
+	} else if (!write_all(out_fd, buf, header_len + body_len)) {
+		PRINT_ERROR(&m->master, "%s\n", strerror(errno));
+		result = 1;
 	}
 	free(buf);
 	return result;
@@ -286,7 +287,11 @@ static int	des_decrypt(
 		free(buf);
 		return 1;
 	}
-	write(out_fd, buf, out_len);
+	if (!write_all(out_fd, buf, out_len)) {
+		PRINT_ERROR(&m->master, "%s\n", strerror(errno));
+		free(buf);
+		return 1;
+	}
 	free(buf);
 	return 0;
 }

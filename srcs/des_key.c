@@ -181,7 +181,8 @@ const char*	des_acquire_password(const t_master_des* m, char* buffer, size_t siz
 	const int	read_fd = (tty_fd >= 0) ? tty_fd : STDIN_FILENO;
 	const int	prompt_fd = (tty_fd >= 0) ? tty_fd : STDERR_FILENO;
 
-	write(prompt_fd, prompt, ft_strlen(prompt));
+	// プロンプトが出せなくても読み取りは試みるので, 失敗は無視する
+	(void)write_all(prompt_fd, prompt, ft_strlen(prompt));
 
 	// getpass は macOS だと129文字以上の入力をサイレントに切り詰めるので使用を避ける.
 	struct termios			saved;
@@ -190,7 +191,7 @@ const char*	des_acquire_password(const t_master_des* m, char* buffer, size_t siz
 	if (muted) {
 		tcsetattr(read_fd, TCSAFLUSH, &saved);
 		// エコーされなかった改行の代わり
-		write(prompt_fd, "\n", 1);
+		(void)write_all(prompt_fd, "\n", 1);
 	}
 	if (tty_fd >= 0) {
 		close(tty_fd);
