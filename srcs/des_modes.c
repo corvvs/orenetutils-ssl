@@ -13,12 +13,12 @@
 // [ECB]
 static uint64_t	ecb_encrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
 	(void)chain;
-	return ctx->cipher->crypt(block, ctx->keys, false);
+	return ctx->cipher->crypt(block, ctx->keys, DES_ENCRYPT);
 }
 
 static uint64_t	ecb_decrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
 	(void)chain;
-	return ctx->cipher->crypt(block, ctx->keys, true);
+	return ctx->cipher->crypt(block, ctx->keys, DES_DECRYPT);
 }
 
 const t_des_mode	g_des_mode_ecb = {
@@ -33,14 +33,14 @@ const t_des_mode	g_des_mode_ecb = {
 // 暗号化・復号のどちらでも, 次の連鎖値になるのは暗号文側であることに注意.
 
 static uint64_t	cbc_encrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	encrypted = ctx->cipher->crypt(block ^ *chain, ctx->keys, false);
+	const uint64_t	encrypted = ctx->cipher->crypt(block ^ *chain, ctx->keys, DES_ENCRYPT);
 	// 出力ブロック(暗号文)が次の連鎖値になる
 	*chain = encrypted;
 	return encrypted;
 }
 
 static uint64_t	cbc_decrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	decrypted = ctx->cipher->crypt(block, ctx->keys, true) ^ *chain;
+	const uint64_t	decrypted = ctx->cipher->crypt(block, ctx->keys, DES_DECRYPT) ^ *chain;
 	// 入力ブロック(暗号文)がそのまま次の連鎖値になる
 	*chain = block;
 	return decrypted;
@@ -59,7 +59,7 @@ const t_des_mode	g_des_mode_cbc = {
 // 連鎖値は暗号文ではなく鍵ストリームそのもので, データには依存しない.
 // そのため暗号化と復号がまったく同じ処理になり, 復号でも暗号化方向の変換を使う.
 static uint64_t	ofb_crypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	*chain = ctx->cipher->crypt(*chain, ctx->keys, false);
+	*chain = ctx->cipher->crypt(*chain, ctx->keys, DES_ENCRYPT);
 	return block ^ *chain;
 }
 
@@ -76,13 +76,13 @@ const t_des_mode	g_des_mode_ofb = {
 // OFB と同じく, 復号でも暗号化方向の変換しか使わない.
 // 連鎖値は CBC と同じく暗号文なので, 暗号化では出力を, 復号では入力を次に渡す.
 static uint64_t	cfb_encrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	encrypted = block ^ ctx->cipher->crypt(*chain, ctx->keys, false);
+	const uint64_t	encrypted = block ^ ctx->cipher->crypt(*chain, ctx->keys, DES_ENCRYPT);
 	*chain = encrypted;
 	return encrypted;
 }
 
 static uint64_t	cfb_decrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	decrypted = block ^ ctx->cipher->crypt(*chain, ctx->keys, false);
+	const uint64_t	decrypted = block ^ ctx->cipher->crypt(*chain, ctx->keys, DES_ENCRYPT);
 	// 入力ブロック(暗号文)がそのまま次の連鎖値になる
 	*chain = block;
 	return decrypted;
@@ -103,7 +103,7 @@ const t_des_mode	g_des_mode_cfb = {
 // OFB との違いは, 次の鍵ストリームを「前の鍵ストリームの暗号化」ではなく
 // 「カウンタを進めて暗号化」で作ること.
 static uint64_t	ctr_crypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	keystream = ctx->cipher->crypt(*chain, ctx->keys, false);
+	const uint64_t	keystream = ctx->cipher->crypt(*chain, ctx->keys, DES_ENCRYPT);
 	*chain += 1; // 規格としては正でありさえすればいいが, 互換性/相互運用性を考えると +1 するしかない
 	return block ^ keystream;
 }
@@ -124,14 +124,14 @@ const t_des_mode	g_des_mode_ctr = {
 // 連鎖値に平文と暗号文の両方が要るが, どちらも 1 ブロック分の処理の中で
 // 手に入る (入力と出力) ので, 追加の状態は要らない.
 static uint64_t	pcbc_encrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	encrypted = ctx->cipher->crypt(block ^ *chain, ctx->keys, false);
+	const uint64_t	encrypted = ctx->cipher->crypt(block ^ *chain, ctx->keys, DES_ENCRYPT);
 	// 平文 ^ 暗号文 が次の連鎖値になる
 	*chain = block ^ encrypted;
 	return encrypted;
 }
 
 static uint64_t	pcbc_decrypt(uint64_t block, const t_des_block_context* ctx, uint64_t* chain) {
-	const uint64_t	decrypted = ctx->cipher->crypt(block, ctx->keys, true) ^ *chain;
+	const uint64_t	decrypted = ctx->cipher->crypt(block, ctx->keys, DES_DECRYPT) ^ *chain;
 	// 復号側でも同じく 平文 ^ 暗号文 (ここでは 出力 ^ 入力)
 	*chain = decrypted ^ block;
 	return decrypted;

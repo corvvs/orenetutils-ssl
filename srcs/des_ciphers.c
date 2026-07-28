@@ -3,8 +3,8 @@
 // [ブロック暗号本体の定義]
 
 // [DES]
-static uint64_t	des_crypt(uint64_t block, const t_des_keys* keys, bool decrypt) {
-	return des_crypt_block(block, &keys->roundkeys[0], decrypt);
+static uint64_t	des_crypt(uint64_t block, const t_des_keys* keys, t_des_direction direction) {
+	return des_crypt_block(block, &keys->roundkeys[0], direction);
 }
 
 const t_des_cipher	g_des_cipher_des = {
@@ -15,16 +15,16 @@ const t_des_cipher	g_des_cipher_des = {
 };
 
 // [Triple DES]
-// 3 本の鍵で Encrypt-Decrypt-Encrypt を行う.
-static uint64_t	des3_crypt(uint64_t block, const t_des_keys* keys, bool decrypt) {
-	if (decrypt) {
-		block = des_crypt_block(block, &keys->roundkeys[2], true);
-		block = des_crypt_block(block, &keys->roundkeys[1], false);
-		return des_crypt_block(block, &keys->roundkeys[0], true);
+static uint64_t	des3_crypt(uint64_t blck, const t_des_keys* keys, t_des_direction direction) {
+	if (direction == DES_DECRYPT) {
+		blck = des_crypt_block(blck, &keys->roundkeys[2], DES_DECRYPT);
+		blck = des_crypt_block(blck, &keys->roundkeys[1], DES_ENCRYPT);
+		return des_crypt_block(blck, &keys->roundkeys[0], DES_DECRYPT);
+	} else {
+		blck = des_crypt_block(blck, &keys->roundkeys[0], DES_ENCRYPT);
+		blck = des_crypt_block(blck, &keys->roundkeys[1], DES_DECRYPT);
+		return des_crypt_block(blck, &keys->roundkeys[2], DES_ENCRYPT);
 	}
-	block = des_crypt_block(block, &keys->roundkeys[0], false);
-	block = des_crypt_block(block, &keys->roundkeys[1], true);
-	return des_crypt_block(block, &keys->roundkeys[2], false);
 }
 
 const t_des_cipher	g_des_cipher_des3 = {

@@ -8,6 +8,13 @@
 // DES のラウンド数
 #define DES_ROUNDS 16
 
+// 暗号本体を通す向き. 暗号化と復号は同じ関数で扱い, この値で区別する.
+typedef enum e_des_direction
+{
+	DES_ENCRYPT,
+	DES_DECRYPT,
+}	t_des_direction;
+
 // 1つの DES ブロック暗号に使う 16 ラウンド分の鍵(ラウンド鍵).
 // 各ラウンド鍵は 48bit で, uint64_t の下位 48bit を使う.
 typedef struct s_des_roundkeys
@@ -25,7 +32,7 @@ typedef struct s_des_keys
 // [ブロック暗号本体の抽象]
 // 64bit ブロック 1 つを変換する. DES は 1 回, Triple DES は E-D-E の 3 回.
 // 連鎖のさせ方 (下の t_des_mode) とは独立に差し替えられる.
-typedef uint64_t	(des_cipher_function)(uint64_t block, const t_des_keys* keys, bool decrypt);
+typedef uint64_t	(des_cipher_function)(uint64_t block, const t_des_keys* keys, t_des_direction direction);
 
 // 実体は des_ciphers.c で定義される.
 typedef struct s_des_cipher
@@ -85,8 +92,8 @@ typedef struct s_des_secret
 
 // 64bit 鍵から 16 ラウンド分のラウンド鍵を生成する.
 t_des_roundkeys	des_key_schedule(uint64_t key);
-// 64bit ブロック 1 つを暗号化 (decrypt=false) または復号 (decrypt=true) する.
-uint64_t		des_crypt_block(uint64_t block, const t_des_roundkeys* roundkeys, bool decrypt);
+// 64bit ブロック 1 つを direction の向きに変換する.
+uint64_t		des_crypt_block(uint64_t block, const t_des_roundkeys* roundkeys, t_des_direction direction);
 // ビッグエンディアンのオクテット列を 64bit ブロックに読み込む / 書き出す.
 uint64_t		des_load_block(const uint8_t bytes[DES_BLOCK_BYTE_SIZE]);
 void			des_store_block(uint64_t block, uint8_t bytes[DES_BLOCK_BYTE_SIZE]);
