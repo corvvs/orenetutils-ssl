@@ -14,9 +14,11 @@ int main(int argc, char **argv) {
 	if (argc < 1) {
 		return 1;
 	}
-	// デバッグ出力の有無を最初に決める (以降の DEBUG* 出力が従う)
+#ifdef DEBUG
+	// デバッグ出力の有無を最初に決める (以降の DEBUG* 出力が従う).
 	const char*	debug_env = getenv("FT_SSL_DEBUG");
 	g_debug_enabled = (debug_env == NULL || ft_strcmp(debug_env, "0") != 0);
+#endif
 
 	// 最初にシステムのエンディアンを求める
 	g_is_little_endian = is_little_endian();
