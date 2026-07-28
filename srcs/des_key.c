@@ -61,25 +61,6 @@ t_des_keys	des_keys_from_bytes(const uint8_t* material, size_t count) {
 	return keys;
 }
 
-bool	des_random_salt(uint8_t salt[DES_SALT_BYTE_SIZE]) {
-	const int	fd = open("/dev/urandom", O_RDONLY);
-	if (fd < 0) {
-		return false;
-	}
-	size_t	got = 0;
-	while (got < DES_SALT_BYTE_SIZE) {
-		 // urandom から擬似**ではない**乱数を生成する
-		const ssize_t	n = read(fd, salt + got, DES_SALT_BYTE_SIZE - got);
-		if (n <= 0) {
-			close(fd);
-			return false;
-		}
-		got += n;
-	}
-	close(fd);
-	return true;
-}
-
 bool	des_derive_key_iv(
 	const char* password,
 	const uint8_t salt[DES_SALT_BYTE_SIZE],

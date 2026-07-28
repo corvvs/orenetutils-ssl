@@ -106,8 +106,6 @@ void			des_bytes_from_hex(const char* hex, uint8_t* out, size_t size);
 // 鍵材料 (8 オクテット × count) からラウンド鍵一式を作る.
 t_des_keys		des_keys_from_bytes(const uint8_t* material, size_t count);
 
-// salt をランダムに生成する.
-bool			des_random_salt(uint8_t salt[DES_SALT_BYTE_SIZE]);
 // パスワードと salt から鍵材料と IV を導出する (PBKDF2-HMAC-SHA256).
 // 導出結果は先頭 key_byte_size オクテットが鍵材料, 続く 8 オクテットが IV.
 bool			des_derive_key_iv(

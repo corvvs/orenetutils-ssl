@@ -10,6 +10,7 @@
 #   3. 準弱鍵の対では互いに打ち消し合う E_K1(E_K2(x)) = x
 #   4. 3DES に同じ鍵を3本与えると単一 DES と一致する
 #   5. CTR のカウンタは 2^64 で巻き戻る
+#   6. 乱数取得は同一プロセス内で繰り返し呼んでも毎回違う値を返す
 #
 # 前提: プロジェクトルートで ./ft_ssl をビルド済みであること.
 # 使い方: bash test/des_properties.sh
@@ -99,6 +100,38 @@ actual=$("$SSL" des-ctr -k "$K" -v ffffffffffffffff -i "$TMP/zero16" | od -An -t
 # 平文が全 0 なので, 出力はそのまま鍵ストリーム E(カウンタ) になる
 expected="$(encrypt_block "$K" ffffffffffffffff)$(encrypt_block "$K" 0000000000000000)"
 expect "カウンタ ffffffffffffffff の次が 0 になる" "$actual" "$expected"
+
+echo "--- 6. 乱数取得は同一プロセス内で繰り返しても毎回変わる ---"
+# random_bytes (srcs/utils_random.c) は /dev/urandom の fd を開いたまま使い回す.
+# REPL は 1 プロセスで複数コマンドを走らせるので, 2 回目以降も正しく読めているかを
+# ここで確かめる. des_mode.sh の同種の検査はプロセスを分けて呼ぶため, この経路は通らない.
+# salt は "Salted__"(8) の直後の 8 バイト.
+salt_of() { # salt_of <暗号文ファイル>
+	head -c 16 "$1" | tail -c 8 | od -An -tx1 | tr -d ' \n'
+}
+# salt_of は改行を付けないので, 数え上げる側で行に分ける.
+# (付けないまま sort -u に渡すと全部が 1 行に繋がり, 常に「1 種」になって素通りする)
+count_distinct_salts() { # count_distinct_salts <暗号文ファイル...>
+	for f in "$@"; do
+		salt_of "$f"
+		echo
+	done | sort -u | wc -l | tr -d ' '
+}
+write_hex "$PLAIN" "$TMP/msg8"
+for i in 1 2 3; do echo "des-ecb -p pw -i $TMP/msg8 -o $TMP/salt_run$i"; done \
+	| "$SSL" >/dev/null 2>&1
+expect "REPL 内 3 回で salt が 3 種" \
+	"$(count_distinct_salts "$TMP/salt_run1" "$TMP/salt_run2" "$TMP/salt_run3")" "3"
+# 全ゼロなら, open の失敗を見逃して未初期化のまま進んでいる疑いがある
+expect "salt が全ゼロでない" \
+	"$([ "$(salt_of "$TMP/salt_run1")" = "0000000000000000" ] && echo zero || echo nonzero)" "nonzero"
+# 陰性対照: -s で salt を固定すれば 3 回とも一致する.
+# (これが 3 種になるなら, 上の検査は salt ではない何かを見ている)
+for i in 1 2 3; do echo "des-ecb -p pw -s 8877665544332211 -i $TMP/msg8 -o $TMP/fixed_run$i"; done \
+	| "$SSL" >/dev/null 2>&1
+expect "陰性対照: -s 指定なら 1 種" \
+	"$(count_distinct_salts "$TMP/fixed_run1" "$TMP/fixed_run2" "$TMP/fixed_run3")" "1"
+expect "陰性対照: -s の値がそのまま入る" "$(salt_of "$TMP/fixed_run1")" "8877665544332211"
 
 echo
 echo "=== des_properties: pass=$pass fail=$fail ==="

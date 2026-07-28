@@ -128,7 +128,7 @@ static bool	resolve_salt(t_master_des* m, t_elastic_buffer* input, t_des_secret*
 		return true;
 	}
 	// ユーザー入力から salt を得られなかったので, 乱数から生成
-	if (!des_random_salt(secret->salt)) {
+	if (!random_bytes(secret->salt, DES_SALT_BYTE_SIZE)) {
 		PRINT_ERROR(&m->master, "%s\n", "unable to generate salt");
 		return false;
 	}
