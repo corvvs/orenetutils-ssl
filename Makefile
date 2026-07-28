@@ -74,6 +74,7 @@ FILES	:=	\
 			utils_endian.c\
 			utils_error.c\
 			utils_print.c\
+			utils_random.c\
 			printf.c\
 			option_parser.c\
 
