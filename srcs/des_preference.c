@@ -1,42 +1,24 @@
 #include "ft_ssl.h"
-#include "ft_ssl_preference.h"
+
+// `des-*` / `des3-*` のオプション
+static const t_option_spec	g_options_des[] = {
+	{ .name = "e", .kind = OPTION_SET_FALSE, .field_offset = offsetof(t_preference_des, is_decode) },
+	{ .name = "d", .kind = OPTION_SET_TRUE,  .field_offset = offsetof(t_preference_des, is_decode) },
+	{ .name = "a", .kind = OPTION_SET_TRUE,  .field_offset = offsetof(t_preference_des, is_base64) },
+	{ .name = "k", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_des, hex_key) },
+	{ .name = "v", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_des, hex_iv) },
+	{ .name = "s", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_des, hex_salt) },
+	{ .name = "p", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_des, password) },
+	{ .name = "i", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_des, path_input) },
+	{ .name = "o", .kind = OPTION_STRING,    .field_offset = offsetof(t_preference_des, path_output) },
+	{ .name = NULL },
+};
 
 int	parse_options_des(const t_master* master, char** argv, t_preference_des* pref_ptr) {
 	t_preference_des	pref = {};
-	int parsed_count = 0;
-	while (*argv != NULL && ft_strncmp(*argv, "-", 1) == 0) {
-
-		const char*	option = *argv;
-		++option;
-		while (*option) {
-			switch (*option) {
-				case 'e': {
-					pref.is_decode = false;
-					break;
-				}
-				case 'd': {
-					pref.is_decode = true;
-					break;
-				}
-				case 'a': {
-					pref.is_base64 = true;
-					break;
-				}
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('k', k, hex_key)
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('v', v, hex_iv)
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('s', s, hex_salt)
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('p', p, password)
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('i', i, path_input)
-				PARSE_PREFERENCE_WITH_1_ARGUMENT('o', o, path_output)
-				default: {
-					yoyo_dprintf(STDERR_FILENO, "illegal option -- %c\n", *option);
-					return -1;
-				}
-			}
-			option += 1;
-		}
-		argv += 1;
-		parsed_count += 1;
+	const int	parsed_count = parse_options(master, argv, &pref, g_options_des);
+	if (parsed_count < 0) {
+		return -1;
 	}
 	*pref_ptr = pref;
 	return parsed_count;
