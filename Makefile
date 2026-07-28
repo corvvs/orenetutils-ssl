@@ -91,8 +91,9 @@ CCOREFLAGS	=	-Wall -Wextra -Werror -I$(INCDIR) -I$(LIBFT_DIR)
 # これがないとヘッダだけ変更したときに再コンパイルされず, 古いオブジェクトが残る.
 DEPFLAGS	=	-MMD -MP
 # 通常ビルド
-CFLAGS		=	$(CCOREFLAGS) -O2
-# 開発用: デバッグ出力 (-D DEBUG) を有効にする.
+# -D NDEBUG: assert を無効にする.
+CFLAGS		=	$(CCOREFLAGS) -O2 -D NDEBUG
+# 開発用: デバッグ出力 (-D DEBUG) と assert を有効にする.
 DEBUGFLAGS	=	$(CCOREFLAGS) -O2 -g -D DEBUG -fsanitize=undefined
 ASANFLAGS	=	$(DEBUGFLAGS) -fsanitize=address
 
