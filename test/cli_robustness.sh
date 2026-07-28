@@ -76,7 +76,7 @@ check_without_tty() { # check_without_tty <名前> <ft_ssl に渡す引数...>
 DIGESTS="md5 sha224 sha256 sha384 sha512 sha512-224 sha512-256"
 DES_MODES="des des-ecb des-cbc des-ofb des-cfb des-ctr des-pcbc"
 DES3_MODES="des3 des3-ecb des3-cbc des3-ofb des3-cfb des3-ctr des3-pcbc"
-ALL="help test hmac pbkdf2 base64 $DIGESTS $DES_MODES $DES3_MODES"
+ALL="help hmac pbkdf2 base64 $DIGESTS $DES_MODES $DES3_MODES"
 
 LONG=$(head -c 20000 /dev/zero | tr '\0' 'X')
 
@@ -90,7 +90,7 @@ make_random() { # make_random <バイト数> <出力先>
 }
 
 echo "--- コマンド名とオプション ---"
-for c in help test hmac pbkdf2 base64 $DIGESTS; do
+for c in help hmac pbkdf2 base64 $DIGESTS; do
 	check "引数なし: $c" "$c"
 done
 # des-* は鍵もパスワードも無いので, 端末があるとパスワード入力に進む

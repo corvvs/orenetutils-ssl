@@ -49,8 +49,6 @@ int	run_des_pcbc(t_master* master, char **argv);
 int	run_des3_pcbc(t_master* master, char **argv);
 int	parse_options_des(const t_master* master, char** argv, t_preference_des* pref_ptr);
 
-int	run_test(t_master* master, char **argv);
-
 // digest core
 t_md5_digest			md5_hash(const uint8_t *message, uint64_t message_len);
 t_sha_224_digest		sha_224_hash(const uint8_t *message, uint64_t message_len);
@@ -102,7 +100,6 @@ static const t_command_pair g_command_pairs[] = {
 	DEF_COMMAND_PAIR("help", run_help, COMMAND_CATEGORY_STANDARD),
 	DEF_COMMAND_PAIR("hmac", run_hmac, COMMAND_CATEGORY_STANDARD),
 	DEF_COMMAND_PAIR("pbkdf2", run_pbkdf2, COMMAND_CATEGORY_STANDARD),
-	DEF_COMMAND_PAIR("test", run_test, COMMAND_CATEGORY_STANDARD),
 
 	DEF_COMMAND_PAIR("md5", run_md5, COMMAND_CATEGORY_DIGEST),
 	DEF_COMMAND_PAIR("sha224", run_sha_224, COMMAND_CATEGORY_DIGEST),

@@ -76,7 +76,6 @@ FILES	:=	\
 			utils_print.c\
 			printf.c\
 			option_parser.c\
-			test.c\
 
 SRCS	:=	$(FILES:%.c=$(SRCDIR)/%.c)
 OBJS	:=	$(FILES:%.c=$(OBJDIR)/%.o)
